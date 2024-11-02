@@ -21,13 +21,6 @@ use function strpos;
 class Literal implements RouteInterface
 {
     /**
-     * RouteInterface to match.
-     *
-     * @var string
-     */
-    protected $route;
-
-    /**
      * Default values.
      *
      * @var array
@@ -48,9 +41,13 @@ class Literal implements RouteInterface
      * @param  string $route
      * @param  array  $defaults
      */
-    public function __construct($route, array $defaults = [])
-    {
-        $this->route    = $route;
+    public function __construct(
+        /**
+         * RouteInterface to match.
+         */
+        protected $route,
+        array $defaults = []
+    ) {
         $this->defaults = $defaults;
     }
 

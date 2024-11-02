@@ -33,13 +33,6 @@ class Part extends TreeRouteStack implements RouteInterface
     protected $route;
 
     /**
-     * Whether the route may terminate.
-     *
-     * @var bool
-     */
-    protected $mayTerminate;
-
-    /**
      * Child routes.
      *
      * @var mixed
@@ -58,7 +51,10 @@ class Part extends TreeRouteStack implements RouteInterface
      */
     public function __construct(
         $route,
-        $mayTerminate,
+        /**
+         * Whether the route may terminate.
+         */
+        protected $mayTerminate,
         RoutePluginManager $routePlugins,
         ?array $childRoutes = null,
         ?ArrayObject $prototypes = null
@@ -73,10 +69,9 @@ class Part extends TreeRouteStack implements RouteInterface
             throw new Exception\InvalidArgumentException('Base route may not be a part route');
         }
 
-        $this->route        = $route;
-        $this->mayTerminate = $mayTerminate;
-        $this->childRoutes  = $childRoutes;
-        $this->prototypes   = $prototypes;
+        $this->route       = $route;
+        $this->childRoutes = $childRoutes;
+        $this->prototypes  = $prototypes;
         /** @var PriorityList<string, TRoute> $this->routes */
         $this->routes = new PriorityList();
     }

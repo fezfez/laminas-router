@@ -19,9 +19,9 @@ use function preg_match;
 use function rawurldecode;
 use function rawurlencode;
 use function sprintf;
+use function str_contains;
 use function str_replace;
 use function strlen;
-use function strpos;
 
 /**
  * Regex route.
@@ -29,27 +29,11 @@ use function strpos;
 class Regex implements RouteInterface
 {
     /**
-     * Regex to match.
-     *
-     * @var string
-     */
-    protected $regex;
-
-    /**
      * Default values.
      *
      * @var array
      */
     protected $defaults;
-
-    /**
-     * Specification for URL assembly.
-     *
-     * Parameters accepting substitutions should be denoted as "%key%"
-     *
-     * @var string
-     */
-    protected $spec;
 
     /**
      * List of assembled parameters.
@@ -73,10 +57,19 @@ class Regex implements RouteInterface
      * @param  string $spec
      * @param  array  $defaults
      */
-    public function __construct($regex, $spec, array $defaults = [])
-    {
-        $this->regex    = $regex;
-        $this->spec     = $spec;
+    public function __construct(
+        /**
+         * Regex to match.
+         */
+        protected $regex,
+        /**
+         * Specification for URL assembly.
+         *
+         * Parameters accepting substitutions should be denoted as "%key%"
+         */
+        protected $spec,
+        array $defaults = []
+    ) {
         $this->defaults = $defaults;
     }
 
@@ -171,7 +164,7 @@ class Regex implements RouteInterface
         foreach ($mergedParams as $key => $value) {
             $spec = '%' . $key . '%';
 
-            if (strpos($url, $spec) !== false) {
+            if (str_contains($url, $spec)) {
                 $url = str_replace($spec, rawurlencode((string) $value), $url);
 
                 $this->assembledParams[] = $key;

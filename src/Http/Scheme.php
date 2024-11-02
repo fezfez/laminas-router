@@ -19,13 +19,6 @@ use function sprintf;
 class Scheme implements RouteInterface
 {
     /**
-     * Scheme to match.
-     *
-     * @var string
-     */
-    protected $scheme;
-
-    /**
      * Default values.
      *
      * @var array
@@ -46,9 +39,13 @@ class Scheme implements RouteInterface
      * @param  string $scheme
      * @param  array  $defaults
      */
-    public function __construct($scheme, array $defaults = [])
-    {
-        $this->scheme   = $scheme;
+    public function __construct(
+        /**
+         * Scheme to match.
+         */
+        protected $scheme,
+        array $defaults = []
+    ) {
         $this->defaults = $defaults;
     }
 

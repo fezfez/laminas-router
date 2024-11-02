@@ -35,10 +35,6 @@ class DummyRouteWithParam extends DummyRoute
      */
     public function assemble(?array $params = null, ?array $options = null)
     {
-        if (isset($params['foo'])) {
-            return $params['foo'];
-        }
-
-        return '';
+        return $params['foo'] ?? '';
     }
 }
