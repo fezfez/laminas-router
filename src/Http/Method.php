@@ -23,13 +23,6 @@ use function strtoupper;
 class Method implements RouteInterface
 {
     /**
-     * Verb to match.
-     *
-     * @var string
-     */
-    protected $verb;
-
-    /**
      * Default values.
      *
      * @var array
@@ -50,9 +43,13 @@ class Method implements RouteInterface
      * @param  string $verb
      * @param  array  $defaults
      */
-    public function __construct($verb, array $defaults = [])
-    {
-        $this->verb     = $verb;
+    public function __construct(
+        /**
+         * Verb to match.
+         */
+        protected $verb,
+        array $defaults = []
+    ) {
         $this->defaults = $defaults;
     }
 

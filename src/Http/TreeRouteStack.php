@@ -284,11 +284,7 @@ class TreeRouteStack extends SimpleRouteStack
      */
     public function getPrototype($name)
     {
-        if (isset($this->prototypes[$name])) {
-            return $this->prototypes[$name];
-        }
-
-        return null;
+        return $this->prototypes[$name] ?? null;
     }
 
     /**

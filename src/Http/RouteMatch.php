@@ -14,23 +14,19 @@ use function array_merge;
 class RouteMatch extends BaseRouteMatch
 {
     /**
-     * Length of the matched path.
-     *
-     * @var int
-     */
-    protected $length;
-
-    /**
      * Create a part RouteMatch with given parameters and length.
      *
      * @param  array   $params
      * @param  int $length
      */
-    public function __construct(array $params, $length = 0)
-    {
+    public function __construct(
+        array $params,
+        /**
+         * Length of the matched path.
+         */
+        protected $length = 0
+    ) {
         parent::__construct($params);
-
-        $this->length = $length;
     }
 
     /**
