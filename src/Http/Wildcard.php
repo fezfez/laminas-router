@@ -52,7 +52,6 @@ class Wildcard implements RouteInterface
      *
      * @param  string $keyValueDelimiter
      * @param  string $paramDelimiter
-     * @param  array  $defaults
      */
     public function __construct(
         /**
@@ -163,8 +162,6 @@ class Wildcard implements RouteInterface
      *
      * @see    \Laminas\Router\RouteInterface::assemble()
      *
-     * @param  array $params
-     * @param  array $options
      * @return mixed
      */
     public function assemble(array $params = [], array $options = [])

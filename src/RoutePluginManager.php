@@ -60,7 +60,6 @@ class RoutePluginManager extends AbstractPluginManager
      * abstract factory.
      *
      * @param ContainerInterface|ConfigInterface $configOrContainerInstance
-     * @param array $v3config
      * @psalm-param ServiceManagerConfiguration $v3config
      */
     public function __construct($configOrContainerInstance, array $v3config = [])
@@ -113,7 +112,6 @@ class RoutePluginManager extends AbstractPluginManager
      * component-specific RouteInvokableFactory; removes the invokables entry
      * before passing to the parent.
      *
-     * @param array $config
      * @psalm-param ServiceManagerConfiguration $config
      * @return $this
      */

@@ -202,7 +202,6 @@ class SimpleRouteStack implements RouteStackInterface
     /**
      * Set a default parameters.
      *
-     * @param  array $params
      * @return SimpleRouteStack
      */
     public function setDefaultParams(array $params)
@@ -289,8 +288,6 @@ class SimpleRouteStack implements RouteStackInterface
      *
      * @see    \Laminas\Router\RouteInterface::assemble()
      *
-     * @param  array $params
-     * @param  array $options
      * @return mixed
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException

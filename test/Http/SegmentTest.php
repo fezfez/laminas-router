@@ -289,7 +289,6 @@ class SegmentTest extends TestCase
 
     /**
      * @param array|null $params
-     * @param array $options
      */
     #[DataProvider('routeProvider')]
     public function testMatching(

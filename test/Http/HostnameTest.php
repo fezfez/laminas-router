@@ -167,7 +167,6 @@ class HostnameTest extends TestCase
 
     /**
      * @param        string   $hostname
-     * @param        array    $params
      */
     #[DataProvider('routeProvider')]
     public function testMatching(Hostname $route, $hostname, ?array $params = null)
@@ -189,7 +188,6 @@ class HostnameTest extends TestCase
 
     /**
      * @param        string   $hostname
-     * @param        array    $params
      */
     #[DataProvider('routeProvider')]
     public function testAssembling(Hostname $route, $hostname, ?array $params = null)
