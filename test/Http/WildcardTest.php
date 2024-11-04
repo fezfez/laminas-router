@@ -9,6 +9,7 @@ use Laminas\Router\Http\RouteMatch;
 use Laminas\Router\Http\Wildcard;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Some\ConnectMiddleware;
 use Some\Handler;
@@ -100,11 +101,11 @@ class WildcardTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $path
      * @param        int|null $offset
      * @param        array    $params
      */
+    #[DataProvider('routeProvider')]
     public function testMatching(Wildcard $route, $path, $offset, ?array $params = null)
     {
         $request = new Request();
@@ -127,12 +128,12 @@ class WildcardTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $path
      * @param        int|null $offset
      * @param        array    $params
      * @param        boolean  $skipAssembling
      */
+    #[DataProvider('routeProvider')]
     public function testAssembling(Wildcard $route, $path, $offset, ?array $params = null, $skipAssembling = false)
     {
         if ($params === null || $skipAssembling) {

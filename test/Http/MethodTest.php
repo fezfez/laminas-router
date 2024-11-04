@@ -9,6 +9,7 @@ use Laminas\Router\Http\Method as HttpMethod;
 use Laminas\Router\Http\RouteMatch;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class MethodTest extends TestCase
@@ -42,9 +43,9 @@ class MethodTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param string $verb
      */
+    #[DataProvider('routeProvider')]
     public function testMatching(HttpMethod $route, $verb)
     {
         $request = new Request();

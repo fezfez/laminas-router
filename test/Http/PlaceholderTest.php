@@ -12,6 +12,7 @@ use Laminas\Router\Http\RouteMatch;
 use Laminas\Router\Http\TreeRouteStack;
 use Laminas\Stdlib\ArrayUtils;
 use LaminasTest\Router\FactoryTester;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class PlaceholderTest extends TestCase
@@ -74,11 +75,11 @@ class PlaceholderTest extends TestCase
     }
 
     /**
-     * @dataProvider placeholderProvider
      * @param array $additionalConfig
      * @param string $uri
      * @param string $expectedRouteName
      */
+    #[DataProvider('placeholderProvider')]
     public function testPlaceholderDefault($additionalConfig, $uri, $expectedRouteName)
     {
         $routeConfig = ArrayUtils::merge(self::$routeConfig, $additionalConfig);

@@ -20,6 +20,8 @@ use Laminas\ServiceManager\ServiceManager;
 use Laminas\Stdlib\Parameters;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 use function strlen;
@@ -283,11 +285,11 @@ class PartTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $path
      * @param        int|null $offset
      * @param        string   $routeName
      */
+    #[DataProvider('routeProvider')]
     public function testMatching(Part $route, $path, $offset, $routeName, ?array $params = null)
     {
         $request = new Request();
@@ -312,11 +314,11 @@ class PartTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $path
      * @param        int|null $offset
      * @param        string   $routeName
      */
+    #[DataProvider('routeProvider')]
     public function testAssembling(Part $route, $path, $offset, $routeName, ?array $params = null)
     {
         if ($params === null) {
@@ -381,9 +383,7 @@ class PartTest extends TestCase
         );
     }
 
-    /**
-     * @group Laminas-105
-     */
+    #[Group('Laminas-105')]
     public function testFactoryShouldAcceptTraversableChildRoutes()
     {
         $children = new ArrayObject([
@@ -418,9 +418,7 @@ class PartTest extends TestCase
         $this->assertInstanceOf(Part::class, $route);
     }
 
-    /**
-     * @group 3711
-     */
+    #[Group('3711')]
     public function testPartRouteMarkedAsMayTerminateCanMatchWhenQueryStringPresent()
     {
         $options = [
@@ -461,9 +459,7 @@ class PartTest extends TestCase
         $this->assertEquals('resource', $match->getParam('action'));
     }
 
-    /**
-     * @group 3711
-     */
+    #[Group('3711')]
     public function testPartRouteMarkedAsMayTerminateButWithQueryRouteChildWillMatchChildRoute()
     {
         $options = [
