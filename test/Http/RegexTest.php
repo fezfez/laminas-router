@@ -9,6 +9,7 @@ use Laminas\Router\Http\Regex;
 use Laminas\Router\Http\RouteMatch;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function strlen;
@@ -79,10 +80,10 @@ class RegexTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $path
      * @param        int|null $offset
      */
+    #[DataProvider('routeProvider')]
     public function testMatching(Regex $route, $path, $offset, ?array $params = null)
     {
         $request = new Request();
@@ -105,10 +106,10 @@ class RegexTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $path
      * @param        int|null $offset
      */
+    #[DataProvider('routeProvider')]
     public function testAssembling(Regex $route, $path, $offset, ?array $params = null)
     {
         if ($params === null) {

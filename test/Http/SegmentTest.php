@@ -14,6 +14,7 @@ use Laminas\Router\Http\RouteMatch;
 use Laminas\Router\Http\Segment;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function implode;
@@ -287,10 +288,10 @@ class SegmentTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param array|null $params
      * @param array $options
      */
+    #[DataProvider('routeProvider')]
     public function testMatching(
         Segment $route,
         string $path,
@@ -317,9 +318,7 @@ class SegmentTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider routeProvider
-     */
+    #[DataProvider('routeProvider')]
     public function testAssembling(
         Segment $route,
         string $path,
@@ -388,11 +387,11 @@ class SegmentTest extends TestCase
     }
 
     /**
-     * @dataProvider parseExceptionsProvider
      * @param        string $route
      * @param        string $exceptionName
      * @param        string $exceptionMessage
      */
+    #[DataProvider('parseExceptionsProvider')]
     public function testParseExceptions($route, $exceptionName, $exceptionMessage)
     {
         $this->expectException($exceptionName);

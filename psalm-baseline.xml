@@ -787,6 +787,9 @@
       <code><![CDATA[$result]]></code>
       <code><![CDATA[$value]]></code>
     </MixedAssignment>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[routeProvider]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="test/Http/HostnameTest.php">
     <DuplicateArrayKey>
@@ -808,6 +811,9 @@
       <code><![CDATA[$path]]></code>
       <code><![CDATA[$value]]></code>
     </MixedAssignment>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[routeProvider]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="test/Http/HttpRouterFactoryTest.php">
     <MissingClosureParamType>
@@ -832,6 +838,9 @@
     <MixedAssignment>
       <code><![CDATA[$result]]></code>
     </MixedAssignment>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[routeProvider]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="test/Http/MethodTest.php">
     <MissingReturnType>
@@ -839,6 +848,9 @@
       <code><![CDATA[testMatching]]></code>
       <code><![CDATA[testNoMatchWithoutVerb]]></code>
     </MissingReturnType>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[routeProvider]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="test/Http/PartTest.php">
     <ArgumentTypeCoercion>
@@ -917,10 +929,9 @@
     <MoreSpecificReturnType>
       <code><![CDATA[RoutePluginManager<RouteInterface>]]></code>
     </MoreSpecificReturnType>
-    <PossiblyInvalidArgument>
-      <code><![CDATA[testAssembling]]></code>
-      <code><![CDATA[testMatching]]></code>
-    </PossiblyInvalidArgument>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[routeProvider]]></code>
+    </PossiblyUnusedMethod>
     <UnusedVariable>
       <code><![CDATA[$query]]></code>
       <code><![CDATA[$query]]></code>
@@ -935,6 +946,9 @@
       <code><![CDATA[testMatch]]></code>
       <code><![CDATA[testPlaceholderDefault]]></code>
     </MissingReturnType>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[placeholderProvider]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="test/Http/RegexTest.php">
     <MissingReturnType>
@@ -957,6 +971,9 @@
       <code><![CDATA[getParam]]></code>
       <code><![CDATA[getParam]]></code>
     </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[routeProvider]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="test/Http/RouteMatchTest.php">
     <MissingReturnType>
@@ -1023,6 +1040,10 @@
       <code><![CDATA[getParam]]></code>
       <code><![CDATA[getParam]]></code>
     </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[parseExceptionsProvider]]></code>
+      <code><![CDATA[routeProvider]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="test/Http/TestAsset/DummyRoute.php">
     <UnsafeInstantiation>
@@ -1212,6 +1233,9 @@
       <code><![CDATA[getParam]]></code>
       <code><![CDATA[getParam]]></code>
     </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[routeProvider]]></code>
+    </PossiblyUnusedMethod>
     <UndefinedClass>
       <code><![CDATA[ConnectMiddleware]]></code>
       <code><![CDATA[Handler]]></code>
@@ -1371,6 +1395,9 @@
       <code><![CDATA[getParam]]></code>
       <code><![CDATA[getParam]]></code>
     </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[routeTypeProvider]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="test/TestAsset/DummyRoute.php">
     <PossiblyUnusedProperty>

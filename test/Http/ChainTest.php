@@ -13,6 +13,7 @@ use Laminas\Router\Http\Wildcard;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
 use LaminasTest\Router\FactoryTester;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function strlen;
@@ -143,10 +144,10 @@ class ChainTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $path
      * @param        int|null $offset
      */
+    #[DataProvider('routeProvider')]
     public function testMatching(Chain $route, $path, $offset, ?array $params = null)
     {
         $request = new Request();
@@ -169,10 +170,10 @@ class ChainTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $path
      * @param        int|null $offset
      */
+    #[DataProvider('routeProvider')]
     public function testAssembling(Chain $route, $path, $offset, ?array $params = null)
     {
         if ($params === null) {

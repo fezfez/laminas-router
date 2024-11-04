@@ -9,6 +9,8 @@ use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\RouteMatch;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 use function strlen;
@@ -61,11 +63,11 @@ class LiteralTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $path
      * @param        int|null $offset
      * @param        bool     $shouldMatch
      */
+    #[DataProvider('routeProvider')]
     public function testMatching(Literal $route, $path, $offset, $shouldMatch)
     {
         $request = new Request();
@@ -84,11 +86,11 @@ class LiteralTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $path
      * @param        int|null $offset
      * @param        bool     $shouldMatch
      */
+    #[DataProvider('routeProvider')]
     public function testAssembling(Literal $route, $path, $offset, $shouldMatch)
     {
         if (! $shouldMatch) {
@@ -136,9 +138,7 @@ class LiteralTest extends TestCase
         );
     }
 
-    /**
-     * @group Laminas-436
-     */
+    #[Group('Laminas-436')]
     public function testEmptyLiteral()
     {
         $request = new Request();

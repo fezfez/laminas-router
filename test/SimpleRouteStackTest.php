@@ -20,6 +20,7 @@ use Laminas\Router\RoutePluginManager;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\ServiceManager\ServiceManager;
 use Laminas\Stdlib\Request;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class SimpleRouteStackTest extends TestCase
@@ -387,7 +388,7 @@ class SimpleRouteStackTest extends TestCase
         ];
     }
 
-    /** @dataProvider routeTypeProvider */
+    #[DataProvider('routeTypeProvider')]
     public function testSimpleRouteStackSetsPriorityForAllKnownRouteTypes(array $routeSpec, int $expectedPriority): void
     {
         $router = new SimpleRouteStack();

@@ -12,6 +12,8 @@ use Laminas\Router\Http\RouteMatch;
 use Laminas\Stdlib\Request as BaseRequest;
 use Laminas\Uri\Http as HttpUri;
 use LaminasTest\Router\FactoryTester;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 class HostnameTest extends TestCase
@@ -164,10 +166,10 @@ class HostnameTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $hostname
      * @param        array    $params
      */
+    #[DataProvider('routeProvider')]
     public function testMatching(Hostname $route, $hostname, ?array $params = null)
     {
         $request = new Request();
@@ -186,10 +188,10 @@ class HostnameTest extends TestCase
     }
 
     /**
-     * @dataProvider routeProvider
      * @param        string   $hostname
      * @param        array    $params
      */
+    #[DataProvider('routeProvider')]
     public function testAssembling(Hostname $route, $hostname, ?array $params = null)
     {
         if ($params === null) {
@@ -275,9 +277,7 @@ class HostnameTest extends TestCase
         );
     }
 
-    /**
-     * @group laminas5656
-     */
+    #[Group('laminas5656')]
     public function testFailedHostnameSegmentMatchDoesNotEmitErrors()
     {
         $this->expectException(RuntimeException::class);
