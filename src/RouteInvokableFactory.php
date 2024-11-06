@@ -142,8 +142,6 @@ class RouteInvokableFactory implements
      * Set options to use when creating a service (v2)
      *
      * @deprecated Since 3.6.0 - This component is no longer compatible with Service Manager v2
-     *
-     * @param array $creationOptions
      */
     public function setCreationOptions(array $creationOptions)
     {

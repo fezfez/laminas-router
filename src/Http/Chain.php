@@ -46,7 +46,6 @@ class Chain extends TreeRouteStack implements RouteInterface
     /**
      * Create a new part route.
      *
-     * @param array                            $routes
      * @param RoutePluginManager<TRoute>       $routePlugins
      * @param ArrayObject<string, TRoute>|null $prototypes
      */
@@ -108,7 +107,6 @@ class Chain extends TreeRouteStack implements RouteInterface
      * @see    \Laminas\Router\RouteInterface::match()
      *
      * @param  int|null $pathOffset
-     * @param  array    $options
      * @return RouteMatch|null
      */
     public function match(Request $request, $pathOffset = null, array $options = [])
@@ -157,8 +155,6 @@ class Chain extends TreeRouteStack implements RouteInterface
      *
      * @see    \Laminas\Router\RouteInterface::assemble()
      *
-     * @param  array $params
-     * @param  array $options
      * @return mixed
      */
     public function assemble(array $params = [], array $options = [])

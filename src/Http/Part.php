@@ -135,7 +135,6 @@ class Part extends TreeRouteStack implements RouteInterface
      * @see    \Laminas\Router\RouteInterface::match()
      *
      * @param  integer|null $pathOffset
-     * @param  array        $options
      * @return RouteMatch|null
      */
     public function match(Request $request, $pathOffset = null, array $options = [])
@@ -186,8 +185,6 @@ class Part extends TreeRouteStack implements RouteInterface
      *
      * @see    \Laminas\Router\RouteInterface::assemble()
      *
-     * @param  array $params
-     * @param  array $options
      * @return mixed
      * @throws Exception\RuntimeException
      */

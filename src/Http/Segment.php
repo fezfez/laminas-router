@@ -121,8 +121,6 @@ class Segment implements RouteInterface
      * Create a new regex route.
      *
      * @param  string $route
-     * @param  array  $constraints
-     * @param  array  $defaults
      */
     public function __construct($route, array $constraints = [], array $defaults = [])
     {
@@ -245,8 +243,6 @@ class Segment implements RouteInterface
     /**
      * Build the matching regex from parsed parts.
      *
-     * @param  array   $parts
-     * @param  array   $constraints
      * @param  int $groupIndex
      * @return string
      */
@@ -291,11 +287,8 @@ class Segment implements RouteInterface
     /**
      * Build a path.
      *
-     * @param  array   $parts
-     * @param  array   $mergedParams
      * @param  bool    $isOptional
      * @param  bool    $hasChild
-     * @param  array   $options
      * @return string
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
@@ -374,7 +367,6 @@ class Segment implements RouteInterface
      * @see    \Laminas\Router\RouteInterface::match()
      *
      * @param  string|null $pathOffset
-     * @param  array       $options
      * @return RouteMatch|null
      * @throws Exception\RuntimeException
      */
@@ -430,8 +422,6 @@ class Segment implements RouteInterface
      *
      * @see    \Laminas\Router\RouteInterface::assemble()
      *
-     * @param  array $params
-     * @param  array $options
      * @return mixed
      */
     public function assemble(array $params = [], array $options = [])

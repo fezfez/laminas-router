@@ -55,7 +55,6 @@ class Regex implements RouteInterface
      *
      * @param  string $regex
      * @param  string $spec
-     * @param  array  $defaults
      */
     public function __construct(
         /**
@@ -151,8 +150,6 @@ class Regex implements RouteInterface
      *
      * @see    \Laminas\Router\RouteInterface::assemble()
      *
-     * @param  array $params
-     * @param  array $options
      * @return mixed
      */
     public function assemble(array $params = [], array $options = [])

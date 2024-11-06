@@ -293,7 +293,6 @@ class TreeRouteStack extends SimpleRouteStack
      * @see    \Laminas\Router\RouteInterface::match()
      *
      * @param  int|null $pathOffset
-     * @param  array $options
      * @return RouteMatch|null
      */
     public function match(Request $request, $pathOffset = null, array $options = [])
@@ -348,8 +347,6 @@ class TreeRouteStack extends SimpleRouteStack
      *
      * @see    \Laminas\Router\RouteInterface::assemble()
      *
-     * @param  array $params
-     * @param  array $options
      * @return mixed
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException

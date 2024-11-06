@@ -39,7 +39,6 @@ class Literal implements RouteInterface
      * Create a new literal route.
      *
      * @param  string $route
-     * @param  array  $defaults
      */
     public function __construct(
         /**
@@ -121,8 +120,6 @@ class Literal implements RouteInterface
      *
      * @see    \Laminas\Router\RouteInterface::assemble()
      *
-     * @param  array $params
-     * @param  array $options
      * @return mixed
      */
     public function assemble(array $params = [], array $options = [])

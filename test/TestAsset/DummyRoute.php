@@ -33,8 +33,6 @@ class DummyRoute implements RouteInterface
      *
      * @see    Route::assemble()
      *
-     * @param  array $params
-     * @param  array $options
      * @return mixed
      */
     public function assemble(?array $params = null, ?array $options = null)
