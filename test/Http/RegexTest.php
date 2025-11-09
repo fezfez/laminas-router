@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use function strlen;
 use function strpos;
 
-class RegexTest extends TestCase
+final class RegexTest extends TestCase
 {
     /**
      * @psalm-return array<string, array{

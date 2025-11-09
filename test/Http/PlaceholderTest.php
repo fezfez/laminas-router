@@ -15,7 +15,7 @@ use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class PlaceholderTest extends TestCase
+final class PlaceholderTest extends TestCase
 {
     /** @var array<string, array<string, mixed>> */
     private static array $routeConfig = [

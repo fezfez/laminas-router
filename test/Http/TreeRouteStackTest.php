@@ -18,7 +18,7 @@ use LaminasTest\Router\TestAsset\DummyRoute;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
-class TreeRouteStackTest extends TestCase
+final class TreeRouteStackTest extends TestCase
 {
     public function testAddRouteRequiresHttpSpecificRoute()
     {

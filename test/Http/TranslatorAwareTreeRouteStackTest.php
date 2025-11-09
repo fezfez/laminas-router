@@ -12,7 +12,7 @@ use Laminas\Router\Http\TranslatorAwareTreeRouteStack;
 use Laminas\Uri\Http as HttpUri;
 use PHPUnit\Framework\TestCase;
 
-class TranslatorAwareTreeRouteStackTest extends TestCase
+final class TranslatorAwareTreeRouteStackTest extends TestCase
 {
     /** @var string */
     protected $testFilesDir;

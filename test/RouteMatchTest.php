@@ -7,7 +7,7 @@ namespace LaminasTest\Router;
 use Laminas\Router\RouteMatch;
 use PHPUnit\Framework\TestCase;
 
-class RouteMatchTest extends TestCase
+final class RouteMatchTest extends TestCase
 {
     public function testParamsAreStored()
     {

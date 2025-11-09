@@ -13,7 +13,7 @@ use function sprintf;
 /**
  * Helper to test route factories.
  */
-class FactoryTester
+final class FactoryTester
 {
     /**
      * Test case to call assertions to.

@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 use function strlen;
 use function strpos;
 
-class LiteralTest extends TestCase
+final class LiteralTest extends TestCase
 {
     /**
      * @psalm-return array<string, array{

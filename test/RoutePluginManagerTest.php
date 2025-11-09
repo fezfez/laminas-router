@@ -9,7 +9,7 @@ use Laminas\ServiceManager\Exception\ServiceNotFoundException;
 use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
 
-class RoutePluginManagerTest extends TestCase
+final class RoutePluginManagerTest extends TestCase
 {
     public function testLoadNonExistentRoute()
     {

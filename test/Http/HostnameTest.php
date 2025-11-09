@@ -16,7 +16,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
-class HostnameTest extends TestCase
+final class HostnameTest extends TestCase
 {
     /**
      * @psalm-return array<string, array{

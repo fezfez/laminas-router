@@ -13,7 +13,7 @@ use Laminas\Stdlib\RequestInterface as Request;
  * @template TRoute of RouteInterface
  * @template-implements RouteStackInterface<TRoute>
  */
-class Router implements RouteStackInterface
+final class Router implements RouteStackInterface
 {
     /**
      * Create a new route with given options.
