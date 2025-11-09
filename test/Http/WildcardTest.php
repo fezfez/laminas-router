@@ -17,7 +17,7 @@ use Some\Handler;
 use function strlen;
 use function strpos;
 
-class WildcardTest extends TestCase
+final class WildcardTest extends TestCase
 {
     /**
      * @psalm-return array<string, array{

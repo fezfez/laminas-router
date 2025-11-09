@@ -12,7 +12,7 @@ use Laminas\Uri\Http as HttpUri;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\TestCase;
 
-class SchemeTest extends TestCase
+final class SchemeTest extends TestCase
 {
     public function testMatching()
     {

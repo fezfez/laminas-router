@@ -10,7 +10,7 @@ use Laminas\Stdlib\RequestInterface;
 /**
  * Dummy route.
  */
-class DummyRouteWithParam extends DummyRoute
+final class DummyRouteWithParam extends DummyRoute
 {
     /**
      * match(): defined by RouteInterface interface.

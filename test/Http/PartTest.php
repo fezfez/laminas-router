@@ -27,7 +27,7 @@ use PHPUnit\Framework\TestCase;
 use function strlen;
 use function strpos;
 
-class PartTest extends TestCase
+final class PartTest extends TestCase
 {
     /** @return RoutePluginManager<RouteInterface> */
     public static function getRoutePlugins(): RoutePluginManager

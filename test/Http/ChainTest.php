@@ -19,7 +19,7 @@ use PHPUnit\Framework\TestCase;
 use function strlen;
 use function strpos;
 
-class ChainTest extends TestCase
+final class ChainTest extends TestCase
 {
     public static function getRoute(): Chain
     {

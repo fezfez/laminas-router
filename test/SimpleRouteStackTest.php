@@ -23,7 +23,7 @@ use Laminas\Stdlib\Request;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class SimpleRouteStackTest extends TestCase
+final class SimpleRouteStackTest extends TestCase
 {
     public function testSetRoutePluginManager()
     {

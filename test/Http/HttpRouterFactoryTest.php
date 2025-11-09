@@ -8,7 +8,7 @@ use Laminas\Router\Http\HttpRouterFactory;
 use Laminas\Router\RoutePluginManager;
 use LaminasTest\Router\RouterFactoryTest as TestCase;
 
-class HttpRouterFactoryTest extends TestCase
+final class HttpRouterFactoryTest extends TestCase
 {
     public function setUp(): void
     {

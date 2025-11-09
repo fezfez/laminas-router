@@ -21,7 +21,7 @@ use function implode;
 use function strlen;
 use function strpos;
 
-class SegmentTest extends TestCase
+final class SegmentTest extends TestCase
 {
     /**
      * @psalm-return array<string, array{

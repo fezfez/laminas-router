@@ -12,7 +12,7 @@ use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class MethodTest extends TestCase
+final class MethodTest extends TestCase
 {
     /**
      * @psalm-return array<string, array{
