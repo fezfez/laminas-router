@@ -7,6 +7,7 @@ namespace Laminas\Router\Http;
 use ArrayObject;
 use Laminas\Router\Exception;
 use Laminas\Router\PriorityList;
+use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface as Request;
@@ -20,10 +21,10 @@ use function sprintf;
 use function strlen;
 
 /**
- * @template TRoute of RouteInterface
+ * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
  */
-class Part extends TreeRouteStack implements RouteInterface
+class Part extends TreeRouteStack implements HttpRouteInterface
 {
     /**
      * RouteInterface to match.
@@ -61,7 +62,7 @@ class Part extends TreeRouteStack implements RouteInterface
     ) {
         $this->routePluginManager = $routePlugins;
 
-        if (! $route instanceof RouteInterface) {
+        if (! $route instanceof HttpRouteInterface) {
             $route = $this->routeFromArray($route);
         }
 
@@ -79,7 +80,7 @@ class Part extends TreeRouteStack implements RouteInterface
     /**
      * factory(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::factory()
+     * @see    RouteInterface::factory()
      *
      * @param  mixed $options
      * @return Part
@@ -132,7 +133,7 @@ class Part extends TreeRouteStack implements RouteInterface
     /**
      * match(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::match()
+     * @see    RouteInterface::match()
      *
      * @param  integer|null $pathOffset
      * @return RouteMatch|null
@@ -183,7 +184,7 @@ class Part extends TreeRouteStack implements RouteInterface
     /**
      * assemble(): Defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::assemble()
+     * @see    RouteInterface::assemble()
      *
      * @return mixed
      * @throws Exception\RuntimeException
@@ -218,9 +219,9 @@ class Part extends TreeRouteStack implements RouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by RouteInterface interface.
+     * getAssembledParams(): defined by HttpRouteInterface interface.
      *
-     * @see    RouteInterface::getAssembledParams
+     * @see    HttpRouteInterface::getAssembledParams
      *
      * @return array
      */

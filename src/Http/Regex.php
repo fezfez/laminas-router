@@ -6,6 +6,7 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\InvalidArgumentException;
+use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface as Request;
 use Traversable;
@@ -26,7 +27,7 @@ use function strlen;
 /**
  * Regex route.
  */
-class Regex implements RouteInterface
+class Regex implements HttpRouteInterface
 {
     /**
      * Default values.
@@ -75,7 +76,7 @@ class Regex implements RouteInterface
     /**
      * factory(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::factory()
+     * @see    RouteInterface::factory()
      *
      * @param  iterable $options
      * @return Regex
@@ -148,7 +149,7 @@ class Regex implements RouteInterface
     /**
      * assemble(): Defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::assemble()
+     * @see    RouteInterface::assemble()
      *
      * @return mixed
      */
@@ -172,9 +173,9 @@ class Regex implements RouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by RouteInterface interface.
+     * getAssembledParams(): defined by HttpRouteInterface interface.
      *
-     * @see    RouteInterface::getAssembledParams
+     * @see    HttpRouteInterface::getAssembledParams
      *
      * @return array
      */

@@ -8,9 +8,9 @@ use ArrayObject;
 use Laminas\Http\Request;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
+use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Part;
-use Laminas\Router\Http\RouteInterface;
 use Laminas\Router\Http\RouteMatch;
 use Laminas\Router\Http\Segment;
 use Laminas\Router\Http\Wildcard;
@@ -29,7 +29,7 @@ use function strpos;
 
 final class PartTest extends TestCase
 {
-    /** @return RoutePluginManager<RouteInterface> */
+    /** @return RoutePluginManager<HttpRouteInterface> */
     public static function getRoutePlugins(): RoutePluginManager
     {
         return new RoutePluginManager(new ServiceManager(), [

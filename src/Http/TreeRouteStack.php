@@ -6,6 +6,7 @@ namespace Laminas\Router\Http;
 
 use ArrayObject;
 use Laminas\Router\Exception;
+use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteInvokableFactory;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\ServiceManager\Config;
@@ -26,7 +27,7 @@ use function strlen;
 /**
  * Tree search implementation.
  *
- * @template TRoute of RouteInterface
+ * @template TRoute of HttpRouteInterface
  * @template-extends SimpleRouteStack<TRoute>
  */
 class TreeRouteStack extends SimpleRouteStack
@@ -66,7 +67,7 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * factory(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::factory()
+     * @see    RouteInterface::factory()
      *
      * @param  iterable $options
      * @return SimpleRouteStack
@@ -164,7 +165,7 @@ class TreeRouteStack extends SimpleRouteStack
      */
     public function addRoute($name, $route, $priority = null)
     {
-        if (! $route instanceof RouteInterface) {
+        if (! $route instanceof HttpRouteInterface) {
             $route = $this->routeFromArray($route);
         }
 
@@ -216,7 +217,7 @@ class TreeRouteStack extends SimpleRouteStack
             $route = parent::routeFromArray($specs);
         }
 
-        if (! $route instanceof RouteInterface) {
+        if (! $route instanceof HttpRouteInterface) {
             throw new Exception\RuntimeException('Given route does not implement HTTP route interface');
         }
 
@@ -267,7 +268,7 @@ class TreeRouteStack extends SimpleRouteStack
      */
     public function addPrototype($name, $route)
     {
-        if (! $route instanceof RouteInterface) {
+        if (! $route instanceof HttpRouteInterface) {
             $route = $this->routeFromArray($route);
         }
 
@@ -288,9 +289,9 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * match(): defined by \Laminas\Router\RouteInterface
+     * match(): defined by RouteInterface
      *
-     * @see    \Laminas\Router\RouteInterface::match()
+     * @see    RouteInterface::match()
      *
      * @param  int|null $pathOffset
      * @return RouteMatch|null
@@ -343,9 +344,9 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * assemble(): defined by \Laminas\Router\RouteInterface interface.
+     * assemble(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::assemble()
+     * @see    RouteInterface::assemble()
      *
      * @return mixed
      * @throws Exception\InvalidArgumentException

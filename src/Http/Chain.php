@@ -7,6 +7,7 @@ namespace Laminas\Router\Http;
 use ArrayObject;
 use Laminas\Router\Exception;
 use Laminas\Router\PriorityList;
+use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface as Request;
@@ -24,10 +25,10 @@ use function sprintf;
 use function strlen;
 
 /**
- * @template TRoute of RouteInterface
+ * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
  */
-class Chain extends TreeRouteStack implements RouteInterface
+class Chain extends TreeRouteStack implements HttpRouteInterface
 {
     /**
      * Chain routes.
@@ -61,7 +62,7 @@ class Chain extends TreeRouteStack implements RouteInterface
     /**
      * factory(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::factory()
+     * @see    RouteInterface::factory()
      *
      * @param  mixed $options
      * @throws Exception\InvalidArgumentException
@@ -104,7 +105,7 @@ class Chain extends TreeRouteStack implements RouteInterface
     /**
      * match(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::match()
+     * @see    RouteInterface::match()
      *
      * @param  int|null $pathOffset
      * @return RouteMatch|null
@@ -132,7 +133,7 @@ class Chain extends TreeRouteStack implements RouteInterface
         $pathLength = strlen($uri->getPath());
 
         foreach ($this->routes as $route) {
-            assert($route instanceof RouteInterface);
+            assert($route instanceof HttpRouteInterface);
             $subMatch = $route->match($request, $pathOffset, $options);
 
             if ($subMatch === null) {
@@ -153,7 +154,7 @@ class Chain extends TreeRouteStack implements RouteInterface
     /**
      * assemble(): Defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::assemble()
+     * @see    RouteInterface::assemble()
      *
      * @return mixed
      */
@@ -188,7 +189,7 @@ class Chain extends TreeRouteStack implements RouteInterface
     /**
      * getAssembledParams(): defined by RouteInterface interface.
      *
-     * @see    RouteInterface::getAssembledParams
+     * @see    HttpRouteInterface::getAssembledParams
      *
      * @return array
      */

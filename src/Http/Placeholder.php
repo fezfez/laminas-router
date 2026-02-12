@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
+use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface as Request;
 use Traversable;
@@ -15,7 +16,7 @@ use function sprintf;
 /**
  * Placeholder route.
  */
-class Placeholder implements RouteInterface
+class Placeholder implements HttpRouteInterface
 {
     /**
      * @internal
@@ -32,7 +33,7 @@ class Placeholder implements RouteInterface
     /**
      * factory(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::factory()
+     * @see    RouteInterface::factory()
      *
      * @param  iterable $options
      * @return Placeholder
@@ -65,7 +66,7 @@ class Placeholder implements RouteInterface
     /**
      * match(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::match()
+     * @see    RouteInterface::match()
      *
      * @param  integer|null $pathOffset
      * @return RouteMatch|null
@@ -78,7 +79,7 @@ class Placeholder implements RouteInterface
     /**
      * assemble(): Defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::assemble()
+     * @see    RouteInterface::assemble()
      *
      * @return mixed
      */
@@ -90,7 +91,7 @@ class Placeholder implements RouteInterface
     /**
      * getAssembledParams(): defined by RouteInterface interface.
      *
-     * @see    RouteInterface::getAssembledParams
+     * @see    HttpRouteInterface::getAssembledParams
      *
      * @return array
      */
