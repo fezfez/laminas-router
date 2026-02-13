@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Laminas\Router;
 
-use Laminas\ServiceManager\AbstractFactoryInterface;
 use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
-use Laminas\ServiceManager\FactoryInterface;
-use Laminas\ServiceManager\ServiceLocatorInterface;
+use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 use Psr\Container\ContainerInterface;
 
 use function class_exists;
@@ -21,51 +19,27 @@ use function sprintf;
  * abstract factory to map FQCN services to invokables.
  */
 class RouteInvokableFactory implements
-    AbstractFactoryInterface,
-    FactoryInterface
+    AbstractFactoryInterface
 {
-    /**
-     * Options used to create instance (used with laminas-servicemanager v2)
-     *
-     * @var array
-     */
-    protected $creationOptions = [];
-
     /**
      * Can we create a route instance with the given name? (v3)
      *
      * Only works for FQCN $routeName values, for classes that implement RouteInterface.
      *
-     * @param string $routeName
+     * @param string $requestedName
      * @return bool
      */
-    public function canCreate(ContainerInterface $container, $routeName)
+    public function canCreate(ContainerInterface $container, $requestedName)
     {
-        if (! class_exists($routeName)) {
+        if (! class_exists($requestedName)) {
             return false;
         }
 
-        if (! is_subclass_of($routeName, RouteInterface::class)) {
+        if (! is_subclass_of($requestedName, RouteInterface::class)) {
             return false;
         }
 
         return true;
-    }
-
-    /**
-     * Can we create a route instance with the given name? (v2)
-     *
-     * Proxies to canCreate().
-     *
-     * @deprecated Since 3.6.0 - This component is no longer compatible with Service Manager v2
-     *
-     * @param string $normalizedName
-     * @param string $routeName
-     * @return bool
-     */
-    public function canCreateServiceWithName(ServiceLocatorInterface $container, $normalizedName, $routeName)
-    {
-        return $this->canCreate($container, $routeName);
     }
 
     /**
@@ -77,74 +51,31 @@ class RouteInvokableFactory implements
      * Otherwise, it uses the class' `factory()` method with the provided
      * $options to produce an instance.
      *
-     * @param string $routeName
+     * @param string $requestedName
      * @param null|array $options
      * @return RouteInterface
      */
-    public function __invoke(ContainerInterface $container, $routeName, ?array $options = null)
+    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
     {
         $options ??= [];
 
-        if (! class_exists($routeName)) {
+        if (! class_exists($requestedName)) {
             throw new ServiceNotCreatedException(sprintf(
                 '%s: failed retrieving invokable class "%s"; class does not exist',
                 self::class,
-                $routeName
+                $requestedName
             ));
         }
 
-        if (! is_subclass_of($routeName, RouteInterface::class)) {
+        if (! is_subclass_of($requestedName, RouteInterface::class)) {
             throw new ServiceNotCreatedException(sprintf(
                 '%s: failed retrieving invokable class "%s"; class does not implement %s',
                 self::class,
-                $routeName,
+                $requestedName,
                 RouteInterface::class
             ));
         }
 
-        return $routeName::factory($options);
-    }
-
-    /**
-     * Create a route instance with the given name. (v2)
-     *
-     * Proxies to __invoke().
-     *
-     * @deprecated Since 3.6.0 - This component is no longer compatible with Service Manager v2
-     *
-     * @param string $normalizedName
-     * @param string $routeName
-     * @return RouteInterface
-     */
-    public function createServiceWithName(ServiceLocatorInterface $container, $normalizedName, $routeName)
-    {
-        return $this($container, $routeName, $this->creationOptions);
-    }
-
-    /**
-     * Create and return RouteInterface instance
-     *
-     * For use with laminas-servicemanager v2; proxies to __invoke().
-     *
-     * @deprecated Since 3.6.0 - This component is no longer compatible with Service Manager v2
-     *
-     * @param null|string $normalizedName Not used
-     * @param null|string $routeName
-     * @return RouteInterface
-     */
-    public function createService(ServiceLocatorInterface $container, $normalizedName = null, $routeName = null)
-    {
-        $routeName ??= RouteInterface::class;
-        return $this($container, $routeName, $this->creationOptions);
-    }
-
-    /**
-     * Set options to use when creating a service (v2)
-     *
-     * @deprecated Since 3.6.0 - This component is no longer compatible with Service Manager v2
-     */
-    public function setCreationOptions(array $creationOptions)
-    {
-        $this->creationOptions = $creationOptions;
+        return $requestedName::factory($options);
     }
 }
