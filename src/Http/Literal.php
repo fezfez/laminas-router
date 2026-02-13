@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
+use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface as Request;
 use Traversable;
@@ -18,7 +19,7 @@ use function strpos;
 /**
  * Literal route.
  */
-class Literal implements RouteInterface
+class Literal implements HttpRouteInterface
 {
     /**
      * Default values.
@@ -53,7 +54,7 @@ class Literal implements RouteInterface
     /**
      * factory(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::factory()
+     * @see    RouteInterface::factory()
      *
      * @param  iterable $options
      * @return Literal
@@ -84,7 +85,7 @@ class Literal implements RouteInterface
     /**
      * match(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::match()
+     * @see    RouteInterface::match()
      *
      * @param  integer|null $pathOffset
      * @return RouteMatch|null
@@ -118,7 +119,7 @@ class Literal implements RouteInterface
     /**
      * assemble(): Defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::assemble()
+     * @see    RouteInterface::assemble()
      *
      * @return mixed
      */
@@ -128,9 +129,9 @@ class Literal implements RouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by RouteInterface interface.
+     * getAssembledParams(): defined by HttpRouteInterface interface.
      *
-     * @see    RouteInterface::getAssembledParams
+     * @see    HttpRouteInterface::getAssembledParams
      *
      * @return array
      */

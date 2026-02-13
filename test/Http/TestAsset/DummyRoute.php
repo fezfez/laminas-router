@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http\TestAsset;
 
-use Laminas\Router\Http\RouteInterface;
+use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\RouteMatch;
 use Laminas\Stdlib\RequestInterface;
 
 /**
  * Dummy route.
  */
-class DummyRoute implements RouteInterface
+class DummyRoute implements HttpRouteInterface
 {
     /**
      * match(): defined by RouteInterface interface.
