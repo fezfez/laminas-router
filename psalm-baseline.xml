@@ -622,28 +622,6 @@
       <code><![CDATA[Module]]></code>
     </UnusedClass>
   </file>
-  <file src="src/RouteInvokableFactory.php">
-    <DeprecatedInterface>
-      <code><![CDATA[RouteInvokableFactory]]></code>
-      <code><![CDATA[RouteInvokableFactory]]></code>
-    </DeprecatedInterface>
-    <MissingReturnType>
-      <code><![CDATA[setCreationOptions]]></code>
-    </MissingReturnType>
-    <ParamNameMismatch>
-      <code><![CDATA[$container]]></code>
-      <code><![CDATA[$container]]></code>
-      <code><![CDATA[$container]]></code>
-      <code><![CDATA[$normalizedName]]></code>
-      <code><![CDATA[$normalizedName]]></code>
-      <code><![CDATA[$routeName]]></code>
-      <code><![CDATA[$routeName]]></code>
-      <code><![CDATA[$routeName]]></code>
-    </ParamNameMismatch>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[setCreationOptions]]></code>
-    </PossiblyUnusedMethod>
-  </file>
   <file src="src/RouteMatch.php">
     <PropertyNotSetInConstructor>
       <code><![CDATA[$matchedRouteName]]></code>
@@ -674,11 +652,6 @@
       <code><![CDATA[$shareByDefault]]></code>
     </PossiblyUnusedProperty>
   </file>
-  <file src="src/RoutePluginManagerFactory.php">
-    <DeprecatedInterface>
-      <code><![CDATA[RoutePluginManagerFactory]]></code>
-    </DeprecatedInterface>
-  </file>
   <file src="src/RouteStackInterface.php">
     <PossiblyUnusedReturnValue>
       <code><![CDATA[static]]></code>
@@ -695,15 +668,9 @@
     </MixedAssignment>
   </file>
   <file src="src/RouterFactory.php">
-    <DeprecatedInterface>
-      <code><![CDATA[RouterFactory]]></code>
-    </DeprecatedInterface>
     <MixedReturnStatement>
       <code><![CDATA[$container->get('HttpRouter')]]></code>
     </MixedReturnStatement>
-    <ParamNameMismatch>
-      <code><![CDATA[$container]]></code>
-    </ParamNameMismatch>
   </file>
   <file src="src/SimpleRouteStack.php">
     <DocblockTypeContradiction>
@@ -1235,9 +1202,6 @@
     </MissingReturnType>
   </file>
   <file src="test/RoutePluginManagerFactoryTest.php">
-    <DeprecatedMethod>
-      <code><![CDATA[createService]]></code>
-    </DeprecatedMethod>
     <MissingClosureParamType>
       <code><![CDATA[$container]]></code>
     </MissingClosureParamType>
@@ -1245,7 +1209,6 @@
       <code><![CDATA[fn($container) => $this->createMock(RouteInterface::class)]]></code>
     </MissingClosureReturnType>
     <MissingReturnType>
-      <code><![CDATA[testCreateServiceReturnsAPluginManager]]></code>
       <code><![CDATA[testInvocationCanProvideOptionsToThePluginManager]]></code>
       <code><![CDATA[testInvocationReturnsAPluginManager]]></code>
     </MissingReturnType>
