@@ -7,12 +7,13 @@ namespace Laminas\Router\Http;
 use Laminas\I18n\Translator\TranslatorAwareInterface;
 use Laminas\I18n\Translator\TranslatorInterface as Translator;
 use Laminas\Router\Exception;
+use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\RequestInterface as Request;
 
 /**
  * Translator aware tree route stack.
  *
- * @template TRoute of RouteInterface
+ * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
  */
 class TranslatorAwareTreeRouteStack extends TreeRouteStack implements TranslatorAwareInterface
@@ -39,9 +40,9 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
     protected $translatorTextDomain = 'default';
 
     /**
-     * match(): defined by \Laminas\Router\RouteInterface
+     * match(): defined by RouteInterface
      *
-     * @see    \Laminas\Router\RouteInterface::match()
+     * @see    RouteInterface::match()
      *
      * @param  integer|null $pathOffset
      * @return RouteMatch|null
@@ -60,9 +61,9 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
     }
 
     /**
-     * assemble(): defined by \Laminas\Router\RouteInterface interface.
+     * assemble(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::assemble()
+     * @see    RouteInterface::assemble()
      *
      * @return mixed
      * @throws Exception\InvalidArgumentException

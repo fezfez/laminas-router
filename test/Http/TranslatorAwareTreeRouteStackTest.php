@@ -7,7 +7,7 @@ namespace LaminasTest\Router\Http;
 use Laminas\Http\Request;
 use Laminas\I18n\Translator\Translator;
 use Laminas\I18n\Translator\TranslatorAwareInterface;
-use Laminas\Router\Http\RouteInterface;
+use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\TranslatorAwareTreeRouteStack;
 use Laminas\Uri\Http as HttpUri;
 use PHPUnit\Framework\TestCase;
@@ -89,7 +89,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
         $translator = new Translator();
         $request    = new Request();
 
-        $route = $this->createMock(RouteInterface::class);
+        $route = $this->createMock(HttpRouteInterface::class);
         $route->expects($this->once())
               ->method('match')
             ->with(
@@ -109,7 +109,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
         $translator = new Translator();
         $uri        = new HttpUri();
 
-        $route = $this->createMock(RouteInterface::class);
+        $route = $this->createMock(HttpRouteInterface::class);
         $route->expects($this->once())
               ->method('assemble')
             ->with(

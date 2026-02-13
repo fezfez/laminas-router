@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
+use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface as Request;
 use Traversable;
@@ -16,7 +17,7 @@ use function sprintf;
 /**
  * Scheme route.
  */
-class Scheme implements RouteInterface
+class Scheme implements HttpRouteInterface
 {
     /**
      * Default values.
@@ -51,7 +52,7 @@ class Scheme implements RouteInterface
     /**
      * factory(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::factory()
+     * @see    RouteInterface::factory()
      *
      * @param  iterable $options
      * @return Scheme
@@ -82,7 +83,7 @@ class Scheme implements RouteInterface
     /**
      * match(): defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::match()
+     * @see    RouteInterface::match()
      *
      * @return RouteMatch|null
      */
@@ -105,7 +106,7 @@ class Scheme implements RouteInterface
     /**
      * assemble(): Defined by RouteInterface interface.
      *
-     * @see    \Laminas\Router\RouteInterface::assemble()
+     * @see    RouteInterface::assemble()
      *
      * @return mixed
      */
@@ -120,9 +121,9 @@ class Scheme implements RouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by RouteInterface interface.
+     * getAssembledParams(): defined by HttpRouteInterface interface.
      *
-     * @see    RouteInterface::getAssembledParams
+     * @see    HttpRouteInterface::getAssembledParams
      *
      * @return array
      */
