@@ -340,7 +340,6 @@ You may use any route type as a child route of a `Part` route.
 >     'regex'    => 'Laminas\Router\Http\Regex',
 >     'scheme'   => 'Laminas\Router\Http\Scheme',
 >     'segment'  => 'Laminas\Router\Http\Segment',
->     'wildcard' => 'Laminas\Router\Http\Wildcard',
 >     'method'   => 'Laminas\Router\Http\Method',
 > ];
 > foreach ($plugins as $name => $class) {
