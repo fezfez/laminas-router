@@ -384,7 +384,6 @@ final class TreeRouteStackTest extends TestCase
 
         $reflectedClass    = new ReflectionClass($stack);
         $reflectedProperty = $reflectedClass->getProperty('routes');
-        $reflectedProperty->setAccessible(true);
         $routes = $reflectedProperty->getValue($stack);
 
         $this->assertEquals(1000, $routes->get('foo')->priority);
