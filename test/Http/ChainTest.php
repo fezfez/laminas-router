@@ -9,7 +9,6 @@ use Laminas\Router\Http\Chain;
 use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\RouteMatch;
 use Laminas\Router\Http\Segment;
-use Laminas\Router\Http\Wildcard;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
 use LaminasTest\Router\FactoryTester;
@@ -45,9 +44,6 @@ final class ChainTest extends TestCase
                             'bar' => 'bar',
                         ],
                     ],
-                ],
-                [
-                    'type' => Wildcard::class,
                 ],
             ],
             $routePlugins

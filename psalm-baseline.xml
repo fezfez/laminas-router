@@ -281,11 +281,6 @@
       <code><![CDATA[new static($options['regex'], $options['spec'], $options['defaults'])]]></code>
     </UnsafeInstantiation>
   </file>
-  <file src="src/Http/RouteInterface.php">
-    <UnusedClass>
-      <code><![CDATA[RouteInterface]]></code>
-    </UnusedClass>
-  </file>
   <file src="src/Http/RouteMatch.php">
     <DocblockTypeContradiction>
       <code><![CDATA[$this->matchedRouteName === null]]></code>
@@ -452,11 +447,6 @@
   </file>
   <file src="src/Http/TreeRouteStack.php">
     <DeprecatedClass>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
       <code><![CDATA[new Config([
             'aliases'   => [
                 'chain'    => Chain::class,
@@ -477,10 +467,6 @@
                 'Scheme'   => Scheme::class,
                 'segment'  => Segment::class,
                 'Segment'  => Segment::class,
-                'wildcard' => Wildcard::class,
-                'Wildcard' => Wildcard::class,
-                'wildCard' => Wildcard::class,
-                'WildCard' => Wildcard::class,
             ],
             'factories' => [
                 Chain::class    => RouteInvokableFactory::class,
@@ -491,18 +477,6 @@
                 Regex::class    => RouteInvokableFactory::class,
                 Scheme::class   => RouteInvokableFactory::class,
                 Segment::class  => RouteInvokableFactory::class,
-                Wildcard::class => RouteInvokableFactory::class,
-
-                // v2 normalized names
-                'laminasmvcrouterhttpchain'    => RouteInvokableFactory::class,
-                'laminasmvcrouterhttphostname' => RouteInvokableFactory::class,
-                'laminasmvcrouterhttpliteral'  => RouteInvokableFactory::class,
-                'laminasmvcrouterhttpmethod'   => RouteInvokableFactory::class,
-                'laminasmvcrouterhttppart'     => RouteInvokableFactory::class,
-                'laminasmvcrouterhttpregex'    => RouteInvokableFactory::class,
-                'laminasmvcrouterhttpscheme'   => RouteInvokableFactory::class,
-                'laminasmvcrouterhttpsegment'  => RouteInvokableFactory::class,
-                'laminasmvcrouterhttpwildcard' => RouteInvokableFactory::class,
             ],
         ])]]></code>
     </DeprecatedClass>
@@ -592,35 +566,6 @@
     <UndefinedMethod>
       <code><![CDATA[addPrototypes]]></code>
     </UndefinedMethod>
-  </file>
-  <file src="src/Http/Wildcard.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[$this->keyValueDelimiter]]></code>
-      <code><![CDATA[$this->paramDelimiter]]></code>
-    </ArgumentTypeCoercion>
-    <DocblockTypeContradiction>
-      <code><![CDATA[is_array($options)]]></code>
-    </DocblockTypeContradiction>
-    <MixedArgument>
-      <code><![CDATA[$options['defaults']]]></code>
-      <code><![CDATA[$options['key_value_delimiter']]]></code>
-      <code><![CDATA[$options['param_delimiter']]]></code>
-      <code><![CDATA[$path]]></code>
-      <code><![CDATA[$path]]></code>
-    </MixedArgument>
-    <MixedArgumentTypeCoercion>
-      <code><![CDATA[$key]]></code>
-    </MixedArgumentTypeCoercion>
-    <MixedAssignment>
-      <code><![CDATA[$path]]></code>
-      <code><![CDATA[$uri]]></code>
-    </MixedAssignment>
-    <MixedMethodCall>
-      <code><![CDATA[getPath]]></code>
-    </MixedMethodCall>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static($options['key_value_delimiter'], $options['param_delimiter'], $options['defaults'])]]></code>
-    </UnsafeInstantiation>
   </file>
   <file src="src/Module.php">
     <UnusedClass>
@@ -739,9 +684,6 @@
     </MixedAssignment>
   </file>
   <file src="test/Http/ChainTest.php">
-    <DeprecatedClass>
-      <code><![CDATA[Wildcard::class]]></code>
-    </DeprecatedClass>
     <MissingReturnType>
       <code><![CDATA[testAssembling]]></code>
       <code><![CDATA[testFactory]]></code>
@@ -811,52 +753,20 @@
     <ArgumentTypeCoercion>
       <code><![CDATA[new RoutePluginManager(new ServiceManager())]]></code>
     </ArgumentTypeCoercion>
-    <DeprecatedClass>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
-    </DeprecatedClass>
-    <DuplicateArrayKey>
-      <code><![CDATA['simple-match'                                     => [
-                self::getRouteAlternative(),
-                '/',
-                null,
-                null,
-                [
-                    'controller' => 'fo-fo',
-                    'action'     => 'index',
-                ],
-            ]]]></code>
-    </DuplicateArrayKey>
     <LessSpecificReturnStatement>
       <code><![CDATA[new RoutePluginManager(new ServiceManager(), [
             'aliases'   => [
-                'literal'  => Literal::class,
-                'Literal'  => Literal::class,
-                'part'     => Part::class,
-                'Part'     => Part::class,
-                'segment'  => Segment::class,
-                'Segment'  => Segment::class,
-                'wildcard' => Wildcard::class,
-                'Wildcard' => Wildcard::class,
-                'wildCard' => Wildcard::class,
-                'WildCard' => Wildcard::class,
+                'literal' => Literal::class,
+                'Literal' => Literal::class,
+                'part'    => Part::class,
+                'Part'    => Part::class,
+                'segment' => Segment::class,
+                'Segment' => Segment::class,
             ],
             'factories' => [
-                Literal::class  => RouteInvokableFactory::class,
-                Part::class     => RouteInvokableFactory::class,
-                Segment::class  => RouteInvokableFactory::class,
-                Wildcard::class => RouteInvokableFactory::class,
-
-                // v2 normalized names
-                'laminasmvcrouterhttpliteral'  => RouteInvokableFactory::class,
-                'laminasmvcrouterhttppart'     => RouteInvokableFactory::class,
-                'laminasmvcrouterhttpsegment'  => RouteInvokableFactory::class,
-                'laminasmvcrouterhttpwildcard' => RouteInvokableFactory::class,
+                Literal::class => RouteInvokableFactory::class,
+                Part::class    => RouteInvokableFactory::class,
+                Segment::class => RouteInvokableFactory::class,
             ],
         ])]]></code>
     </LessSpecificReturnStatement>
@@ -869,14 +779,12 @@
       <code><![CDATA[testGetAssembledParams]]></code>
       <code><![CDATA[testMatching]]></code>
       <code><![CDATA[testNoMatchWithoutUriMethod]]></code>
-      <code><![CDATA[testPartRouteMarkedAsMayTerminateButWithQueryRouteChildWillMatchChildRoute]]></code>
       <code><![CDATA[testPartRouteMarkedAsMayTerminateCanMatchWhenQueryStringPresent]]></code>
     </MissingReturnType>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$key]]></code>
     </MixedArgumentTypeCoercion>
     <MixedAssignment>
-      <code><![CDATA[$query]]></code>
       <code><![CDATA[$query]]></code>
       <code><![CDATA[$result]]></code>
       <code><![CDATA[$value]]></code>
@@ -890,8 +798,6 @@
     </PossiblyInvalidArgument>
     <UnusedVariable>
       <code><![CDATA[$query]]></code>
-      <code><![CDATA[$query]]></code>
-      <code><![CDATA[$route]]></code>
     </UnusedVariable>
   </file>
   <file src="test/Http/PlaceholderTest.php">
@@ -1050,139 +956,6 @@
     <UnusedMethodCall>
       <code><![CDATA[setAccessible]]></code>
     </UnusedMethodCall>
-  </file>
-  <file src="test/Http/WildcardTest.php">
-    <DeprecatedClass>
-      <code><![CDATA[Wildcard]]></code>
-      <code><![CDATA[Wildcard]]></code>
-      <code><![CDATA[Wildcard::class]]></code>
-      <code><![CDATA[array<string, array{
-     *     0: Wildcard,
-     *     1: string,
-     *     2: null|int,
-     *     3: array<string, string|int|float>
-     * }>]]></code>
-      <code><![CDATA[new Wildcard('-')]]></code>
-      <code><![CDATA[new Wildcard('-')]]></code>
-      <code><![CDATA[new Wildcard('/', '-')]]></code>
-      <code><![CDATA[new Wildcard('/', '/', ['foo' => 'baz'])]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-      <code><![CDATA[new Wildcard()]]></code>
-    </DeprecatedClass>
-    <LessSpecificReturnStatement>
-      <code><![CDATA[[
-            'simple-match'                       => [
-                new Wildcard(),
-                '/foo/bar/baz/bat',
-                null,
-                ['foo' => 'bar', 'baz' => 'bat'],
-            ],
-            'empty-match'                        => [
-                new Wildcard(),
-                '',
-                null,
-                [],
-            ],
-            'no-match-without-leading-delimiter' => [
-                new Wildcard(),
-                '/foo/foo/bar/baz/bat',
-                5,
-                null,
-            ],
-            'no-match-with-trailing-slash'       => [
-                new Wildcard(),
-                '/foo/bar/baz/bat/',
-                null,
-                null,
-            ],
-            'match-overrides-default'            => [
-                new Wildcard('/', '/', ['foo' => 'baz']),
-                '/foo/bat',
-                null,
-                ['foo' => 'bat'],
-            ],
-            'offset-skips-beginning'             => [
-                new Wildcard(),
-                '/bat/foo/bar',
-                4,
-                ['foo' => 'bar'],
-            ],
-            'non-standard-key-value-delimiter'   => [
-                new Wildcard('-'),
-                '/foo-bar/baz-bat',
-                null,
-                ['foo' => 'bar', 'baz' => 'bat'],
-            ],
-            'non-standard-parameter-delimiter'   => [
-                new Wildcard('/', '-'),
-                '/foo/-foo/bar-baz/bat',
-                5,
-                ['foo' => 'bar', 'baz' => 'bat'],
-            ],
-            'empty-values-with-non-standard-key-value-delimiter-are-omitted' => [
-                new Wildcard('-'),
-                '/foo',
-                null,
-                [],
-                true,
-            ],
-            'url-encoded-parameters-are-decoded'                             => [
-                new Wildcard(),
-                '/foo/foo%20bar',
-                null,
-                ['foo' => 'foo bar'],
-            ],
-            'params-contain-non-string-scalar-values'                        => [
-                new Wildcard(),
-                '/int_param/42/float_param/4.2',
-                null,
-                ['int_param' => 42, 'float_param' => 4.2],
-            ],
-        ]]]></code>
-    </LessSpecificReturnStatement>
-    <MissingReturnType>
-      <code><![CDATA[testAssembling]]></code>
-      <code><![CDATA[testEncodedDecode]]></code>
-      <code><![CDATA[testFactory]]></code>
-      <code><![CDATA[testGetAssembledParams]]></code>
-      <code><![CDATA[testMatching]]></code>
-      <code><![CDATA[testNoMatchWithoutUriMethod]]></code>
-      <code><![CDATA[testPathAssemblyShouldSkipAnyNonScalarValues]]></code>
-      <code><![CDATA[testRawDecode]]></code>
-    </MissingReturnType>
-    <MixedArgumentTypeCoercion>
-      <code><![CDATA[$key]]></code>
-    </MixedArgumentTypeCoercion>
-    <MixedAssignment>
-      <code><![CDATA[$path]]></code>
-      <code><![CDATA[$result]]></code>
-      <code><![CDATA[$value]]></code>
-    </MixedAssignment>
-    <MoreSpecificReturnType>
-      <code><![CDATA[array<string, array{
-     *     0: Wildcard,
-     *     1: string,
-     *     2: null|int,
-     *     3: array<string, string|int|float>
-     * }>]]></code>
-    </MoreSpecificReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[getParam]]></code>
-      <code><![CDATA[getParam]]></code>
-    </PossiblyNullReference>
-    <UndefinedClass>
-      <code><![CDATA[ConnectMiddleware]]></code>
-      <code><![CDATA[Handler]]></code>
-    </UndefinedClass>
   </file>
   <file src="test/PriorityListTest.php">
     <InvalidArgument>
