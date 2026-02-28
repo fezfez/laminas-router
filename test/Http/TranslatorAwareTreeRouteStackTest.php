@@ -5,31 +5,49 @@ declare(strict_types=1);
 namespace LaminasTest\Router\Http;
 
 use Laminas\Http\Request;
-use Laminas\I18n\Translator\Translator;
-use Laminas\I18n\Translator\TranslatorAwareInterface;
 use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\TranslatorAwareTreeRouteStack;
+use Laminas\Translator\TranslatorInterface;
 use Laminas\Uri\Http as HttpUri;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 final class TranslatorAwareTreeRouteStackTest extends TestCase
 {
-    /** @var string */
-    protected $testFilesDir;
-
-    /** @var Translator */
-    protected $translator;
+    protected TranslatorInterface&MockObject $translator;
 
     /** @var array */
     protected $fooRoute;
 
     public function setUp(): void
     {
-        $this->testFilesDir = __DIR__ . '/_files';
+        $this->translator = $this->createMock(TranslatorInterface::class);
+        $this->translator->expects($this->any())
+                   ->method('translate')
+                   ->willReturnCallback(function (
+                       string $message,
+                       string $textDomain = 'default',
+                       ?string $locale = null
+                   ): string {
+                    if ($message === 'homepage' && $textDomain === 'default' && $locale === null) {
+                        return 'homepage';
+                    }
 
-        $this->translator = new Translator();
-        $this->translator->addTranslationFile('phpArray', $this->testFilesDir . '/tokens.en.php', 'route', 'en');
-        $this->translator->addTranslationFile('phpArray', $this->testFilesDir . '/tokens.de.php', 'route', 'de');
+                    if ($message === 'homepage' && $textDomain === 'route' && $locale === 'en') {
+                        return 'homepage';
+                    }
+
+                    if ($message === 'homepage' && $textDomain === 'route' && $locale === 'de') {
+                        return 'hauptseite';
+                    }
+
+                    if ($message === 'homepage' && $textDomain === 'default' && $locale === 'de-DE') {
+                        return 'hauptseite';
+                    }
+
+                    throw new UnexpectedValueException('Translation not found');
+                   });
 
         $this->fooRoute = [
             'type'         => 'Segment',
@@ -50,7 +68,6 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
     public function testTranslatorAwareInterfaceImplementation(): void
     {
         $stack = new TranslatorAwareTreeRouteStack();
-        $this->assertInstanceOf(TranslatorAwareInterface::class, $stack);
 
         // Defaults
         $this->assertNull($stack->getTranslator());
@@ -59,7 +76,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
         $this->assertTrue($stack->isTranslatorEnabled());
 
         // Inject translator without text domain
-        $translator = new Translator();
+        $translator = $this->createMock(TranslatorInterface::class);
         $stack->setTranslator($translator);
         $this->assertSame($translator, $stack->getTranslator());
         $this->assertEquals('default', $stack->getTranslatorTextDomain());
@@ -86,7 +103,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
     public function testTranslatorIsPassedThroughMatchMethod(): void
     {
-        $translator = new Translator();
+        $translator = $this->createMock(TranslatorInterface::class);
         $request    = new Request();
 
         $route = $this->createMock(HttpRouteInterface::class);
@@ -106,7 +123,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
     public function testTranslatorIsPassedThroughAssembleMethod(): void
     {
-        $translator = new Translator();
+        $translator = $this->createMock(TranslatorInterface::class);
         $uri        = new HttpUri();
 
         $route = $this->createMock(HttpRouteInterface::class);

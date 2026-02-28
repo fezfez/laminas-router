@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
-use Laminas\I18n\Translator\TranslatorAwareInterface;
-use Laminas\I18n\Translator\TranslatorInterface as Translator;
 use Laminas\Router\Exception;
 use Laminas\Stdlib\RequestInterface;
+use Laminas\Translator\TranslatorInterface;
 use Override;
 
 /**
@@ -17,28 +16,22 @@ use Override;
  * @template-extends TreeRouteStack<TRoute>
  * @final
  */
-class TranslatorAwareTreeRouteStack extends TreeRouteStack implements TranslatorAwareInterface
+class TranslatorAwareTreeRouteStack extends TreeRouteStack
 {
     /**
      * Translator used for translatable segments.
-     *
-     * @var Translator
      */
-    protected $translator;
+    protected ?TranslatorInterface $translator = null;
 
     /**
      * Whether the translator is enabled.
-     *
-     * @var bool
      */
-    protected $translatorEnabled = true;
+    protected bool $translatorEnabled = true;
 
     /**
      * Translator text domain to use.
-     *
-     * @var string
      */
-    protected $translatorTextDomain = 'default';
+    protected string $translatorTextDomain = 'default';
 
     /**
      * @inheritDoc
@@ -77,16 +70,7 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
         return parent::assemble($params, $options);
     }
 
-    /**
-     * setTranslator(): defined by TranslatorAwareInterface.
-     *
-     * @see    TranslatorAwareInterface::setTranslator()
-     *
-     * @param  string     $textDomain
-     * @return TreeRouteStack
-     */
-    #[Override]
-    public function setTranslator(?Translator $translator = null, $textDomain = null)
+    public function setTranslator(?TranslatorInterface $translator = null, ?string $textDomain = null): self
     {
         $this->translator = $translator;
 
@@ -97,85 +81,35 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
         return $this;
     }
 
-    /**
-     * getTranslator(): defined by TranslatorAwareInterface.
-     *
-     * @see    TranslatorAwareInterface::getTranslator()
-     *
-     * @return Translator
-     */
-    #[Override]
-    public function getTranslator()
+    public function getTranslator(): ?TranslatorInterface
     {
         return $this->translator;
     }
 
-    /**
-     * hasTranslator(): defined by TranslatorAwareInterface.
-     *
-     * @see    TranslatorAwareInterface::hasTranslator()
-     *
-     * @return bool
-     */
-    #[Override]
-    public function hasTranslator()
+    public function hasTranslator(): bool
     {
         return $this->translator !== null;
     }
 
-    /**
-     * setTranslatorEnabled(): defined by TranslatorAwareInterface.
-     *
-     * @see    TranslatorAwareInterface::setTranslatorEnabled()
-     *
-     * @param  bool $enabled
-     * @return TreeRouteStack
-     */
-    #[Override]
-    public function setTranslatorEnabled($enabled = true)
+    public function setTranslatorEnabled(bool $enabled = true): self
     {
         $this->translatorEnabled = $enabled;
         return $this;
     }
 
-    /**
-     * isTranslatorEnabled(): defined by TranslatorAwareInterface.
-     *
-     * @see    TranslatorAwareInterface::isTranslatorEnabled()
-     *
-     * @return bool
-     */
-    #[Override]
-    public function isTranslatorEnabled()
+    public function isTranslatorEnabled(): bool
     {
         return $this->translatorEnabled;
     }
 
-    /**
-     * setTranslatorTextDomain(): defined by TranslatorAwareInterface.
-     *
-     * @see    TranslatorAwareInterface::setTranslatorTextDomain()
-     *
-     * @param  string $textDomain
-     * @return self
-     */
-    #[Override]
-    public function setTranslatorTextDomain($textDomain = 'default')
+    public function setTranslatorTextDomain(string $textDomain = 'default'): self
     {
         $this->translatorTextDomain = $textDomain;
 
         return $this;
     }
 
-    /**
-     * getTranslatorTextDomain(): defined by TranslatorAwareInterface.
-     *
-     * @see    TranslatorAwareInterface::getTranslatorTextDomain()
-     *
-     * @return string
-     */
-    #[Override]
-    public function getTranslatorTextDomain()
+    public function getTranslatorTextDomain(): string
     {
         return $this->translatorTextDomain;
     }

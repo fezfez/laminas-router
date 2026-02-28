@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace LaminasTest\Router\Http;
 
 use Laminas\Http\Request;
-use Laminas\I18n\Translator\Loader\FileLoaderInterface;
-use Laminas\I18n\Translator\TextDomain;
-use Laminas\I18n\Translator\Translator;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Segment;
 use Laminas\Stdlib\Request as BaseRequest;
+use Laminas\Translator\TranslatorInterface;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 use function implode;
 use function strlen;
@@ -183,23 +182,36 @@ final class SegmentTest extends TestCase
 
     public function testL10nRoute(): void
     {
-        $translator = new Translator();
-        $translator->setLocale('en-US');
+        $translator = $this->createMock(TranslatorInterface::class);
+        $translator->expects($this->any())
+            ->method('translate')
+            ->willReturnCallback(function (
+                string $message,
+                string $textDomain = 'default',
+                ?string $locale = null
+            ): string {
+                if ($message === 'fw' && $textDomain === 'default' && $locale === null) {
+                    return 'framework';
+                }
 
-        $enLoader     = $this->createMock(FileLoaderInterface::class);
-        $deLoader     = $this->createMock(FileLoaderInterface::class);
-        $domainLoader = $this->createMock(FileLoaderInterface::class);
+                if ($message === 'fw' && $textDomain === 'default' && $locale === 'de-DE') {
+                    return 'baukasten';
+                }
 
-        $enLoader->expects($this->any())->method('load')->willReturn(new TextDomain(['fw' => 'framework']));
-        $deLoader->expects($this->any())->method('load')->willReturn(new TextDomain(['fw' => 'baukasten']));
-        $domainLoader->expects($this->any())->method('load')->willReturn(new TextDomain(['fw' => 'fw-alternative']));
+                if ($message === 'fw' && $textDomain === 'alternative' && $locale === null) {
+                    return 'fw-alternative';
+                }
 
-        $translator->getPluginManager()->setService('test-en', $enLoader);
-        $translator->getPluginManager()->setService('test-de', $deLoader);
-        $translator->getPluginManager()->setService('test-domain', $domainLoader);
-        $translator->addTranslationFile('test-en', null, 'default', 'en-US');
-        $translator->addTranslationFile('test-de', null, 'default', 'de-DE');
-        $translator->addTranslationFile('test-domain', null, 'alternative', 'en-US');
+                if ($message === 'fw' && $textDomain === 'default' && $locale === 'fr-FR') {
+                    return 'fw';
+                }
+
+                if ($message === 'fw' && $textDomain === 'default') {
+                    return 'framework';
+                }
+
+                throw new UnexpectedValueException('Translation not found');
+            });
 
         $this->matchingWithL10n(
             new Segment('/{fw}', [], []),
