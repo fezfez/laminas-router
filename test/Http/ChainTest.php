@@ -143,12 +143,8 @@ final class ChainTest extends TestCase
         ];
     }
 
-    /**
-     * @param        string   $path
-     * @param        int|null $offset
-     */
     #[DataProvider('routeProvider')]
-    public function testMatching(Chain $route, $path, $offset, ?array $params = null)
+    public function testMatching(Chain $route, string $path, int|null $offset, ?array $params = null): void
     {
         $request = new Request();
         $request->setUri('http://example.com' . $path);
@@ -169,12 +165,8 @@ final class ChainTest extends TestCase
         }
     }
 
-    /**
-     * @param        string   $path
-     * @param        int|null $offset
-     */
     #[DataProvider('routeProvider')]
-    public function testAssembling(Chain $route, $path, $offset, ?array $params = null)
+    public function testAssembling(Chain $route, string $path, int|null $offset, ?array $params = null): void
     {
         if ($params === null) {
             // Data which will not match are not tested for assembling.
@@ -190,7 +182,7 @@ final class ChainTest extends TestCase
         }
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(

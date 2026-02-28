@@ -25,7 +25,7 @@ use PHPUnit\Framework\TestCase;
 
 final class SimpleRouteStackTest extends TestCase
 {
-    public function testSetRoutePluginManager()
+    public function testSetRoutePluginManager(): void
     {
         $routes = new RoutePluginManager(new ServiceManager());
         $stack  = new SimpleRouteStack();
@@ -34,7 +34,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertEquals($routes, $stack->getRoutePluginManager());
     }
 
-    public function testAddRoutesWithInvalidArgument()
+    public function testAddRoutesWithInvalidArgument(): void
     {
         $stack = new SimpleRouteStack();
 
@@ -43,7 +43,7 @@ final class SimpleRouteStackTest extends TestCase
         $stack->addRoutes('foo');
     }
 
-    public function testAddRoutesAsArray()
+    public function testAddRoutesAsArray(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoutes([
@@ -53,7 +53,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertInstanceOf(RouteMatch::class, $stack->match(new Request()));
     }
 
-    public function testAddRoutesAsTraversable()
+    public function testAddRoutesAsTraversable(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoutes(new ArrayIterator([
@@ -63,7 +63,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertInstanceOf(RouteMatch::class, $stack->match(new Request()));
     }
 
-    public function testSetRoutesWithInvalidArgument()
+    public function testSetRoutesWithInvalidArgument(): void
     {
         $stack = new SimpleRouteStack();
 
@@ -72,7 +72,7 @@ final class SimpleRouteStackTest extends TestCase
         $stack->setRoutes('foo');
     }
 
-    public function testSetRoutesAsArray()
+    public function testSetRoutesAsArray(): void
     {
         $stack = new SimpleRouteStack();
         $stack->setRoutes([
@@ -86,7 +86,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertNull($stack->match(new Request()));
     }
 
-    public function testSetRoutesAsTraversable()
+    public function testSetRoutesAsTraversable(): void
     {
         $stack = new SimpleRouteStack();
         $stack->setRoutes(new ArrayIterator([
@@ -100,7 +100,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertNull($stack->match(new Request()));
     }
 
-    public function testremoveRouteAsArray()
+    public function testremoveRouteAsArray(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoutes([
@@ -111,7 +111,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertNull($stack->match(new Request()));
     }
 
-    public function testAddRouteWithInvalidArgument()
+    public function testAddRouteWithInvalidArgument(): void
     {
         $stack = new SimpleRouteStack();
 
@@ -121,7 +121,7 @@ final class SimpleRouteStackTest extends TestCase
         $stack->addRoute('foo', 'bar');
     }
 
-    public function testAddRouteAsArrayWithoutOptions()
+    public function testAddRouteAsArrayWithoutOptions(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoute('foo', [
@@ -131,7 +131,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertInstanceOf(RouteMatch::class, $stack->match(new Request()));
     }
 
-    public function testAddRouteAsArrayWithOptions()
+    public function testAddRouteAsArrayWithOptions(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoute('foo', [
@@ -142,7 +142,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertInstanceOf(RouteMatch::class, $stack->match(new Request()));
     }
 
-    public function testAddRouteAsArrayWithoutType()
+    public function testAddRouteAsArrayWithoutType(): void
     {
         $stack = new SimpleRouteStack();
 
@@ -151,7 +151,7 @@ final class SimpleRouteStackTest extends TestCase
         $stack->addRoute('foo', []);
     }
 
-    public function testAddRouteAsArrayWithPriority()
+    public function testAddRouteAsArrayWithPriority(): void
     {
         $stack = new SimpleRouteStack();
 
@@ -166,7 +166,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertEquals('bar', $stack->match(new Request())->getParam('foo'));
     }
 
-    public function testAddRouteWithPriority()
+    public function testAddRouteWithPriority(): void
     {
         $stack = new SimpleRouteStack();
 
@@ -182,7 +182,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertEquals('bar', $stack->match(new Request())->getParam('foo'));
     }
 
-    public function testAddRouteAsTraversable()
+    public function testAddRouteAsTraversable(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoute('foo', new ArrayIterator([
@@ -192,14 +192,14 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertInstanceOf(RouteMatch::class, $stack->match(new Request()));
     }
 
-    public function testAssemble()
+    public function testAssemble(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoute('foo', new TestAsset\DummyRoute());
         $this->assertEquals('', $stack->assemble([], ['name' => 'foo']));
     }
 
-    public function testAssembleWithoutNameOption()
+    public function testAssembleWithoutNameOption(): void
     {
         $stack = new SimpleRouteStack();
 
@@ -208,7 +208,7 @@ final class SimpleRouteStackTest extends TestCase
         $stack->assemble();
     }
 
-    public function testAssembleNonExistentRoute()
+    public function testAssembleNonExistentRoute(): void
     {
         $stack = new SimpleRouteStack();
 
@@ -217,7 +217,7 @@ final class SimpleRouteStackTest extends TestCase
         $stack->assemble([], ['name' => 'foo']);
     }
 
-    public function testDefaultParamIsAddedToMatch()
+    public function testDefaultParamIsAddedToMatch(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoute('foo', new TestAsset\DummyRoute());
@@ -226,7 +226,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertEquals('bar', $stack->match(new Request())->getParam('foo'));
     }
 
-    public function testDefaultParamDoesNotOverrideParam()
+    public function testDefaultParamDoesNotOverrideParam(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
@@ -235,7 +235,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertEquals('bar', $stack->match(new Request())->getParam('foo'));
     }
 
-    public function testDefaultParamIsUsedForAssembling()
+    public function testDefaultParamIsUsedForAssembling(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
@@ -244,7 +244,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertEquals('bar', $stack->assemble([], ['name' => 'foo']));
     }
 
-    public function testDefaultParamDoesNotOverrideParamForAssembling()
+    public function testDefaultParamDoesNotOverrideParamForAssembling(): void
     {
         $stack = new SimpleRouteStack();
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
@@ -253,7 +253,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertEquals('bar', $stack->assemble(['foo' => 'bar'], ['name' => 'foo']));
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(
@@ -267,13 +267,13 @@ final class SimpleRouteStackTest extends TestCase
         );
     }
 
-    public function testGetRoutes()
+    public function testGetRoutes(): void
     {
         $stack = new SimpleRouteStack();
         $this->assertInstanceOf('Traversable', $stack->getRoutes());
     }
 
-    public function testGetRouteByName()
+    public function testGetRouteByName(): void
     {
         $stack = new SimpleRouteStack();
         $route = new TestAsset\DummyRoute();
@@ -282,7 +282,7 @@ final class SimpleRouteStackTest extends TestCase
         $this->assertEquals($route, $stack->getRoute('foo'));
     }
 
-    public function testHasRoute()
+    public function testHasRoute(): void
     {
         $stack = new SimpleRouteStack();
         $this->assertEquals(false, $stack->hasRoute('foo'));

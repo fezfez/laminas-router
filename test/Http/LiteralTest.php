@@ -62,13 +62,8 @@ final class LiteralTest extends TestCase
         ];
     }
 
-    /**
-     * @param        string   $path
-     * @param        int|null $offset
-     * @param        bool     $shouldMatch
-     */
     #[DataProvider('routeProvider')]
-    public function testMatching(Literal $route, $path, $offset, $shouldMatch)
+    public function testMatching(Literal $route, string $path, int|null $offset, bool $shouldMatch): void
     {
         $request = new Request();
         $request->setUri('http://example.com' . $path);
@@ -85,13 +80,8 @@ final class LiteralTest extends TestCase
         }
     }
 
-    /**
-     * @param        string   $path
-     * @param        int|null $offset
-     * @param        bool     $shouldMatch
-     */
     #[DataProvider('routeProvider')]
-    public function testAssembling(Literal $route, $path, $offset, $shouldMatch)
+    public function testAssembling(Literal $route, string $path, int|null $offset, bool $shouldMatch): void
     {
         if (! $shouldMatch) {
             // Data which will not match are not tested for assembling.
@@ -108,7 +98,7 @@ final class LiteralTest extends TestCase
         }
     }
 
-    public function testNoMatchWithoutUriMethod()
+    public function testNoMatchWithoutUriMethod(): void
     {
         $route   = new Literal('/foo');
         $request = new BaseRequest();
@@ -116,7 +106,7 @@ final class LiteralTest extends TestCase
         $this->assertNull($route->match($request));
     }
 
-    public function testGetAssembledParams()
+    public function testGetAssembledParams(): void
     {
         $route = new Literal('/foo');
         $route->assemble(['foo' => 'bar']);
@@ -124,7 +114,7 @@ final class LiteralTest extends TestCase
         $this->assertEquals([], $route->getAssembledParams());
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(
@@ -139,7 +129,7 @@ final class LiteralTest extends TestCase
     }
 
     #[Group('Laminas-436')]
-    public function testEmptyLiteral()
+    public function testEmptyLiteral(): void
     {
         $request = new Request();
         $route   = new Literal('');
