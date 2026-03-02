@@ -13,8 +13,7 @@ use Psr\Container\ContainerInterface;
 
 final class RoutePluginManagerFactoryTest extends TestCase
 {
-    /** @var ContainerInterface|MockObject */
-    private $container;
+    private ContainerInterface&MockObject $container;
     private RoutePluginManagerFactory $factory;
 
     public function setUp(): void
@@ -23,17 +22,17 @@ final class RoutePluginManagerFactoryTest extends TestCase
         $this->factory   = new RoutePluginManagerFactory();
     }
 
-    public function testInvocationReturnsAPluginManager()
+    public function testInvocationReturnsAPluginManager(): void
     {
         $plugins = $this->factory->__invoke($this->container, RoutePluginManager::class);
         $this->assertInstanceOf(RoutePluginManager::class, $plugins);
     }
 
-    public function testInvocationCanProvideOptionsToThePluginManager()
+    public function testInvocationCanProvideOptionsToThePluginManager(): void
     {
         $options = [
             'factories' => [
-                'TestRoute' => fn($container) => $this->createMock(RouteInterface::class),
+                'TestRoute' => fn($container): MockObject&RouteInterface => $this->createMock(RouteInterface::class),
             ],
         ];
         $plugins = $this->factory->__invoke(

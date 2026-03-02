@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
-use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function is_array;
@@ -18,6 +18,8 @@ use function strpos;
 
 /**
  * Literal route.
+ *
+ * @final
  */
 class Literal implements HttpRouteInterface
 {
@@ -52,14 +54,10 @@ class Literal implements HttpRouteInterface
     }
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  iterable $options
-     * @return Literal
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -83,14 +81,11 @@ class Literal implements HttpRouteInterface
     }
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::match()
-     *
-     * @param  integer|null $pathOffset
-     * @return RouteMatch|null
+     * @inheritDoc
+     * @param int|null $pathOffset
      */
-    public function match(Request $request, $pathOffset = null)
+    #[Override]
+    public function match(RequestInterface $request, $pathOffset = null)
     {
         if (! method_exists($request, 'getUri')) {
             return null;
@@ -102,7 +97,7 @@ class Literal implements HttpRouteInterface
         if ($pathOffset !== null) {
             if ($pathOffset >= 0 && strlen((string) $path) >= $pathOffset && ! empty($this->route)) {
                 if (strpos($path, $this->route, $pathOffset) === $pathOffset) {
-                    return new RouteMatch($this->defaults, strlen($this->route));
+                    return new HttpRouteMatch($this->defaults, strlen($this->route));
                 }
             }
 
@@ -110,31 +105,25 @@ class Literal implements HttpRouteInterface
         }
 
         if ($path === $this->route) {
-            return new RouteMatch($this->defaults, strlen($this->route));
+            return new HttpRouteMatch($this->defaults, strlen($this->route));
         }
 
         return null;
     }
 
     /**
-     * assemble(): Defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         return $this->route;
     }
 
     /**
-     * getAssembledParams(): defined by HttpRouteInterface interface.
-     *
-     * @see    HttpRouteInterface::getAssembledParams
-     *
-     * @return array
+     * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return [];

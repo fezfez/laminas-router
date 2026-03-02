@@ -11,14 +11,14 @@ use PHPUnit\Framework\TestCase;
 
 final class RoutePluginManagerTest extends TestCase
 {
-    public function testLoadNonExistentRoute()
+    public function testLoadNonExistentRoute(): void
     {
         $routes = new RoutePluginManager(new ServiceManager());
         $this->expectException(ServiceNotFoundException::class);
         $routes->get('foo');
     }
 
-    public function testCanLoadAnyRoute()
+    public function testCanLoadAnyRoute(): void
     {
         $routes = new RoutePluginManager(new ServiceManager(), [
             'invokables' => [

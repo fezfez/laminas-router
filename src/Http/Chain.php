@@ -7,10 +7,10 @@ namespace Laminas\Router\Http;
 use ArrayObject;
 use Laminas\Router\Exception;
 use Laminas\Router\PriorityList;
-use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function array_diff_key;
@@ -27,6 +27,7 @@ use function strlen;
 /**
  * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
+ * @final
  */
 class Chain extends TreeRouteStack implements HttpRouteInterface
 {
@@ -60,14 +61,10 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
     }
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  mixed $options
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
-     * @return Part
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -103,17 +100,14 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
     }
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::match()
-     *
-     * @param  int|null $pathOffset
-     * @return RouteMatch|null
+     * @inheritDoc
+     * @param int|null $pathOffset
      */
-    public function match(Request $request, $pathOffset = null, array $options = [])
+    #[Override]
+    public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if (! method_exists($request, 'getUri')) {
-            return;
+            return null;
         }
 
         if ($pathOffset === null) {
@@ -128,7 +122,7 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
             $this->chainRoutes = null;
         }
 
-        $match      = new RouteMatch([]);
+        $match      = new HttpRouteMatch([]);
         $uri        = $request->getUri();
         $pathLength = strlen($uri->getPath());
 
@@ -137,7 +131,7 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
             $subMatch = $route->match($request, $pathOffset, $options);
 
             if ($subMatch === null) {
-                return;
+                return null;
             }
 
             $match->merge($subMatch);
@@ -145,19 +139,16 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
         }
 
         if ($mustTerminate && $pathOffset !== $pathLength) {
-            return;
+            return null;
         }
 
         return $match;
     }
 
     /**
-     * assemble(): Defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         if ($this->chainRoutes !== null) {
@@ -187,12 +178,9 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by RouteInterface interface.
-     *
-     * @see    HttpRouteInterface::getAssembledParams
-     *
-     * @return array
+     * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return $this->assembledParams;

@@ -7,7 +7,7 @@ namespace LaminasTest\Router\TestAsset;
 
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteStackInterface;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 
 /**
  * @template TRoute of RouteInterface
@@ -16,10 +16,7 @@ use Laminas\Stdlib\RequestInterface as Request;
 final class Router implements RouteStackInterface
 {
     /**
-     * Create a new route with given options.
-     *
-     * @param iterable $options
-     * @return self
+     * @inheritDoc
      */
     public static function factory($options = [])
     {
@@ -27,21 +24,19 @@ final class Router implements RouteStackInterface
     }
 
     /**
-     * Match a given request.
-     *
-     * @return RouteMatch|null
+     * @inheritDoc
      */
-    public function match(Request $request)
+    public function match(RequestInterface $request)
     {
+        return null;
     }
 
     /**
-     * Assemble the route.
-     *
-     * @return mixed
+     * @inheritDoc
      */
     public function assemble(array $params = [], array $options = [])
     {
+        return null;
     }
 
     /** @inheritDoc */

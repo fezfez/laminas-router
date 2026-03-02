@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace LaminasTest\Router\Http;
 
 use Laminas\Http\Request;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Regex;
-use Laminas\Router\Http\RouteMatch;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -79,12 +79,8 @@ final class RegexTest extends TestCase
         ];
     }
 
-    /**
-     * @param        string   $path
-     * @param        int|null $offset
-     */
     #[DataProvider('routeProvider')]
-    public function testMatching(Regex $route, $path, $offset, ?array $params = null)
+    public function testMatching(Regex $route, string $path, int|null $offset, ?array $params = null): void
     {
         $request = new Request();
         $request->setUri('http://example.com' . $path);
@@ -93,7 +89,7 @@ final class RegexTest extends TestCase
         if ($params === null) {
             $this->assertNull($match);
         } else {
-            $this->assertInstanceOf(RouteMatch::class, $match);
+            $this->assertInstanceOf(HttpRouteMatch::class, $match);
 
             if ($offset === null) {
                 $this->assertEquals(strlen($path), $match->getLength());
@@ -105,12 +101,8 @@ final class RegexTest extends TestCase
         }
     }
 
-    /**
-     * @param        string   $path
-     * @param        int|null $offset
-     */
     #[DataProvider('routeProvider')]
-    public function testAssembling(Regex $route, $path, $offset, ?array $params = null)
+    public function testAssembling(Regex $route, string $path, int|null $offset, ?array $params = null): void
     {
         if ($params === null) {
             // Data which will not match are not tested for assembling.
@@ -127,7 +119,7 @@ final class RegexTest extends TestCase
         }
     }
 
-    public function testNoMatchWithoutUriMethod()
+    public function testNoMatchWithoutUriMethod(): void
     {
         $route   = new Regex('/foo', '/foo');
         $request = new BaseRequest();
@@ -135,7 +127,7 @@ final class RegexTest extends TestCase
         $this->assertNull($route->match($request));
     }
 
-    public function testGetAssembledParams()
+    public function testGetAssembledParams(): void
     {
         $route = new Regex('/(?<foo>.+)', '/%foo%');
         $route->assemble(['foo' => 'bar', 'baz' => 'bat']);
@@ -143,7 +135,7 @@ final class RegexTest extends TestCase
         $this->assertEquals(['foo'], $route->getAssembledParams());
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(
@@ -159,7 +151,7 @@ final class RegexTest extends TestCase
         );
     }
 
-    public function testRawDecode()
+    public function testRawDecode(): void
     {
         // verify all characters which don't absolutely require encoding pass through match unchanged
         // this includes every character other than #, %, / and ?
@@ -172,7 +164,7 @@ final class RegexTest extends TestCase
         $this->assertSame($raw, $match->getParam('foo'));
     }
 
-    public function testEncodedDecode()
+    public function testEncodedDecode(): void
     {
         // @codingStandardsIgnoreStart
         // every character

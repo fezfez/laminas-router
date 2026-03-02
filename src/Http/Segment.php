@@ -6,9 +6,9 @@ namespace Laminas\Router\Http;
 
 use Laminas\I18n\Translator\TranslatorInterface as Translator;
 use Laminas\Router\Exception;
-use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function array_merge;
@@ -26,6 +26,8 @@ use function strtr;
 
 /**
  * Segment route.
+ *
+ * @final
  */
 class Segment implements HttpRouteInterface
 {
@@ -131,14 +133,10 @@ class Segment implements HttpRouteInterface
     }
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  iterable $options
-     * @return Segment
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -363,18 +361,15 @@ class Segment implements HttpRouteInterface
     }
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::match()
-     *
-     * @param  string|null $pathOffset
-     * @return RouteMatch|null
+     * @inheritDoc
+     * @param int|null $pathOffset
      * @throws Exception\RuntimeException
      */
-    public function match(Request $request, $pathOffset = null, array $options = [])
+    #[Override]
+    public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if (! method_exists($request, 'getUri')) {
-            return;
+            return null;
         }
 
         $uri  = $request->getUri();
@@ -403,7 +398,7 @@ class Segment implements HttpRouteInterface
         }
 
         if (! $result) {
-            return;
+            return null;
         }
 
         $matchedLength = strlen($matches[0]);
@@ -415,16 +410,13 @@ class Segment implements HttpRouteInterface
             }
         }
 
-        return new RouteMatch(array_merge($this->defaults, $params), $matchedLength);
+        return new HttpRouteMatch(array_merge($this->defaults, $params), $matchedLength);
     }
 
     /**
-     * assemble(): Defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         $this->assembledParams = [];
@@ -439,12 +431,9 @@ class Segment implements HttpRouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by HttpRouteInterface interface.
-     *
-     * @see    HttpRouteInterface::getAssembledParams
-     *
-     * @return array
+     * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return $this->assembledParams;

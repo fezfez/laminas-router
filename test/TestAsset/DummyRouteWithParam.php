@@ -13,11 +13,7 @@ use Laminas\Stdlib\RequestInterface;
 final class DummyRouteWithParam extends DummyRoute
 {
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    Route::match()
-     *
-     * @return RouteMatch
+     * @inheritDoc
      */
     public function match(RequestInterface $request)
     {
@@ -25,13 +21,9 @@ final class DummyRouteWithParam extends DummyRoute
     }
 
     /**
-     * assemble(): defined by RouteInterface interface.
-     *
-     * @see    Route::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function assemble(?array $params = null, ?array $options = null)
+    public function assemble(array $params = [], array $options = [])
     {
         return $params['foo'] ?? '';
     }

@@ -16,27 +16,20 @@ use function sprintf;
 final class FactoryTester
 {
     /**
-     * Test case to call assertions to.
-     *
-     * @var TestCase
-     */
-    protected $testCase;
-
-    /**
      * Create a new factory tester.
      */
-    public function __construct(TestCase $testCase)
-    {
-        $this->testCase = $testCase;
+    public function __construct(
+        /**
+         * Test case to call assertions to.
+         */
+        protected TestCase $testCase
+    ) {
     }
 
     /**
      * Test a factory.
-     *
-     * @param  string $classname
-     * @return void
      */
-    public function testFactory($classname, array $requiredOptions, array $options)
+    public function testFactory(string $classname, array $requiredOptions, array $options): void
     {
         $factory = sprintf('%s::factory', $classname);
 

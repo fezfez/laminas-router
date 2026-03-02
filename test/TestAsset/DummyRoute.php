@@ -20,11 +20,7 @@ class DummyRoute implements RouteInterface
     public ?int $priority = null;
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    Route::match()
-     *
-     * @return RouteMatch
+     * @inheritDoc
      */
     public function match(RequestInterface $request)
     {
@@ -32,22 +28,15 @@ class DummyRoute implements RouteInterface
     }
 
     /**
-     * assemble(): defined by RouteInterface interface.
-     *
-     * @see    Route::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function assemble(?array $params = null, ?array $options = null)
+    public function assemble(array $params = [], array $options = [])
     {
         return '';
     }
 
     /**
-     * factory(): defined by RouteInterface interface
-     *
-     * @param iterable $options
-     * @return DummyRoute
+     * @inheritDoc
      */
     public static function factory($options = [])
     {

@@ -9,14 +9,14 @@ use PHPUnit\Framework\TestCase;
 
 final class RouteMatchTest extends TestCase
 {
-    public function testParamsAreStored()
+    public function testParamsAreStored(): void
     {
         $match = new RouteMatch(['foo' => 'bar']);
 
         $this->assertEquals(['foo' => 'bar'], $match->getParams());
     }
 
-    public function testMatchedRouteNameIsSet()
+    public function testMatchedRouteNameIsSet(): void
     {
         $match = new RouteMatch([]);
         $match->setMatchedRouteName('foo');
@@ -24,7 +24,7 @@ final class RouteMatchTest extends TestCase
         $this->assertEquals('foo', $match->getMatchedRouteName());
     }
 
-    public function testSetParam()
+    public function testSetParam(): void
     {
         $match = new RouteMatch([]);
         $match->setParam('foo', 'bar');
@@ -32,21 +32,21 @@ final class RouteMatchTest extends TestCase
         $this->assertEquals(['foo' => 'bar'], $match->getParams());
     }
 
-    public function testGetParam()
+    public function testGetParam(): void
     {
         $match = new RouteMatch(['foo' => 'bar']);
 
         $this->assertEquals('bar', $match->getParam('foo'));
     }
 
-    public function testGetNonExistentParamWithoutDefault()
+    public function testGetNonExistentParamWithoutDefault(): void
     {
         $match = new RouteMatch([]);
 
         $this->assertNull($match->getParam('foo'));
     }
 
-    public function testGetNonExistentParamWithDefault()
+    public function testGetNonExistentParamWithDefault(): void
     {
         $match = new RouteMatch([]);
 

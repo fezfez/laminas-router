@@ -7,6 +7,11 @@ namespace Laminas\Router;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
 
+/**
+ * @internal
+ *
+ * @final
+ */
 class RoutePluginManagerFactory implements FactoryInterface
 {
     /**
