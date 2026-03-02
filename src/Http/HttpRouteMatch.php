@@ -6,6 +6,8 @@ namespace Laminas\Router\Http;
 
 /**
  * Part route match.
+ *
+ * @final
  */
 class HttpRouteMatch extends RouteMatch
 {

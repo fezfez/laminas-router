@@ -13,7 +13,7 @@ use Laminas\Stdlib\RequestInterface as Request;
  * Note: the additional {@see self::match()} annotation is only here for documentation purposes, because we cannot
  *       change the signature of {@see self::match()} in the interface definition without breaking BC.
  *
- * @method HttpRouteMatch|null match(Request $request, int|null $pathOffset = null, array $options = [])
+ * @method RouteMatch|null match(Request $request, int|null $pathOffset = null, array $options = [])
  */
 interface HttpRouteInterface extends RouteInterface
 {
