@@ -183,7 +183,7 @@ final class SegmentTest extends TestCase
     public function testL10nRoute(): void
     {
         $translator = $this->createMock(TranslatorInterface::class);
-        $translator->expects($this->any())
+        $translator->expects($this->exactly(8))
             ->method('translate')
             ->willReturnCallback(function (
                 string $message,

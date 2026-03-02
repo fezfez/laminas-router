@@ -15,54 +15,51 @@ use UnexpectedValueException;
 
 final class TranslatorAwareTreeRouteStackTest extends TestCase
 {
-    protected TranslatorInterface&MockObject $translator;
-
-    /** @var array */
-    protected $fooRoute;
-
-    public function setUp(): void
-    {
-        $this->translator = $this->createMock(TranslatorInterface::class);
-        $this->translator->expects($this->any())
-                   ->method('translate')
-                   ->willReturnCallback(function (
-                       string $message,
-                       string $textDomain = 'default',
-                       ?string $locale = null
-                   ): string {
-                    if ($message === 'homepage' && $textDomain === 'default' && $locale === null) {
-                        return 'homepage';
-                    }
-
-                    if ($message === 'homepage' && $textDomain === 'route' && $locale === 'en') {
-                        return 'homepage';
-                    }
-
-                    if ($message === 'homepage' && $textDomain === 'route' && $locale === 'de') {
-                        return 'hauptseite';
-                    }
-
-                    if ($message === 'homepage' && $textDomain === 'default' && $locale === 'de-DE') {
-                        return 'hauptseite';
-                    }
-
-                    throw new UnexpectedValueException('Translation not found');
-                   });
-
-        $this->fooRoute = [
-            'type'         => 'Segment',
-            'options'      => [
-                'route' => '/:locale',
-            ],
-            'child_routes' => [
-                'index' => [
-                    'type'    => 'Segment',
-                    'options' => [
-                        'route' => '/{homepage}',
-                    ],
+    private array $fooRoute = [
+        'type'         => 'Segment',
+        'options'      => [
+            'route' => '/:locale',
+        ],
+        'child_routes' => [
+            'index' => [
+                'type'    => 'Segment',
+                'options' => [
+                    'route' => '/{homepage}',
                 ],
             ],
-        ];
+        ],
+    ];
+
+    private function getTranslator(int $expectedCallCount): TranslatorInterface&MockObject
+    {
+        $translator = $this->createMock(TranslatorInterface::class);
+        $translator->expects($this->exactly($expectedCallCount))
+            ->method('translate')
+            ->willReturnCallback(function (
+                string $message,
+                string $textDomain = 'default',
+                ?string $locale = null
+            ): string {
+                if ($message === 'homepage' && $textDomain === 'default' && $locale === null) {
+                    return 'homepage';
+                }
+
+                if ($message === 'homepage' && $textDomain === 'route' && $locale === 'en') {
+                    return 'homepage';
+                }
+
+                if ($message === 'homepage' && $textDomain === 'route' && $locale === 'de') {
+                    return 'hauptseite';
+                }
+
+                if ($message === 'homepage' && $textDomain === 'default' && $locale === 'de-DE') {
+                    return 'hauptseite';
+                }
+
+                throw new UnexpectedValueException('Translation not found');
+            });
+
+        return $translator;
     }
 
     public function testTranslatorAwareInterfaceImplementation(): void
@@ -143,7 +140,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
     public function testAssembleRouteWithParameterLocale(): void
     {
         $stack = new TranslatorAwareTreeRouteStack();
-        $stack->setTranslator($this->translator, 'route');
+        $stack->setTranslator($this->getTranslator(2), 'route');
         $stack->addRoute(
             'foo',
             $this->fooRoute
@@ -156,7 +153,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
     public function testMatchRouteWithParameterLocale(): void
     {
         $stack = new TranslatorAwareTreeRouteStack();
-        $stack->setTranslator($this->translator, 'route');
+        $stack->setTranslator($this->getTranslator(1), 'route');
         $stack->addRoute(
             'foo',
             $this->fooRoute
