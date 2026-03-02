@@ -56,12 +56,7 @@ class SimpleRouteStack implements RouteStackInterface
     }
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    \Laminas\Router\RouteInterface::factory()
-     *
-     * @param  iterable $options
-     * @return SimpleRouteStack
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
     public static function factory($options = [])
@@ -258,11 +253,7 @@ class SimpleRouteStack implements RouteStackInterface
     }
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    \Laminas\Router\RouteInterface::match()
-     *
-     * @return RouteMatch|null
+     * @inheritDoc
      */
     public function match(Request $request)
     {
@@ -284,11 +275,7 @@ class SimpleRouteStack implements RouteStackInterface
     }
 
     /**
-     * assemble(): defined by RouteInterface interface.
-     *
-     * @see    \Laminas\Router\RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */

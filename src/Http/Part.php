@@ -7,7 +7,6 @@ namespace Laminas\Router\Http;
 use ArrayObject;
 use Laminas\Router\Exception;
 use Laminas\Router\PriorityList;
-use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface as Request;
@@ -78,12 +77,7 @@ class Part extends TreeRouteStack implements HttpRouteInterface
     }
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  mixed $options
-     * @return Part
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
     public static function factory($options = [])
@@ -131,12 +125,8 @@ class Part extends TreeRouteStack implements HttpRouteInterface
     }
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::match()
-     *
-     * @param  integer|null $pathOffset
-     * @return RouteMatch|null
+     * @inheritDoc
+     * @param int|null $pathOffset
      */
     public function match(Request $request, $pathOffset = null, array $options = [])
     {
@@ -182,11 +172,7 @@ class Part extends TreeRouteStack implements HttpRouteInterface
     }
 
     /**
-     * assemble(): Defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      * @throws Exception\RuntimeException
      */
     public function assemble(array $params = [], array $options = [])
@@ -219,11 +205,7 @@ class Part extends TreeRouteStack implements HttpRouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by HttpRouteInterface interface.
-     *
-     * @see    HttpRouteInterface::getAssembledParams
-     *
-     * @return array
+     * @inheritDoc
      */
     public function getAssembledParams()
     {

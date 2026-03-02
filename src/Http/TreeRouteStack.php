@@ -6,7 +6,6 @@ namespace Laminas\Router\Http;
 
 use ArrayObject;
 use Laminas\Router\Exception;
-use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteInvokableFactory;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\ServiceManager\Config;
@@ -65,12 +64,7 @@ class TreeRouteStack extends SimpleRouteStack
     public $priority;
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  iterable $options
-     * @return SimpleRouteStack
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
     public static function factory($options = [])
@@ -96,9 +90,7 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * init(): defined by SimpleRouteStack.
-     *
-     * @see    SimpleRouteStack::init()
+     * @inheritDoc
      */
     protected function init()
     {
@@ -156,12 +148,7 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * addRoute(): defined by RouteStackInterface interface.
-     *
-     * @param string                 $name
-     * @param string|iterable|TRoute $route
-     * @param int                    $priority
-     * @return $this
+     * @inheritDoc
      */
     public function addRoute($name, $route, $priority = null)
     {
@@ -289,12 +276,8 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * match(): defined by RouteInterface
-     *
-     * @see    RouteInterface::match()
-     *
-     * @param  int|null $pathOffset
-     * @return RouteMatch|null
+     * @inheritDoc
+     * @param int|null $pathOffset
      */
     public function match(Request $request, $pathOffset = null, array $options = [])
     {
@@ -344,11 +327,7 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * assemble(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */
