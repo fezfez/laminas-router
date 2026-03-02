@@ -23,12 +23,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Laminas\\Paginator\\": "../../src/"
+      "Laminas\\Router\\": "../../src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "LaminasTest\\Paginator\\": "../../test/"
+      "LaminasTest\\Router\\": "../../test/"
     }
   }
 }
