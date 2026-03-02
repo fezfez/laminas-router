@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
-use Laminas\I18n\Translator\TranslatorInterface as Translator;
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
+use Laminas\Translator\TranslatorInterface as Translator;
 use Override;
 use Traversable;
 
