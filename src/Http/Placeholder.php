@@ -6,7 +6,7 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 use Traversable;
 
 use function is_array;
@@ -61,7 +61,7 @@ class Placeholder implements HttpRouteInterface
      * @inheritDoc
      * @param int|null $pathOffset
      */
-    public function match(Request $request, $pathOffset = null)
+    public function match(RequestInterface $request, $pathOffset = null)
     {
         return new RouteMatch($this->defaults);
     }

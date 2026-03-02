@@ -7,7 +7,7 @@ namespace Laminas\Router\Http;
 use Laminas\I18n\Translator\TranslatorInterface as Translator;
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 use Traversable;
 
 use function array_merge;
@@ -361,7 +361,7 @@ class Segment implements HttpRouteInterface
      * @param int|null $pathOffset
      * @throws Exception\RuntimeException
      */
-    public function match(Request $request, $pathOffset = null, array $options = [])
+    public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if (! method_exists($request, 'getUri')) {
             return null;

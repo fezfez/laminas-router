@@ -9,7 +9,7 @@ use Laminas\Router\Exception;
 use Laminas\Router\PriorityList;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 use Traversable;
 
 use function array_diff_key;
@@ -128,7 +128,7 @@ class Part extends TreeRouteStack implements HttpRouteInterface
      * @inheritDoc
      * @param int|null $pathOffset
      */
-    public function match(Request $request, $pathOffset = null, array $options = [])
+    public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if ($pathOffset === null) {
             $pathOffset = 0;

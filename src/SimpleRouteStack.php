@@ -6,7 +6,7 @@ namespace Laminas\Router;
 
 use Laminas\ServiceManager\ServiceManager;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 use Traversable;
 
 use function array_merge;
@@ -255,7 +255,7 @@ class SimpleRouteStack implements RouteStackInterface
     /**
      * @inheritDoc
      */
-    public function match(Request $request)
+    public function match(RequestInterface $request)
     {
         foreach ($this->routes as $name => $route) {
             if (($match = $route->match($request)) instanceof RouteMatch) {

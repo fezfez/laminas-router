@@ -10,7 +10,7 @@ use Laminas\Router\RouteInvokableFactory;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\ServiceManager\Config;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http as HttpUri;
 use Traversable;
 
@@ -279,7 +279,7 @@ class TreeRouteStack extends SimpleRouteStack
      * @inheritDoc
      * @param int|null $pathOffset
      */
-    public function match(Request $request, $pathOffset = null, array $options = [])
+    public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if (! method_exists($request, 'getUri')) {
             return null;

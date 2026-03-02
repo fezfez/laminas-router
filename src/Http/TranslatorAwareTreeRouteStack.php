@@ -7,7 +7,7 @@ namespace Laminas\Router\Http;
 use Laminas\I18n\Translator\TranslatorAwareInterface;
 use Laminas\I18n\Translator\TranslatorInterface as Translator;
 use Laminas\Router\Exception;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 
 /**
  * Translator aware tree route stack.
@@ -42,7 +42,7 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
      * @inheritDoc
      * @param int|null $pathOffset
      */
-    public function match(Request $request, $pathOffset = null, array $options = [])
+    public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if ($this->hasTranslator() && $this->isTranslatorEnabled() && ! isset($options['translator'])) {
             $options['translator'] = $this->getTranslator();

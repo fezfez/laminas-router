@@ -6,7 +6,7 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 use Traversable;
 
 use function array_map;
@@ -81,7 +81,7 @@ class Method implements HttpRouteInterface
     /**
      * @inheritDoc
      */
-    public function match(Request $request)
+    public function match(RequestInterface $request)
     {
         if (! method_exists($request, 'getMethod')) {
             return null;

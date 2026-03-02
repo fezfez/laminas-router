@@ -6,7 +6,7 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 use Traversable;
 
 use function is_array;
@@ -77,7 +77,7 @@ class Scheme implements HttpRouteInterface
     /**
      * @inheritDoc
      */
-    public function match(Request $request)
+    public function match(RequestInterface $request)
     {
         if (! method_exists($request, 'getUri')) {
             return null;
