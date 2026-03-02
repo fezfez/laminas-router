@@ -19,6 +19,8 @@ use function strtoupper;
 
 /**
  * Method route.
+ *
+ * @final
  */
 class Method implements HttpRouteInterface
 {

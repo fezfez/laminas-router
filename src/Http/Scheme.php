@@ -15,6 +15,8 @@ use function sprintf;
 
 /**
  * Scheme route.
+ *
+ * @final
  */
 class Scheme implements HttpRouteInterface
 {

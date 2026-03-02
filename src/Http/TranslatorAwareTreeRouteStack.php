@@ -14,6 +14,7 @@ use Laminas\Stdlib\RequestInterface;
  *
  * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
+ * @final
  */
 class TranslatorAwareTreeRouteStack extends TreeRouteStack implements TranslatorAwareInterface
 {

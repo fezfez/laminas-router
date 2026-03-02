@@ -38,6 +38,7 @@ use function strlen;
  *      list<array{'literal', string, string|null}|array{'parameter', string}|array{'optional', array}>
  *     }
  * >
+ * @final
  */
 class Hostname implements HttpRouteInterface
 {

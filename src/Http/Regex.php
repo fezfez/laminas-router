@@ -25,6 +25,8 @@ use function strlen;
 
 /**
  * Regex route.
+ *
+ * @final
  */
 class Regex implements HttpRouteInterface
 {

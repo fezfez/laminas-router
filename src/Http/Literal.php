@@ -17,6 +17,8 @@ use function strpos;
 
 /**
  * Literal route.
+ *
+ * @final
  */
 class Literal implements HttpRouteInterface
 {

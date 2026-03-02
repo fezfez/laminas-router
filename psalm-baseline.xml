@@ -36,13 +36,6 @@
     <TooManyArguments>
       <code><![CDATA[match]]></code>
     </TooManyArguments>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static(
-            $options['routes'],
-            $options['route_plugins'],
-            $options['prototypes']
-        )]]></code>
-    </UnsafeInstantiation>
   </file>
   <file src="src/Http/Hostname.php">
     <ArgumentTypeCoercion>
@@ -112,9 +105,6 @@
     <PossiblyUnusedProperty>
       <code><![CDATA[$priority]]></code>
     </PossiblyUnusedProperty>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static($options['route'], $options['constraints'], $options['defaults'])]]></code>
-    </UnsafeInstantiation>
     <UnsupportedReferenceUsage>
       <code><![CDATA[$levelParts[$level + 1] = &$levelParts[$level][count($levelParts[$level]) - 1][1]]]></code>
     </UnsupportedReferenceUsage>
@@ -159,9 +149,6 @@
     <PossiblyUnusedProperty>
       <code><![CDATA[$priority]]></code>
     </PossiblyUnusedProperty>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static($options['route'], $options['defaults'])]]></code>
-    </UnsafeInstantiation>
   </file>
   <file src="src/Http/Method.php">
     <DocblockTypeContradiction>
@@ -175,9 +162,6 @@
     <PossiblyUnusedProperty>
       <code><![CDATA[$priority]]></code>
     </PossiblyUnusedProperty>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static($options['verb'], $options['defaults'])]]></code>
-    </UnsafeInstantiation>
   </file>
   <file src="src/Http/Part.php">
     <DocblockTypeContradiction>
@@ -226,15 +210,6 @@
       <code><![CDATA[match]]></code>
       <code><![CDATA[match]]></code>
     </TooManyArguments>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static(
-            $options['route'],
-            $options['may_terminate'],
-            $options['route_plugins'],
-            $options['child_routes'],
-            $options['prototypes']
-        )]]></code>
-    </UnsafeInstantiation>
   </file>
   <file src="src/Http/Placeholder.php">
     <DocblockTypeContradiction>
@@ -243,9 +218,6 @@
     <PossiblyUnusedProperty>
       <code><![CDATA[$priority]]></code>
     </PossiblyUnusedProperty>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static($options['defaults'])]]></code>
-    </UnsafeInstantiation>
   </file>
   <file src="src/Http/Regex.php">
     <DocblockTypeContradiction>
@@ -273,9 +245,6 @@
       <code><![CDATA[is_int($key)]]></code>
       <code><![CDATA[is_numeric($key) || is_int($key)]]></code>
     </TypeDoesNotContainType>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static($options['regex'], $options['spec'], $options['defaults'])]]></code>
-    </UnsafeInstantiation>
   </file>
   <file src="src/Http/RouteInterface.php">
     <UnusedClass>
@@ -309,9 +278,6 @@
     <PossiblyUnusedProperty>
       <code><![CDATA[$priority]]></code>
     </PossiblyUnusedProperty>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static($options['scheme'], $options['defaults'])]]></code>
-    </UnsafeInstantiation>
   </file>
   <file src="src/Http/Segment.php">
     <DocblockTypeContradiction>
@@ -413,9 +379,6 @@
     <PossiblyUnusedProperty>
       <code><![CDATA[$priority]]></code>
     </PossiblyUnusedProperty>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static($options['route'], $options['constraints'], $options['defaults'])]]></code>
-    </UnsafeInstantiation>
     <UnsupportedReferenceUsage>
       <code><![CDATA[$levelParts[$level + 1] = &$levelParts[$level][count($levelParts[$level]) - 1][1]]]></code>
     </UnsupportedReferenceUsage>
@@ -429,7 +392,6 @@
     <LessSpecificImplementedReturnType>
       <code><![CDATA[TreeRouteStack]]></code>
       <code><![CDATA[TreeRouteStack]]></code>
-      <code><![CDATA[self]]></code>
     </LessSpecificImplementedReturnType>
     <PossiblyNullPropertyAssignmentValue>
       <code><![CDATA[$translator]]></code>
@@ -910,6 +872,12 @@
       <code><![CDATA[new static()]]></code>
     </UnsafeInstantiation>
   </file>
+  <file src="test/Http/TranslatorAwareTreeRouteStackTest.php">
+    <DocblockTypeContradiction>
+      <code><![CDATA[assertNull]]></code>
+      <code><![CDATA[assertNull]]></code>
+    </DocblockTypeContradiction>
+  </file>
   <file src="test/Http/TreeRouteStackTest.php">
     <InvalidArgument>
       <code><![CDATA['bar']]></code>
@@ -1054,6 +1022,9 @@
     </UndefinedClass>
   </file>
   <file src="test/PriorityListTest.php">
+    <InternalClass>
+      <code><![CDATA[new PriorityList()]]></code>
+    </InternalClass>
     <InvalidArgument>
       <code><![CDATA[$list]]></code>
       <code><![CDATA[$list]]></code>
@@ -1069,6 +1040,14 @@
     <DeprecatedMethod>
       <code><![CDATA[createService]]></code>
     </DeprecatedMethod>
+    <InternalClass>
+      <code><![CDATA[new RoutePluginManagerFactory()]]></code>
+    </InternalClass>
+    <InternalMethod>
+      <code><![CDATA[__invoke]]></code>
+      <code><![CDATA[__invoke]]></code>
+      <code><![CDATA[createService]]></code>
+    </InternalMethod>
     <MissingClosureParamType>
       <code><![CDATA[$container]]></code>
     </MissingClosureParamType>
@@ -1097,6 +1076,13 @@
             ],
         ]))]]></code>
     </DeprecatedClass>
+    <InternalClass>
+      <code><![CDATA[new RouterFactory()]]></code>
+    </InternalClass>
+    <InternalMethod>
+      <code><![CDATA[__invoke]]></code>
+      <code><![CDATA[__invoke]]></code>
+    </InternalMethod>
     <MissingClosureParamType>
       <code><![CDATA[$services]]></code>
     </MissingClosureParamType>
