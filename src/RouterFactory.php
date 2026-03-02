@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Laminas\Router;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Override;
 use Psr\Container\ContainerInterface;
 
 /**
