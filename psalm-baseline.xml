@@ -1039,16 +1039,6 @@
             ],
         ]]]></code>
     </LessSpecificReturnStatement>
-    <MissingReturnType>
-      <code><![CDATA[testAssembling]]></code>
-      <code><![CDATA[testEncodedDecode]]></code>
-      <code><![CDATA[testFactory]]></code>
-      <code><![CDATA[testGetAssembledParams]]></code>
-      <code><![CDATA[testMatching]]></code>
-      <code><![CDATA[testNoMatchWithoutUriMethod]]></code>
-      <code><![CDATA[testPathAssemblyShouldSkipAnyNonScalarValues]]></code>
-      <code><![CDATA[testRawDecode]]></code>
-    </MissingReturnType>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$key]]></code>
     </MixedArgumentTypeCoercion>
@@ -1093,10 +1083,6 @@
     <MissingClosureParamType>
       <code><![CDATA[$container]]></code>
     </MissingClosureParamType>
-    <PossiblyInvalidArgument>
-      <code><![CDATA[$this->container]]></code>
-      <code><![CDATA[$this->container]]></code>
-    </PossiblyInvalidArgument>
     <UnusedClosureParam>
       <code><![CDATA[$container]]></code>
     </UnusedClosureParam>

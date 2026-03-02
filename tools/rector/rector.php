@@ -12,6 +12,10 @@ return RectorConfig::configure()
         // __DIR__ . '/../../src', excluded in 3.x.x branches
         __DIR__ . '/../../test',
     ])
+    ->withSkip([
+        'test/Http/TestAsset/',
+        'test/TestAsset/',
+    ])
     ->withPreparedSets(
         typeDeclarations: true,
     );

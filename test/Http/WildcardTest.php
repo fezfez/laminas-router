@@ -100,12 +100,8 @@ final class WildcardTest extends TestCase
         ];
     }
 
-    /**
-     * @param        string   $path
-     * @param        int|null $offset
-     */
     #[DataProvider('routeProvider')]
-    public function testMatching(Wildcard $route, $path, $offset, ?array $params = null)
+    public function testMatching(Wildcard $route, string $path, ?int $offset, ?array $params = null): void
     {
         $request = new Request();
         $request->setUri('http://example.com' . $path);
@@ -126,14 +122,14 @@ final class WildcardTest extends TestCase
         }
     }
 
-    /**
-     * @param        string   $path
-     * @param        int|null $offset
-     * @param        boolean  $skipAssembling
-     */
     #[DataProvider('routeProvider')]
-    public function testAssembling(Wildcard $route, $path, $offset, ?array $params = null, $skipAssembling = false)
-    {
+    public function testAssembling(
+        Wildcard $route,
+        string $path,
+        ?int $offset,
+        ?array $params = null,
+        bool $skipAssembling = false
+    ): void {
         if ($params === null || $skipAssembling) {
             // Data which will not match are not tested for assembling.
             $this->expectNotToPerformAssertions();
@@ -149,7 +145,7 @@ final class WildcardTest extends TestCase
         }
     }
 
-    public function testNoMatchWithoutUriMethod()
+    public function testNoMatchWithoutUriMethod(): void
     {
         $route   = new Wildcard();
         $request = new BaseRequest();
@@ -157,7 +153,7 @@ final class WildcardTest extends TestCase
         $this->assertNull($route->match($request));
     }
 
-    public function testGetAssembledParams()
+    public function testGetAssembledParams(): void
     {
         $route = new Wildcard();
         $route->assemble(['foo' => 'bar']);
@@ -165,7 +161,7 @@ final class WildcardTest extends TestCase
         $this->assertEquals(['foo'], $route->getAssembledParams());
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(
@@ -175,7 +171,7 @@ final class WildcardTest extends TestCase
         );
     }
 
-    public function testRawDecode()
+    public function testRawDecode(): void
     {
         // verify all characters which don't absolutely require encoding pass through match unchanged
         // this includes every character other than #, %, / and ?
@@ -188,7 +184,7 @@ final class WildcardTest extends TestCase
         $this->assertSame($raw, $match->getParam('foo'));
     }
 
-    public function testEncodedDecode()
+    public function testEncodedDecode(): void
     {
         // @phpcs:disable Generic.Files.LineLength.TooLong
         // every character
@@ -204,7 +200,7 @@ final class WildcardTest extends TestCase
         $this->assertSame($out, $match->getParam('foo'));
     }
 
-    public function testPathAssemblyShouldSkipAnyNonScalarValues()
+    public function testPathAssemblyShouldSkipAnyNonScalarValues(): void
     {
         /** @psalm-suppress DeprecatedClass */
         $route = new Wildcard('/', '/', [

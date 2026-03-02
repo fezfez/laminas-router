@@ -13,3 +13,4 @@ composer.lock export-ignore
 renovate.json export-ignore
 /tools export-ignore
 /.infection.json5.dist export-ignore
+Makefile export-ignore

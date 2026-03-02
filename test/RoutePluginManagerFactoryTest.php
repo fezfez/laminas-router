@@ -14,7 +14,7 @@ use Psr\Container\ContainerInterface;
 
 final class RoutePluginManagerFactoryTest extends TestCase
 {
-    private ContainerInterface|MockObject $container;
+    private ContainerInterface&MockObject $container;
     private RoutePluginManagerFactory $factory;
 
     public function setUp(): void
