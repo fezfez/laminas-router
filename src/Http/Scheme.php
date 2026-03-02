@@ -90,7 +90,7 @@ class Scheme implements HttpRouteInterface
             return null;
         }
 
-        return new RouteMatch($this->defaults);
+        return new HttpRouteMatch($this->defaults);
     }
 
     /**

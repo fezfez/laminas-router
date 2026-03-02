@@ -6,9 +6,9 @@ namespace LaminasTest\Router\Http;
 
 use Laminas\Http\Request;
 use Laminas\Router\Http\Hostname;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Placeholder;
-use Laminas\Router\Http\RouteMatch;
 use Laminas\Router\Http\TreeRouteStack;
 use Laminas\Stdlib\ArrayUtils;
 use LaminasTest\Router\FactoryTester;
@@ -53,7 +53,7 @@ final class PlaceholderTest extends TestCase
         $request->setUri('http://example.com/');
         $match = $route->match($request);
 
-        $this->assertInstanceOf(RouteMatch::class, $match);
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
     }
 
     public function testAssembling(): void
@@ -84,7 +84,7 @@ final class PlaceholderTest extends TestCase
         $request->setUri($uri);
         $match = $router->match($request);
 
-        $this->assertInstanceOf(RouteMatch::class, $match);
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
         $this->assertEquals($expectedRouteName, $match->getMatchedRouteName());
     }
 

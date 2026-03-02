@@ -10,7 +10,7 @@ use Laminas\I18n\Translator\TextDomain;
 use Laminas\I18n\Translator\Translator;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
-use Laminas\Router\Http\RouteMatch;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Segment;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
@@ -305,7 +305,7 @@ final class SegmentTest extends TestCase
         if ($params === null) {
             $this->assertNull($match);
         } else {
-            $this->assertInstanceOf(RouteMatch::class, $match);
+            $this->assertInstanceOf(HttpRouteMatch::class, $match);
 
             if ($offset === null) {
                 $this->assertEquals(strlen($path), $match->getLength());
@@ -354,7 +354,7 @@ final class SegmentTest extends TestCase
         if ($params === null) {
             $this->assertNull($match);
         } else {
-            $this->assertInstanceOf(RouteMatch::class, $match);
+            $this->assertInstanceOf(HttpRouteMatch::class, $match);
 
             if ($offset === null) {
                 $this->assertEquals(strlen($path), $match->getLength());

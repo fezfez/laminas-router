@@ -118,7 +118,7 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
             $this->chainRoutes = null;
         }
 
-        $match      = new RouteMatch([]);
+        $match      = new HttpRouteMatch([]);
         $uri        = $request->getUri();
         $pathLength = strlen($uri->getPath());
 

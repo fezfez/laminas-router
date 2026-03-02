@@ -92,7 +92,7 @@ class Literal implements HttpRouteInterface
         if ($pathOffset !== null) {
             if ($pathOffset >= 0 && strlen((string) $path) >= $pathOffset && ! empty($this->route)) {
                 if (strpos($path, $this->route, $pathOffset) === $pathOffset) {
-                    return new RouteMatch($this->defaults, strlen($this->route));
+                    return new HttpRouteMatch($this->defaults, strlen($this->route));
                 }
             }
 
@@ -100,7 +100,7 @@ class Literal implements HttpRouteInterface
         }
 
         if ($path === $this->route) {
-            return new RouteMatch($this->defaults, strlen($this->route));
+            return new HttpRouteMatch($this->defaults, strlen($this->route));
         }
 
         return null;

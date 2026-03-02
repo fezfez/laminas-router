@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace LaminasTest\Router\Http;
 
 use Laminas\Http\Request;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Method as HttpMethod;
-use Laminas\Router\Http\RouteMatch;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -50,7 +50,7 @@ final class MethodTest extends TestCase
         $request->setMethod($verb);
 
         $match = $route->match($request);
-        $this->assertInstanceOf(RouteMatch::class, $match);
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
     }
 
     public function testNoMatchWithoutVerb(): void

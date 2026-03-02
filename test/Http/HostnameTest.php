@@ -8,7 +8,7 @@ use Laminas\Http\Request;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\Hostname;
-use Laminas\Router\Http\RouteMatch;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\Request as BaseRequest;
 use Laminas\Uri\Http as HttpUri;
 use LaminasTest\Router\FactoryTester;
@@ -175,7 +175,7 @@ final class HostnameTest extends TestCase
         if ($params === null) {
             $this->assertNull($match);
         } else {
-            $this->assertInstanceOf(RouteMatch::class, $match);
+            $this->assertInstanceOf(HttpRouteMatch::class, $match);
 
             foreach ($params as $key => $value) {
                 $this->assertEquals($value, $match->getParam($key));
@@ -232,7 +232,7 @@ final class HostnameTest extends TestCase
         $request->setUri('/relative/path');
 
         $match = $route->match($request);
-        self::assertInstanceOf(RouteMatch::class, $match);
+        self::assertInstanceOf(HttpRouteMatch::class, $match);
         self::assertArrayNotHasKey('domain', $match->getParams());
     }
 

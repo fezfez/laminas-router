@@ -9,12 +9,13 @@ use Laminas\Http\Request;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\HttpRouteInterface;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Part;
-use Laminas\Router\Http\RouteMatch;
 use Laminas\Router\Http\Segment;
 use Laminas\Router\Http\Wildcard;
 use Laminas\Router\RouteInvokableFactory;
+use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
 use Laminas\Stdlib\Parameters;
@@ -299,7 +300,7 @@ final class PartTest extends TestCase
         if ($params === null) {
             $this->assertNull($match);
         } else {
-            $this->assertInstanceOf(RouteMatch::class, $match);
+            $this->assertInstanceOf(HttpRouteMatch::class, $match);
 
             if ($offset === null) {
                 $this->assertEquals(strlen($path), $match->getLength());
@@ -455,7 +456,7 @@ final class PartTest extends TestCase
         $request->getQuery();
 
         $match = $route->match($request);
-        $this->assertInstanceOf(\Laminas\Router\RouteMatch::class, $match);
+        $this->assertInstanceOf(RouteMatch::class, $match);
         $this->assertEquals('resource', $match->getParam('action'));
     }
 }

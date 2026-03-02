@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace LaminasTest\Router\Http;
 
 use Laminas\Http\Request;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
-use Laminas\Router\Http\RouteMatch;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -72,7 +72,7 @@ final class LiteralTest extends TestCase
         if (! $shouldMatch) {
             $this->assertNull($match);
         } else {
-            $this->assertInstanceOf(RouteMatch::class, $match);
+            $this->assertInstanceOf(HttpRouteMatch::class, $match);
 
             if ($offset === null) {
                 $this->assertEquals(strlen($path), $match->getLength());
