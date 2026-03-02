@@ -7,6 +7,11 @@ namespace Laminas\Router;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
 
+/**
+ * @internal
+ *
+ * @final
+ */
 class RouterFactory implements FactoryInterface
 {
     /**
@@ -18,6 +23,7 @@ class RouterFactory implements FactoryInterface
      * @param  null|array $options
      * @return RouteStackInterface
      */
+    #[Override]
     public function __invoke(ContainerInterface $container, $name, ?array $options = null)
     {
         return $container->get('HttpRouter');

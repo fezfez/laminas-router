@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace LaminasTest\Router\Http;
 
 use Laminas\Http\Request;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Method as HttpMethod;
-use Laminas\Router\Http\RouteMatch;
 use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -42,21 +42,18 @@ final class MethodTest extends TestCase
         ];
     }
 
-    /**
-     * @param string $verb
-     */
     #[DataProvider('routeProvider')]
-    public function testMatching(HttpMethod $route, $verb)
+    public function testMatching(HttpMethod $route, string $verb): void
     {
         $request = new Request();
         $request->setUri('http://example.com');
         $request->setMethod($verb);
 
         $match = $route->match($request);
-        $this->assertInstanceOf(RouteMatch::class, $match);
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
     }
 
-    public function testNoMatchWithoutVerb()
+    public function testNoMatchWithoutVerb(): void
     {
         $route   = new HttpMethod('get');
         $request = new BaseRequest();
@@ -64,7 +61,7 @@ final class MethodTest extends TestCase
         $this->assertNull($route->match($request));
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(

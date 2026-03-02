@@ -6,13 +6,13 @@ namespace Laminas\Router\Http;
 
 use ArrayObject;
 use Laminas\Router\Exception;
-use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteInvokableFactory;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\ServiceManager\Config;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http as HttpUri;
+use Override;
 use Traversable;
 
 use function array_merge;
@@ -65,14 +65,10 @@ class TreeRouteStack extends SimpleRouteStack
     public $priority;
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  iterable $options
-     * @return SimpleRouteStack
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -96,10 +92,9 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * init(): defined by SimpleRouteStack.
-     *
-     * @see    SimpleRouteStack::init()
+     * @inheritDoc
      */
+    #[Override]
     protected function init()
     {
         /** @var ArrayObject<string, TRoute> $this->prototypes */
@@ -140,13 +135,9 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * addRoute(): defined by RouteStackInterface interface.
-     *
-     * @param string                 $name
-     * @param string|iterable|TRoute $route
-     * @param int                    $priority
-     * @return $this
+     * @inheritDoc
      */
+    #[Override]
     public function addRoute($name, $route, $priority = null)
     {
         if (! $route instanceof HttpRouteInterface) {
@@ -164,6 +155,7 @@ class TreeRouteStack extends SimpleRouteStack
      * @throws Exception\InvalidArgumentException When chain routes are not an array nor traversable.
      * @throws Exception\RuntimeException         When a generated routes does not implement the HTTP route interface.
      */
+    #[Override]
     protected function routeFromArray($specs)
     {
         if (is_string($specs)) {
@@ -273,14 +265,11 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * match(): defined by RouteInterface
-     *
-     * @see    RouteInterface::match()
-     *
-     * @param  int|null $pathOffset
-     * @return RouteMatch|null
+     * @inheritDoc
+     * @param int|null $pathOffset
      */
-    public function match(Request $request, $pathOffset = null, array $options = [])
+    #[Override]
+    public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if (! method_exists($request, 'getUri')) {
             return null;
@@ -328,14 +317,11 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * assemble(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         if (! isset($options['name'])) {

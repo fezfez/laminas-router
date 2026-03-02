@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace LaminasTest\Router\Http\TestAsset;
 
 use Laminas\Router\Http\HttpRouteInterface;
-use Laminas\Router\Http\RouteMatch;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\RequestInterface;
 
 /**
@@ -14,35 +14,25 @@ use Laminas\Stdlib\RequestInterface;
 class DummyRoute implements HttpRouteInterface
 {
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    Route::match()
-     *
-     * @param  int $pathOffset
-     * @return RouteMatch
+     * @inheritDoc
      */
-    public function match(RequestInterface $request, $pathOffset = null)
-    {
-        return new RouteMatch(['offset' => $pathOffset], -4);
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null
+    ) {
+        return new HttpRouteMatch(['offset' => $pathOffset], -4);
     }
 
     /**
-     * assemble(): defined by RouteInterface interface.
-     *
-     * @see    Route::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function assemble(?array $params = null, ?array $options = null)
+    public function assemble(array $params = [], array $options = [])
     {
         return '';
     }
 
     /**
-     * factory(): defined by RouteInterface interface
-     *
-     * @param  iterable $options
-     * @return DummyRoute
+     * @inheritDoc
      */
     public static function factory($options = [])
     {
@@ -50,11 +40,7 @@ class DummyRoute implements HttpRouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by RouteInterface interface.
-     *
-     * @see    Route::getAssembledParams
-     *
-     * @return array
+     * @inheritDoc
      */
     public function getAssembledParams()
     {

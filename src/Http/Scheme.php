@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
-use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function is_array;
@@ -16,6 +16,8 @@ use function sprintf;
 
 /**
  * Scheme route.
+ *
+ * @final
  */
 class Scheme implements HttpRouteInterface
 {
@@ -50,14 +52,10 @@ class Scheme implements HttpRouteInterface
     }
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  iterable $options
-     * @return Scheme
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -81,35 +79,29 @@ class Scheme implements HttpRouteInterface
     }
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::match()
-     *
-     * @return RouteMatch|null
+     * @inheritDoc
      */
-    public function match(Request $request)
+    #[Override]
+    public function match(RequestInterface $request)
     {
         if (! method_exists($request, 'getUri')) {
-            return;
+            return null;
         }
 
         $uri    = $request->getUri();
         $scheme = $uri->getScheme();
 
         if ($scheme !== $this->scheme) {
-            return;
+            return null;
         }
 
-        return new RouteMatch($this->defaults);
+        return new HttpRouteMatch($this->defaults);
     }
 
     /**
-     * assemble(): Defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         if (isset($options['uri'])) {
@@ -121,12 +113,9 @@ class Scheme implements HttpRouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by HttpRouteInterface interface.
-     *
-     * @see    HttpRouteInterface::getAssembledParams
-     *
-     * @return array
+     * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return [];

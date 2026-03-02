@@ -9,11 +9,12 @@ use Laminas\Http\Request;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\HttpRouteInterface;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Part;
-use Laminas\Router\Http\RouteMatch;
 use Laminas\Router\Http\Segment;
 use Laminas\Router\RouteInvokableFactory;
+use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
 use Laminas\Stdlib\Parameters;
@@ -200,14 +201,14 @@ final class PartTest extends TestCase
         ];
     }
 
-    /**
-     * @param        string   $path
-     * @param        int|null $offset
-     * @param        string   $routeName
-     */
     #[DataProvider('routeProvider')]
-    public function testMatching(Part $route, $path, $offset, $routeName, ?array $params = null)
-    {
+    public function testMatching(
+        Part $route,
+        string $path,
+        int|null $offset,
+        ?string $routeName,
+        ?array $params = null
+    ): void {
         $request = new Request();
         $request->setUri('http://example.com' . $path);
         $match = $route->match($request, $offset);
@@ -215,7 +216,7 @@ final class PartTest extends TestCase
         if ($params === null) {
             $this->assertNull($match);
         } else {
-            $this->assertInstanceOf(RouteMatch::class, $match);
+            $this->assertInstanceOf(HttpRouteMatch::class, $match);
 
             if ($offset === null) {
                 $this->assertEquals(strlen($path), $match->getLength());
@@ -229,14 +230,14 @@ final class PartTest extends TestCase
         }
     }
 
-    /**
-     * @param        string   $path
-     * @param        int|null $offset
-     * @param        string   $routeName
-     */
     #[DataProvider('routeProvider')]
-    public function testAssembling(Part $route, $path, $offset, $routeName, ?array $params = null)
-    {
+    public function testAssembling(
+        Part $route,
+        string $path,
+        int|null $offset,
+        ?string $routeName,
+        ?array $params = null
+    ): void {
         if ($params === null) {
             // Data which will not match are not tested for assembling.
             $this->expectNotToPerformAssertions();
@@ -252,14 +253,14 @@ final class PartTest extends TestCase
         }
     }
 
-    public function testAssembleNonTerminatedRoute()
+    public function testAssembleNonTerminatedRoute(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Part route may not terminate');
         self::getRoute()->assemble([], ['name' => 'baz']);
     }
 
-    public function testBaseRouteMayNotBePartRoute()
+    public function testBaseRouteMayNotBePartRoute(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Base route may not be a part route');
@@ -267,7 +268,7 @@ final class PartTest extends TestCase
         new Part(self::getRoute(), true, new RoutePluginManager(new ServiceManager()));
     }
 
-    public function testNoMatchWithoutUriMethod()
+    public function testNoMatchWithoutUriMethod(): void
     {
         $route   = self::getRoute();
         $request = new BaseRequest();
@@ -275,7 +276,7 @@ final class PartTest extends TestCase
         $this->assertNull($route->match($request));
     }
 
-    public function testGetAssembledParams()
+    public function testGetAssembledParams(): void
     {
         $route = self::getRoute();
         $route->assemble(['controller' => 'foo'], ['name' => 'baz/bat']);
@@ -283,7 +284,7 @@ final class PartTest extends TestCase
         $this->assertEquals([], $route->getAssembledParams());
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(
@@ -300,7 +301,7 @@ final class PartTest extends TestCase
     }
 
     #[Group('Laminas-105')]
-    public function testFactoryShouldAcceptTraversableChildRoutes()
+    public function testFactoryShouldAcceptTraversableChildRoutes(): void
     {
         $children = new ArrayObject([
             'create' => [
@@ -335,7 +336,7 @@ final class PartTest extends TestCase
     }
 
     #[Group('3711')]
-    public function testPartRouteMarkedAsMayTerminateCanMatchWhenQueryStringPresent()
+    public function testPartRouteMarkedAsMayTerminateCanMatchWhenQueryStringPresent(): void
     {
         $options = [
             'route'         => [
@@ -368,10 +369,10 @@ final class PartTest extends TestCase
         $request->setUri('http://example.com/resource?foo=bar');
         $query = new Parameters(['foo' => 'bar']);
         $request->setQuery($query);
-        $query = $request->getQuery();
+        $request->getQuery();
 
         $match = $route->match($request);
-        $this->assertInstanceOf(\Laminas\Router\RouteMatch::class, $match);
+        $this->assertInstanceOf(RouteMatch::class, $match);
         $this->assertEquals('resource', $match->getParam('action'));
     }
 }

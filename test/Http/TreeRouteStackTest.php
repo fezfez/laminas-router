@@ -20,7 +20,7 @@ use ReflectionClass;
 
 final class TreeRouteStackTest extends TestCase
 {
-    public function testAddRouteRequiresHttpSpecificRoute()
+    public function testAddRouteRequiresHttpSpecificRoute(): void
     {
         $stack = new TreeRouteStack();
 
@@ -30,7 +30,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->addRoute('foo', new DummyRoute());
     }
 
-    public function testAddRouteViaStringRequiresHttpSpecificRoute()
+    public function testAddRouteViaStringRequiresHttpSpecificRoute(): void
     {
         $stack = new TreeRouteStack();
 
@@ -41,7 +41,7 @@ final class TreeRouteStackTest extends TestCase
         ]);
     }
 
-    public function testAddRouteAcceptsTraversable()
+    public function testAddRouteAcceptsTraversable(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute('foo', new ArrayIterator([
@@ -50,7 +50,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertTrue($stack->hasRoute('foo'));
     }
 
-    public function testNoMatchWithoutUriMethod()
+    public function testNoMatchWithoutUriMethod(): void
     {
         $stack   = new TreeRouteStack();
         $request = new BaseRequest();
@@ -58,7 +58,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertNull($stack->match($request));
     }
 
-    public function testSetBaseUrlFromFirstMatch()
+    public function testSetBaseUrlFromFirstMatch(): void
     {
         $stack = new TreeRouteStack();
 
@@ -73,7 +73,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('/foo', $stack->getBaseUrl());
     }
 
-    public function testBaseUrlLengthIsPassedAsOffset()
+    public function testBaseUrlLengthIsPassedAsOffset(): void
     {
         $stack = new TreeRouteStack();
         $stack->setBaseUrl('/foo');
@@ -84,7 +84,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals(4, $stack->match(new Request())->getParam('offset'));
     }
 
-    public function testNoOffsetIsPassedWithoutBaseUrl()
+    public function testNoOffsetIsPassedWithoutBaseUrl(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute('foo', [
@@ -94,14 +94,14 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals(null, $stack->match(new Request())->getParam('offset'));
     }
 
-    public function testAssemble()
+    public function testAssemble(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute('foo', new TestAsset\DummyRoute());
         $this->assertEquals('', $stack->assemble([], ['name' => 'foo']));
     }
 
-    public function testAssembleCanonicalUriWithoutRequestUri()
+    public function testAssembleCanonicalUriWithoutRequestUri(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute('foo', new TestAsset\DummyRoute());
@@ -111,7 +111,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->assemble([], ['name' => 'foo', 'force_canonical' => true]);
     }
 
-    public function testAssembleCanonicalUriWithRequestUri()
+    public function testAssembleCanonicalUriWithRequestUri(): void
     {
         $uri   = new HttpUri('http://example.com:8080/');
         $stack = new TreeRouteStack();
@@ -124,7 +124,7 @@ final class TreeRouteStackTest extends TestCase
         );
     }
 
-    public function testAssembleCanonicalUriWithGivenUri()
+    public function testAssembleCanonicalUriWithGivenUri(): void
     {
         $uri   = new HttpUri('http://example.com:8080/');
         $stack = new TreeRouteStack();
@@ -136,7 +136,7 @@ final class TreeRouteStackTest extends TestCase
         );
     }
 
-    public function testAssembleCanonicalUriWithHostnameRoute()
+    public function testAssembleCanonicalUriWithHostnameRoute(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute('foo', new Hostname('example.com'));
@@ -146,7 +146,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('http://example.com/', $stack->assemble([], ['name' => 'foo', 'uri' => $uri]));
     }
 
-    public function testAssembleCanonicalUriWithHostnameRouteWithoutScheme()
+    public function testAssembleCanonicalUriWithHostnameRouteWithoutScheme(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute('foo', new Hostname('example.com'));
@@ -157,7 +157,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->assemble([], ['name' => 'foo', 'uri' => $uri]);
     }
 
-    public function testAssembleCanonicalUriWithHostnameRouteAndRequestUriWithoutScheme()
+    public function testAssembleCanonicalUriWithHostnameRouteAndRequestUriWithoutScheme(): void
     {
         $uri = new HttpUri();
         $uri->setScheme('http');
@@ -168,7 +168,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('http://example.com/', $stack->assemble([], ['name' => 'foo']));
     }
 
-    public function testAssembleWithQueryParams()
+    public function testAssembleWithQueryParams(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute(
@@ -184,7 +184,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('/?foo=bar', $stack->assemble([], ['name' => 'index', 'query' => ['foo' => 'bar']]));
     }
 
-    public function testAssembleWithEncodedPath()
+    public function testAssembleWithEncodedPath(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute(
@@ -200,7 +200,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('/this%2Fthat', $stack->assemble([], ['name' => 'index']));
     }
 
-    public function testAssembleWithEncodedPathAndQueryParams()
+    public function testAssembleWithEncodedPathAndQueryParams(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute(
@@ -219,7 +219,7 @@ final class TreeRouteStackTest extends TestCase
         );
     }
 
-    public function testAssembleWithScheme()
+    public function testAssembleWithScheme(): void
     {
         $uri = new HttpUri();
         $uri->setScheme('http');
@@ -246,7 +246,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('https://example.com/', $stack->assemble([], ['name' => 'secure/index']));
     }
 
-    public function testAssembleWithFragment()
+    public function testAssembleWithFragment(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute(
@@ -262,7 +262,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('/#foobar', $stack->assemble([], ['name' => 'index', 'fragment' => 'foobar']));
     }
 
-    public function testAssembleWithoutNameOption()
+    public function testAssembleWithoutNameOption(): void
     {
         $stack = new TreeRouteStack();
 
@@ -271,7 +271,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->assemble();
     }
 
-    public function testAssembleNonExistentRoute()
+    public function testAssembleNonExistentRoute(): void
     {
         $stack = new TreeRouteStack();
 
@@ -280,7 +280,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->assemble([], ['name' => 'foo']);
     }
 
-    public function testAssembleNonExistentChildRoute()
+    public function testAssembleNonExistentChildRoute(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute(
@@ -298,7 +298,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->assemble([], ['name' => 'index/foo']);
     }
 
-    public function testDefaultParamIsAddedToMatch()
+    public function testDefaultParamIsAddedToMatch(): void
     {
         $stack = new TreeRouteStack();
         $stack->setBaseUrl('/foo');
@@ -308,7 +308,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('bar', $stack->match(new Request())->getParam('foo'));
     }
 
-    public function testDefaultParamDoesNotOverrideParam()
+    public function testDefaultParamDoesNotOverrideParam(): void
     {
         $stack = new TreeRouteStack();
         $stack->setBaseUrl('/foo');
@@ -318,7 +318,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('bar', $stack->match(new Request())->getParam('foo'));
     }
 
-    public function testDefaultParamIsUsedForAssembling()
+    public function testDefaultParamIsUsedForAssembling(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
@@ -327,7 +327,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('bar', $stack->assemble([], ['name' => 'foo']));
     }
 
-    public function testDefaultParamDoesNotOverrideParamForAssembling()
+    public function testDefaultParamDoesNotOverrideParamForAssembling(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
@@ -336,7 +336,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('bar', $stack->assemble(['foo' => 'bar'], ['name' => 'foo']));
     }
 
-    public function testSetBaseUrl()
+    public function testSetBaseUrl(): void
     {
         $stack = new TreeRouteStack();
 
@@ -344,7 +344,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('/foo', $stack->getBaseUrl());
     }
 
-    public function testSetRequestUri()
+    public function testSetRequestUri(): void
     {
         $uri   = new HttpUri();
         $stack = new TreeRouteStack();
@@ -353,7 +353,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals($uri, $stack->getRequestUri());
     }
 
-    public function testPriorityIsPassedToPartRoute()
+    public function testPriorityIsPassedToPartRoute(): void
     {
         $stack = new TreeRouteStack();
         $stack->addRoutes([
@@ -384,13 +384,12 @@ final class TreeRouteStackTest extends TestCase
 
         $reflectedClass    = new ReflectionClass($stack);
         $reflectedProperty = $reflectedClass->getProperty('routes');
-        $reflectedProperty->setAccessible(true);
-        $routes = $reflectedProperty->getValue($stack);
+        $routes            = $reflectedProperty->getValue($stack);
 
         $this->assertEquals(1000, $routes->get('foo')->priority);
     }
 
-    public function testPrototypeRoute()
+    public function testPrototypeRoute(): void
     {
         $stack = new TreeRouteStack();
         $stack->addPrototype(
@@ -401,7 +400,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('/bar', $stack->assemble([], ['name' => 'foo']));
     }
 
-    public function testChainRouteAssembling()
+    public function testChainRouteAssembling(): void
     {
         $stack = new TreeRouteStack();
         $stack->addPrototype(
@@ -423,7 +422,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('/foo/bar', $stack->assemble([], ['name' => 'foo']));
     }
 
-    public function testChainRouteAssemblingWithChildrenAndSecureScheme()
+    public function testChainRouteAssemblingWithChildrenAndSecureScheme(): void
     {
         $stack = new TreeRouteStack();
 
@@ -454,7 +453,7 @@ final class TreeRouteStackTest extends TestCase
         $this->assertEquals('https://localhost/foo/baz', $stack->assemble([], ['name' => 'foo/baz']));
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(

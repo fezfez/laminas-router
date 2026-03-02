@@ -6,9 +6,9 @@ namespace LaminasTest\Router\Http;
 
 use Laminas\Http\Request;
 use Laminas\Router\Http\Hostname;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Placeholder;
-use Laminas\Router\Http\RouteMatch;
 use Laminas\Router\Http\TreeRouteStack;
 use Laminas\Stdlib\ArrayUtils;
 use LaminasTest\Router\FactoryTester;
@@ -45,7 +45,7 @@ final class PlaceholderTest extends TestCase
             ],
         ],
     ];
-    public function testMatch()
+    public function testMatch(): void
     {
         $route = new Placeholder([]);
 
@@ -53,34 +53,29 @@ final class PlaceholderTest extends TestCase
         $request->setUri('http://example.com/');
         $match = $route->match($request);
 
-        $this->assertInstanceOf(RouteMatch::class, $match);
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
     }
 
-    public function testAssembling()
+    public function testAssembling(): void
     {
         $route = new Placeholder([]);
         $this->assertEquals('', $route->assemble());
     }
 
-    public function testGetAssembledParams()
+    public function testGetAssembledParams(): void
     {
         $route = new Placeholder([]);
         $this->assertEquals([], $route->getAssembledParams());
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(Placeholder::class, [], []);
     }
 
-    /**
-     * @param array $additionalConfig
-     * @param string $uri
-     * @param string $expectedRouteName
-     */
     #[DataProvider('placeholderProvider')]
-    public function testPlaceholderDefault($additionalConfig, $uri, $expectedRouteName)
+    public function testPlaceholderDefault(array $additionalConfig, string $uri, string $expectedRouteName): void
     {
         $routeConfig = ArrayUtils::merge(self::$routeConfig, $additionalConfig);
         $router      = TreeRouteStack::factory(['routes' => $routeConfig]);
@@ -89,7 +84,7 @@ final class PlaceholderTest extends TestCase
         $request->setUri($uri);
         $match = $router->match($request);
 
-        $this->assertInstanceOf(RouteMatch::class, $match);
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
         $this->assertEquals($expectedRouteName, $match->getMatchedRouteName());
     }
 

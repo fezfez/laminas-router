@@ -8,7 +8,7 @@ use Laminas\Http\Request;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\Hostname;
-use Laminas\Router\Http\RouteMatch;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\Request as BaseRequest;
 use Laminas\Uri\Http as HttpUri;
 use LaminasTest\Router\FactoryTester;
@@ -165,11 +165,8 @@ final class HostnameTest extends TestCase
         ];
     }
 
-    /**
-     * @param        string   $hostname
-     */
     #[DataProvider('routeProvider')]
-    public function testMatching(Hostname $route, $hostname, ?array $params = null)
+    public function testMatching(Hostname $route, string $hostname, ?array $params = null): void
     {
         $request = new Request();
         $request->setUri('http://' . $hostname . '/');
@@ -178,7 +175,7 @@ final class HostnameTest extends TestCase
         if ($params === null) {
             $this->assertNull($match);
         } else {
-            $this->assertInstanceOf(RouteMatch::class, $match);
+            $this->assertInstanceOf(HttpRouteMatch::class, $match);
 
             foreach ($params as $key => $value) {
                 $this->assertEquals($value, $match->getParam($key));
@@ -186,11 +183,8 @@ final class HostnameTest extends TestCase
         }
     }
 
-    /**
-     * @param        string   $hostname
-     */
     #[DataProvider('routeProvider')]
-    public function testAssembling(Hostname $route, $hostname, ?array $params = null)
+    public function testAssembling(Hostname $route, string $hostname, ?array $params = null): void
     {
         if ($params === null) {
             // Data which will not match are not tested for assembling.
@@ -205,7 +199,7 @@ final class HostnameTest extends TestCase
         $this->assertEquals($hostname, $uri->getHost());
     }
 
-    public function testNoMatchWithoutUriMethod()
+    public function testNoMatchWithoutUriMethod(): void
     {
         $route   = new Hostname('example.com');
         $request = new BaseRequest();
@@ -238,11 +232,11 @@ final class HostnameTest extends TestCase
         $request->setUri('/relative/path');
 
         $match = $route->match($request);
-        self::assertInstanceOf(RouteMatch::class, $match);
+        self::assertInstanceOf(HttpRouteMatch::class, $match);
         self::assertArrayNotHasKey('domain', $match->getParams());
     }
 
-    public function testAssemblingWithMissingParameter()
+    public function testAssemblingWithMissingParameter(): void
     {
         $route = new Hostname(':foo.example.com');
         $uri   = new HttpUri();
@@ -252,7 +246,7 @@ final class HostnameTest extends TestCase
         $route->assemble([], ['uri' => $uri]);
     }
 
-    public function testGetAssembledParams()
+    public function testGetAssembledParams(): void
     {
         $route = new Hostname(':foo.example.com');
         $uri   = new HttpUri();
@@ -261,7 +255,7 @@ final class HostnameTest extends TestCase
         $this->assertEquals(['foo'], $route->getAssembledParams());
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(
@@ -276,7 +270,7 @@ final class HostnameTest extends TestCase
     }
 
     #[Group('laminas5656')]
-    public function testFailedHostnameSegmentMatchDoesNotEmitErrors()
+    public function testFailedHostnameSegmentMatchDoesNotEmitErrors(): void
     {
         $this->expectException(RuntimeException::class);
         new Hostname(':subdomain.with_underscore.com');

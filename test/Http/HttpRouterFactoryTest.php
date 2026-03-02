@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LaminasTest\Router\Http;
 
 use Laminas\Router\Http\HttpRouterFactory;
+use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
 use LaminasTest\Router\RouterFactoryTest as TestCase;
 
@@ -14,7 +15,10 @@ final class HttpRouterFactoryTest extends TestCase
     {
         $this->defaultServiceConfig = [
             'factories' => [
-                'RoutePluginManager' => static fn($services) => new RoutePluginManager($services),
+                /**
+                 * @psalm-return RoutePluginManager<RouteInterface>
+                 */
+                'RoutePluginManager' => static fn($services): RoutePluginManager => new RoutePluginManager($services),
             ],
         ];
 

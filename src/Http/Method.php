@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
-use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function array_map;
@@ -20,6 +20,8 @@ use function strtoupper;
 
 /**
  * Method route.
+ *
+ * @final
  */
 class Method implements HttpRouteInterface
 {
@@ -54,14 +56,10 @@ class Method implements HttpRouteInterface
     }
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  iterable $options
-     * @return Method
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -85,13 +83,10 @@ class Method implements HttpRouteInterface
     }
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::match()
-     *
-     * @return RouteMatch|null
+     * @inheritDoc
      */
-    public function match(Request $request)
+    #[Override]
+    public function match(RequestInterface $request)
     {
         if (! method_exists($request, 'getMethod')) {
             return null;
@@ -102,19 +97,16 @@ class Method implements HttpRouteInterface
         $matchVerbs  = array_map('trim', $matchVerbs);
 
         if (in_array($requestVerb, $matchVerbs)) {
-            return new RouteMatch($this->defaults);
+            return new HttpRouteMatch($this->defaults);
         }
 
         return null;
     }
 
     /**
-     * assemble(): Defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         // The request method does not contribute to the path, thus nothing is returned.
@@ -122,12 +114,9 @@ class Method implements HttpRouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by HttpRouteInterface interface.
-     *
-     * @see    HttpRouteInterface::getAssembledParams
-     *
-     * @return array
+     * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return [];

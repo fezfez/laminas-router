@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http\TestAsset;
 
-use Laminas\Router\Http\RouteMatch;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\RequestInterface;
 
 /**
@@ -13,26 +13,19 @@ use Laminas\Stdlib\RequestInterface;
 final class DummyRouteWithParam extends DummyRoute
 {
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    Route::match()
-     *
-     * @param  int $pathOffset
-     * @return RouteMatch
+     * @inheritDoc
      */
-    public function match(RequestInterface $request, $pathOffset = null)
-    {
-        return new RouteMatch(['foo' => 'bar'], -4);
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null
+    ) {
+        return new HttpRouteMatch(['foo' => 'bar'], -4);
     }
 
     /**
-     * assemble(): defined by RouteInterface interface.
-     *
-     * @see    Route::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function assemble(?array $params = null, ?array $options = null)
+    public function assemble(array $params = [], array $options = [])
     {
         return $params['foo'] ?? '';
     }
