@@ -11,8 +11,6 @@ use function sprintf;
 
 /**
  * @internal
- *
- * @final
  */
 trait RouterConfigTrait
 {

@@ -14,9 +14,8 @@ use Override;
  *
  * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
- * @final
  */
-class TranslatorAwareTreeRouteStack extends TreeRouteStack
+final class TranslatorAwareTreeRouteStack extends TreeRouteStack
 {
     /**
      * Translator used for translatable segments.

@@ -26,10 +26,8 @@ use function strtr;
 
 /**
  * Segment route.
- *
- * @final
  */
-class Segment implements HttpRouteInterface
+final class Segment implements HttpRouteInterface
 {
     /**
      * Cache for the encode output.

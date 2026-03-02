@@ -26,10 +26,8 @@ use function strlen;
 
 /**
  * Regex route.
- *
- * @final
  */
-class Regex implements HttpRouteInterface
+final class Regex implements HttpRouteInterface
 {
     /**
      * Default values.

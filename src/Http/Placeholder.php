@@ -15,10 +15,8 @@ use function sprintf;
 
 /**
  * Placeholder route.
- *
- * @final
  */
-class Placeholder implements HttpRouteInterface
+final class Placeholder implements HttpRouteInterface
 {
     /**
      * @internal

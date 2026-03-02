@@ -27,9 +27,8 @@ use function strlen;
 /**
  * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
- * @final
  */
-class Chain extends TreeRouteStack implements HttpRouteInterface
+final class Chain extends TreeRouteStack implements HttpRouteInterface
 {
     /**
      * Chain routes.

@@ -134,9 +134,6 @@
     <MoreSpecificReturnType>
       <code><![CDATA[RouteStackInterface]]></code>
     </MoreSpecificReturnType>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[createService]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Http/Literal.php">
     <DocblockTypeContradiction>

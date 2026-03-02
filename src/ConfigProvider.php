@@ -23,7 +23,7 @@ use Laminas\ServiceManager\ServiceManager;
  *
  * @final
  */
-class ConfigProvider
+final class ConfigProvider
 {
     /**
      * Provide default configuration.

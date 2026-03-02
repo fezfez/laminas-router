@@ -37,9 +37,8 @@ use function sprintf;
  *
  * @extends AbstractPluginManager<RouteInterface>
  * @psalm-import-type ServiceManagerConfiguration from ServiceManager
- * @final
  */
-class RoutePluginManager extends AbstractPluginManager
+final class RoutePluginManager extends AbstractPluginManager
 {
     /**
      * @psalm-var ServiceManagerConfiguration

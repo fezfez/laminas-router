@@ -20,10 +20,8 @@ use function strtoupper;
 
 /**
  * Method route.
- *
- * @final
  */
-class Method implements HttpRouteInterface
+final class Method implements HttpRouteInterface
 {
     /**
      * Default values.

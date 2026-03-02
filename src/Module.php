@@ -6,10 +6,8 @@ namespace Laminas\Router;
 
 /**
  * Register with a laminas-mvc application.
- *
- * @final
  */
-class Module
+final class Module
 {
     /**
      * Provide default router configuration.

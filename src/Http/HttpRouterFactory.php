@@ -7,7 +7,6 @@ namespace Laminas\Router\Http;
 use Laminas\Router\RouterConfigTrait;
 use Laminas\Router\RouteStackInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Laminas\ServiceManager\ServiceLocatorInterface;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -39,17 +38,5 @@ final class HttpRouterFactory implements FactoryInterface
         $config = $config['router'] ?? [];
 
         return $this->createRouter($class, $config, $container);
-    }
-
-    /**
-     * Create and return RouteStackInterface instance
-     *
-     * For use with laminas-servicemanager v2; proxies to __invoke().
-     *
-     * @return RouteStackInterface
-     */
-    public function createService(ServiceLocatorInterface $serviceLocator)
-    {
-        return $this($serviceLocator, RouteStackInterface::class);
     }
 }

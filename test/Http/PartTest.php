@@ -213,18 +213,19 @@ final class PartTest extends TestCase
 
         if ($params === null) {
             $this->assertNull($match);
-        } else {
-            $this->assertInstanceOf(HttpRouteMatch::class, $match);
+            return;
+        }
 
-            if ($offset === null) {
-                $this->assertEquals(strlen($path), $match->getLength());
-            }
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
 
-            $this->assertEquals($routeName, $match->getMatchedRouteName());
+        if ($offset === null) {
+            $this->assertEquals(strlen($path), $match->getLength());
+        }
 
-            foreach ($params as $key => $value) {
-                $this->assertEquals($value, $match->getParam($key));
-            }
+        $this->assertEquals($routeName, $match->getMatchedRouteName());
+
+        foreach ($params as $key => $value) {
+            $this->assertEquals($value, $match->getParam($key));
         }
     }
 

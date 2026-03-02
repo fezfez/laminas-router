@@ -41,7 +41,7 @@ use function strlen;
  * >
  * @final
  */
-class Hostname implements HttpRouteInterface
+final class Hostname implements HttpRouteInterface
 {
     /**
      * Parts of the route.

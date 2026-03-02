@@ -18,10 +18,8 @@ use function strpos;
 
 /**
  * Literal route.
- *
- * @final
  */
-class Literal implements HttpRouteInterface
+final class Literal implements HttpRouteInterface
 {
     /**
      * Default values.
