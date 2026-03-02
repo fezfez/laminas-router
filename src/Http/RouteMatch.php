@@ -10,6 +10,8 @@ use function array_merge;
 
 /**
  * Part route match.
+ *
+ * @deprecated Use HttpRouteMatch instead; this will be removed in v4.0
  */
 class RouteMatch extends BaseRouteMatch
 {

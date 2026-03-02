@@ -109,7 +109,7 @@ class Wildcard implements HttpRouteInterface
      * @see    RouteInterface::match()
      *
      * @param  integer|null $pathOffset
-     * @return RouteMatch|null
+     * @return HttpRouteMatch|null
      */
     public function match(Request $request, $pathOffset = null)
     {
@@ -155,7 +155,7 @@ class Wildcard implements HttpRouteInterface
             }
         }
 
-        return new RouteMatch(array_merge($this->defaults, $matches), strlen($path));
+        return new HttpRouteMatch(array_merge($this->defaults, $matches), strlen($path));
     }
 
     /**

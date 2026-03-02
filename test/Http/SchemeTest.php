@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace LaminasTest\Router\Http;
 
 use Laminas\Http\Request;
-use Laminas\Router\Http\RouteMatch;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Scheme;
 use Laminas\Stdlib\Request as BaseRequest;
 use Laminas\Uri\Http as HttpUri;
@@ -22,7 +22,7 @@ final class SchemeTest extends TestCase
         $route = new Scheme('https');
         $match = $route->match($request);
 
-        $this->assertInstanceOf(RouteMatch::class, $match);
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
     }
 
     public function testNoMatchingOnDifferentScheme(): void

@@ -119,6 +119,14 @@
       <code><![CDATA[$levelParts[$level + 1] = &$levelParts[$level][count($levelParts[$level]) - 1][1]]]></code>
     </UnsupportedReferenceUsage>
   </file>
+  <file src="src/Http/HttpRouteMatch.php">
+    <DeprecatedClass>
+      <code><![CDATA[RouteMatch]]></code>
+    </DeprecatedClass>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[HttpRouteMatch]]></code>
+    </PropertyNotSetInConstructor>
+  </file>
   <file src="src/Http/HttpRouterFactory.php">
     <DeprecatedInterface>
       <code><![CDATA[HttpRouterFactory]]></code>

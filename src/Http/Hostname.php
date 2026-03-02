@@ -327,7 +327,7 @@ class Hostname implements HttpRouteInterface
             }
         }
 
-        return new RouteMatch(array_merge($this->defaults, $params));
+        return new HttpRouteMatch(array_merge($this->defaults, $params));
     }
 
     /**

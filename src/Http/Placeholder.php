@@ -63,7 +63,7 @@ class Placeholder implements HttpRouteInterface
      */
     public function match(Request $request, $pathOffset = null)
     {
-        return new RouteMatch($this->defaults);
+        return new HttpRouteMatch($this->defaults);
     }
 
     /**

@@ -92,7 +92,7 @@ class Method implements HttpRouteInterface
         $matchVerbs  = array_map('trim', $matchVerbs);
 
         if (in_array($requestVerb, $matchVerbs)) {
-            return new RouteMatch($this->defaults);
+            return new HttpRouteMatch($this->defaults);
         }
 
         return null;

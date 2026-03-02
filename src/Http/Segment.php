@@ -405,7 +405,7 @@ class Segment implements HttpRouteInterface
             }
         }
 
-        return new RouteMatch(array_merge($this->defaults, $params), $matchedLength);
+        return new HttpRouteMatch(array_merge($this->defaults, $params), $matchedLength);
     }
 
     /**

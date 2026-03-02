@@ -135,7 +135,7 @@ class Regex implements HttpRouteInterface
             }
         }
 
-        return new RouteMatch(array_merge($this->defaults, $matches), $matchedLength);
+        return new HttpRouteMatch(array_merge($this->defaults, $matches), $matchedLength);
     }
 
     /**
