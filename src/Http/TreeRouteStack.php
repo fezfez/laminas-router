@@ -308,7 +308,7 @@ class TreeRouteStack extends SimpleRouteStack
 
         foreach ($this->routes as $name => $route) {
             if (
-                ($match = $route->match($request, $baseUrlLength, $options)) instanceof HttpRouteMatch
+                ($match = $route->match($request, $baseUrlLength, $options)) instanceof RouteMatch
                 && ($pathLength === null || $match->getLength() === $pathLength)
             ) {
                 $match->setMatchedRouteName($name);
