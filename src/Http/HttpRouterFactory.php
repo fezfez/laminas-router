@@ -6,7 +6,7 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\RouterConfigTrait;
 use Laminas\Router\RouteStackInterface;
-use Laminas\ServiceManager\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use Laminas\ServiceManager\ServiceLocatorInterface;
 use Psr\Container\ContainerInterface;
 
@@ -23,13 +23,12 @@ class HttpRouterFactory implements FactoryInterface
      * Retrieves the "router" key of the Config service, and uses it
      * to instantiate the router. Uses the TreeRouteStack implementation by
      * default.
-     *
-     * @param  string $name
-     * @param  null|array $options
-     * @return RouteStackInterface
      */
-    public function __invoke(ContainerInterface $container, $name, ?array $options = null)
-    {
+    public function __invoke(
+        ContainerInterface $container,
+        string $requestedName,
+        ?array $options = null
+    ): RouteStackInterface {
         $config = $container->has('config') ? $container->get('config') : [];
 
         // Defaults

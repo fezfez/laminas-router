@@ -8,8 +8,6 @@ use Laminas\Router\Http\HttpRouterFactory;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Router\RouterFactory;
-use Laminas\ServiceManager\Config;
-use Laminas\ServiceManager\ConfigInterface;
 use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
 
@@ -18,13 +16,12 @@ use function array_merge_recursive;
 /**
  * @see ConfigInterface
  *
- * @psalm-import-type ServiceManagerConfigurationType from ConfigInterface
+ * @psalm-import-type ServiceManagerConfiguration from ServiceManager
  */
 class RouterFactoryTest extends TestCase
 {
-    /** @psalm-var ServiceManagerConfigurationType */
+    /** @psalm-var ServiceManagerConfiguration */
     protected $defaultServiceConfig;
-
     /** @var HttpRouterFactory|RouterFactory */
     protected $factory;
 
@@ -45,7 +42,7 @@ class RouterFactoryTest extends TestCase
 
     public function testFactoryCanCreateRouterBasedOnConfiguredName(): void
     {
-        $config   = new Config(array_merge_recursive($this->defaultServiceConfig, [
+        $config   = array_merge_recursive($this->defaultServiceConfig, [
             'services' => [
                 'config' => [
                     'router' => [
@@ -53,9 +50,8 @@ class RouterFactoryTest extends TestCase
                     ],
                 ],
             ],
-        ]));
-        $services = new ServiceManager();
-        $config->configureServiceManager($services);
+        ]);
+        $services = new ServiceManager($config);
 
         $router = $this->factory->__invoke($services, 'router');
         $this->assertInstanceOf(TestAsset\Router::class, $router);
@@ -63,7 +59,7 @@ class RouterFactoryTest extends TestCase
 
     public function testFactoryCanCreateRouterWhenOnlyHttpRouterConfigPresent(): void
     {
-        $config   = new Config(array_merge_recursive($this->defaultServiceConfig, [
+        $config   = array_merge_recursive($this->defaultServiceConfig, [
             'services' => [
                 'config' => [
                     'router' => [
@@ -71,9 +67,8 @@ class RouterFactoryTest extends TestCase
                     ],
                 ],
             ],
-        ]));
-        $services = new ServiceManager();
-        $config->configureServiceManager($services);
+        ]);
+        $services = new ServiceManager($config);
 
         $router = $this->factory->__invoke($services, 'router');
         $this->assertInstanceOf(TestAsset\Router::class, $router);

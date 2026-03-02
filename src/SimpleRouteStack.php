@@ -52,8 +52,6 @@ class SimpleRouteStack implements RouteStackInterface
         $this->routes = new PriorityList();
         /** @var RoutePluginManager<TRoute> $this->routePluginManager */
         $this->routePluginManager = $routePluginManager ?? new RoutePluginManager(new ServiceManager());
-
-        $this->init();
     }
 
     /**
@@ -88,15 +86,6 @@ class SimpleRouteStack implements RouteStackInterface
         }
 
         return $instance;
-    }
-
-    /**
-     * Init method for extending classes.
-     *
-     * @return void
-     */
-    protected function init()
-    {
     }
 
     /**
@@ -249,7 +238,7 @@ class SimpleRouteStack implements RouteStackInterface
             $specs['options'] = [];
         }
 
-        $route = $this->getRoutePluginManager()->get($specs['type'], $specs['options']);
+        $route = $this->getRoutePluginManager()->build($specs['type'], $specs['options']);
 
         if (isset($specs['priority'])) {
             $route->priority = $specs['priority'];
