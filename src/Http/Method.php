@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
-use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface as Request;
 use Traversable;
@@ -54,12 +53,7 @@ class Method implements HttpRouteInterface
     }
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  iterable $options
-     * @return Method
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
     public static function factory($options = [])
@@ -85,11 +79,7 @@ class Method implements HttpRouteInterface
     }
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::match()
-     *
-     * @return RouteMatch|null
+     * @inheritDoc
      */
     public function match(Request $request)
     {
@@ -109,11 +99,7 @@ class Method implements HttpRouteInterface
     }
 
     /**
-     * assemble(): Defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
     public function assemble(array $params = [], array $options = [])
     {
@@ -122,11 +108,7 @@ class Method implements HttpRouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by HttpRouteInterface interface.
-     *
-     * @see    HttpRouteInterface::getAssembledParams
-     *
-     * @return array
+     * @inheritDoc
      */
     public function getAssembledParams()
     {

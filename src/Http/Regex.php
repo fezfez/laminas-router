@@ -6,7 +6,6 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\InvalidArgumentException;
-use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface as Request;
 use Traversable;
@@ -74,12 +73,7 @@ class Regex implements HttpRouteInterface
     }
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  iterable $options
-     * @return Regex
+     * @inheritDoc
      * @throws InvalidArgumentException
      */
     public static function factory($options = [])
@@ -109,15 +103,13 @@ class Regex implements HttpRouteInterface
     }
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @param  int $pathOffset
-     * @return RouteMatch|null
+     * @inheritDoc
+     * @param int|null $pathOffset
      */
     public function match(Request $request, $pathOffset = null)
     {
         if (! method_exists($request, 'getUri')) {
-            return;
+            return null;
         }
 
         $uri  = $request->getUri();
@@ -130,7 +122,7 @@ class Regex implements HttpRouteInterface
         }
 
         if (! $result) {
-            return;
+            return null;
         }
 
         $matchedLength = strlen($matches[0]);
@@ -147,11 +139,7 @@ class Regex implements HttpRouteInterface
     }
 
     /**
-     * assemble(): Defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
     public function assemble(array $params = [], array $options = [])
     {
@@ -173,11 +161,7 @@ class Regex implements HttpRouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by HttpRouteInterface interface.
-     *
-     * @see    HttpRouteInterface::getAssembledParams
-     *
-     * @return array
+     * @inheritDoc
      */
     public function getAssembledParams()
     {

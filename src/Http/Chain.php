@@ -7,7 +7,6 @@ namespace Laminas\Router\Http;
 use ArrayObject;
 use Laminas\Router\Exception;
 use Laminas\Router\PriorityList;
-use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface as Request;
@@ -60,13 +59,8 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
     }
 
     /**
-     * factory(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::factory()
-     *
-     * @param  mixed $options
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
-     * @return Part
      */
     public static function factory($options = [])
     {
@@ -103,17 +97,13 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
     }
 
     /**
-     * match(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::match()
-     *
-     * @param  int|null $pathOffset
-     * @return RouteMatch|null
+     * @inheritDoc
+     * @param int|null $pathOffset
      */
     public function match(Request $request, $pathOffset = null, array $options = [])
     {
         if (! method_exists($request, 'getUri')) {
-            return;
+            return null;
         }
 
         if ($pathOffset === null) {
@@ -137,7 +127,7 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
             $subMatch = $route->match($request, $pathOffset, $options);
 
             if ($subMatch === null) {
-                return;
+                return null;
             }
 
             $match->merge($subMatch);
@@ -145,18 +135,14 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
         }
 
         if ($mustTerminate && $pathOffset !== $pathLength) {
-            return;
+            return null;
         }
 
         return $match;
     }
 
     /**
-     * assemble(): Defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      */
     public function assemble(array $params = [], array $options = [])
     {
@@ -187,11 +173,7 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
     }
 
     /**
-     * getAssembledParams(): defined by RouteInterface interface.
-     *
-     * @see    HttpRouteInterface::getAssembledParams
-     *
-     * @return array
+     * @inheritDoc
      */
     public function getAssembledParams()
     {

@@ -29,12 +29,7 @@ class RouteMatch extends BaseRouteMatch
     }
 
     /**
-     * setMatchedRouteName(): defined by BaseRouteMatch.
-     *
-     * @see    BaseRouteMatch::setMatchedRouteName()
-     *
-     * @param  string $name
-     * @return RouteMatch
+     * @inheritDoc
      */
     public function setMatchedRouteName($name)
     {

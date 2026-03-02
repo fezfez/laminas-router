@@ -7,7 +7,6 @@ namespace Laminas\Router\Http;
 use Laminas\I18n\Translator\TranslatorAwareInterface;
 use Laminas\I18n\Translator\TranslatorInterface as Translator;
 use Laminas\Router\Exception;
-use Laminas\Router\RouteInterface;
 use Laminas\Stdlib\RequestInterface as Request;
 
 /**
@@ -40,12 +39,8 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
     protected $translatorTextDomain = 'default';
 
     /**
-     * match(): defined by RouteInterface
-     *
-     * @see    RouteInterface::match()
-     *
-     * @param  integer|null $pathOffset
-     * @return RouteMatch|null
+     * @inheritDoc
+     * @param int|null $pathOffset
      */
     public function match(Request $request, $pathOffset = null, array $options = [])
     {
@@ -61,11 +56,7 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
     }
 
     /**
-     * assemble(): defined by RouteInterface interface.
-     *
-     * @see    RouteInterface::assemble()
-     *
-     * @return mixed
+     * @inheritDoc
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */
