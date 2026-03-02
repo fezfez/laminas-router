@@ -32,11 +32,8 @@ final class FactoryTester
 
     /**
      * Test a factory.
-     *
-     * @param  string $classname
-     * @return void
      */
-    public function testFactory($classname, array $requiredOptions, array $options)
+    public function testFactory(string $classname, array $requiredOptions, array $options): void
     {
         $factory = sprintf('%s::factory', $classname);
 

@@ -46,7 +46,7 @@ final class MethodTest extends TestCase
      * @param string $verb
      */
     #[DataProvider('routeProvider')]
-    public function testMatching(HttpMethod $route, $verb)
+    public function testMatching(HttpMethod $route, $verb): void
     {
         $request = new Request();
         $request->setUri('http://example.com');
@@ -56,7 +56,7 @@ final class MethodTest extends TestCase
         $this->assertInstanceOf(RouteMatch::class, $match);
     }
 
-    public function testNoMatchWithoutVerb()
+    public function testNoMatchWithoutVerb(): void
     {
         $route   = new HttpMethod('get');
         $request = new BaseRequest();
@@ -64,7 +64,7 @@ final class MethodTest extends TestCase
         $this->assertNull($route->match($request));
     }
 
-    public function testFactory()
+    public function testFactory(): void
     {
         $tester = new FactoryTester($this);
         $tester->testFactory(

@@ -16,10 +16,7 @@ use Laminas\Stdlib\RequestInterface as Request;
 final class Router implements RouteStackInterface
 {
     /**
-     * Create a new route with given options.
-     *
-     * @param iterable $options
-     * @return self
+     * @inheritDoc
      */
     public static function factory($options = [])
     {
@@ -27,21 +24,19 @@ final class Router implements RouteStackInterface
     }
 
     /**
-     * Match a given request.
-     *
-     * @return RouteMatch|null
+     * @inheritDoc
      */
     public function match(Request $request)
     {
+        return null;
     }
 
     /**
-     * Assemble the route.
-     *
-     * @return mixed
+     * @inheritDoc
      */
     public function assemble(array $params = [], array $options = [])
     {
+        return null;
     }
 
     /** @inheritDoc */
