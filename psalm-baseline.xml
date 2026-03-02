@@ -581,9 +581,6 @@
     <MixedReturnStatement>
       <code><![CDATA[$container->get('HttpRouter')]]></code>
     </MixedReturnStatement>
-    <UndefinedAttributeClass>
-      <code><![CDATA[Override]]></code>
-    </UndefinedAttributeClass>
   </file>
   <file src="src/SimpleRouteStack.php">
     <DocblockTypeContradiction>
