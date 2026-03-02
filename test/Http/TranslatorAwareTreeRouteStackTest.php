@@ -76,7 +76,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
         $this->assertTrue($stack->isTranslatorEnabled());
 
         // Inject translator without text domain
-        $translator = $this->createMock(TranslatorInterface::class);
+        $translator = $this->createStub(TranslatorInterface::class);
         $stack->setTranslator($translator);
         $this->assertSame($translator, $stack->getTranslator());
         $this->assertEquals('default', $stack->getTranslatorTextDomain());
