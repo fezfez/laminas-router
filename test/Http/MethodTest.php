@@ -42,11 +42,8 @@ final class MethodTest extends TestCase
         ];
     }
 
-    /**
-     * @param string $verb
-     */
     #[DataProvider('routeProvider')]
-    public function testMatching(HttpMethod $route, $verb): void
+    public function testMatching(HttpMethod $route, string $verb): void
     {
         $request = new Request();
         $request->setUri('http://example.com');

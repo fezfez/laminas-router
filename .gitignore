@@ -5,3 +5,4 @@
 /vendor/
 .phpunit.cache
 .phpcs-cache
+infection.json5

@@ -165,11 +165,8 @@ final class HostnameTest extends TestCase
         ];
     }
 
-    /**
-     * @param string   $hostname
-     */
     #[DataProvider('routeProvider')]
-    public function testMatching(Hostname $route, $hostname, ?array $params = null): void
+    public function testMatching(Hostname $route, string $hostname, ?array $params = null): void
     {
         $request = new Request();
         $request->setUri('http://' . $hostname . '/');
