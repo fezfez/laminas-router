@@ -7,6 +7,7 @@ namespace Laminas\Router\Http;
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function array_map;
@@ -58,6 +59,7 @@ class Method implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -83,6 +85,7 @@ class Method implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function match(RequestInterface $request)
     {
         if (! method_exists($request, 'getMethod')) {
@@ -103,6 +106,7 @@ class Method implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         // The request method does not contribute to the path, thus nothing is returned.
@@ -112,6 +116,7 @@ class Method implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return [];

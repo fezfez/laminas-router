@@ -7,6 +7,7 @@ namespace Laminas\Router;
 use Laminas\ServiceManager\ServiceManager;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function array_merge;
@@ -59,6 +60,7 @@ class SimpleRouteStack implements RouteStackInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -118,6 +120,7 @@ class SimpleRouteStack implements RouteStackInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function addRoutes($routes)
     {
         if (! is_array($routes) && ! $routes instanceof Traversable) {
@@ -132,6 +135,7 @@ class SimpleRouteStack implements RouteStackInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function addRoute($name, $route, $priority = null)
     {
         if (! $route instanceof RouteInterface) {
@@ -148,6 +152,7 @@ class SimpleRouteStack implements RouteStackInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function removeRoute($name)
     {
         $this->routes->remove($name);
@@ -155,6 +160,7 @@ class SimpleRouteStack implements RouteStackInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function setRoutes($routes)
     {
         $this->routes->clear();
@@ -255,6 +261,7 @@ class SimpleRouteStack implements RouteStackInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function match(RequestInterface $request)
     {
         foreach ($this->routes as $name => $route) {
@@ -279,6 +286,7 @@ class SimpleRouteStack implements RouteStackInterface
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         if (! isset($options['name'])) {

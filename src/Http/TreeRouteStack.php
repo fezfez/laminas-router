@@ -12,6 +12,7 @@ use Laminas\ServiceManager\Config;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http as HttpUri;
+use Override;
 use Traversable;
 
 use function array_merge;
@@ -67,6 +68,7 @@ class TreeRouteStack extends SimpleRouteStack
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -92,6 +94,7 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * @inheritDoc
      */
+    #[Override]
     protected function init()
     {
         /** @var ArrayObject<string, TRoute> $this->prototypes */
@@ -150,6 +153,7 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * @inheritDoc
      */
+    #[Override]
     public function addRoute($name, $route, $priority = null)
     {
         if (! $route instanceof HttpRouteInterface) {
@@ -167,6 +171,7 @@ class TreeRouteStack extends SimpleRouteStack
      * @throws Exception\InvalidArgumentException When chain routes are not an array nor traversable.
      * @throws Exception\RuntimeException         When a generated routes does not implement the HTTP route interface.
      */
+    #[Override]
     protected function routeFromArray($specs)
     {
         if (is_string($specs)) {
@@ -279,6 +284,7 @@ class TreeRouteStack extends SimpleRouteStack
      * @inheritDoc
      * @param int|null $pathOffset
      */
+    #[Override]
     public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if (! method_exists($request, 'getUri')) {
@@ -331,6 +337,7 @@ class TreeRouteStack extends SimpleRouteStack
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         if (! isset($options['name'])) {

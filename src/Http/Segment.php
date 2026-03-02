@@ -8,6 +8,7 @@ use Laminas\I18n\Translator\TranslatorInterface as Translator;
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function array_merge;
@@ -135,6 +136,7 @@ class Segment implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -363,6 +365,7 @@ class Segment implements HttpRouteInterface
      * @param int|null $pathOffset
      * @throws Exception\RuntimeException
      */
+    #[Override]
     public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if (! method_exists($request, 'getUri')) {
@@ -413,6 +416,7 @@ class Segment implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         $this->assembledParams = [];
@@ -429,6 +433,7 @@ class Segment implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return $this->assembledParams;

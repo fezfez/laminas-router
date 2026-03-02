@@ -10,6 +10,7 @@ use Laminas\Router\PriorityList;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function array_diff_key;
@@ -81,6 +82,7 @@ class Part extends TreeRouteStack implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -129,6 +131,7 @@ class Part extends TreeRouteStack implements HttpRouteInterface
      * @inheritDoc
      * @param int|null $pathOffset
      */
+    #[Override]
     public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if ($pathOffset === null) {
@@ -176,6 +179,7 @@ class Part extends TreeRouteStack implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\RuntimeException
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         if ($this->childRoutes !== null) {
@@ -208,6 +212,7 @@ class Part extends TreeRouteStack implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         // Part routes may not occur as base route of other part routes, so we

@@ -7,6 +7,7 @@ namespace Laminas\Router\Http;
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function is_array;
@@ -54,6 +55,7 @@ class Scheme implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -79,6 +81,7 @@ class Scheme implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function match(RequestInterface $request)
     {
         if (! method_exists($request, 'getUri')) {
@@ -98,6 +101,7 @@ class Scheme implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         if (isset($options['uri'])) {
@@ -111,6 +115,7 @@ class Scheme implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return [];
