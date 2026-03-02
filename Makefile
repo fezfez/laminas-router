@@ -120,7 +120,7 @@ mutants: ## Run mutation tests
 	@$(call MK_INFO,"Running Mutation Tests")
 	tools/infection/vendor/bin/roave-infection-static-analysis-plugin \
  		--configuration=.infection.json5.dist \
- 		--psalm-config=psalm.xml.dist --debug
+ 		--psalm-config=psalm.xml.dist
 .PHONY: mutants
 
 vendor/bin/composer-unused:
