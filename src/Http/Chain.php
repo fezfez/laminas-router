@@ -9,7 +9,8 @@ use Laminas\Router\Exception;
 use Laminas\Router\PriorityList;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function array_diff_key;
@@ -26,6 +27,7 @@ use function strlen;
 /**
  * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
+ * @final
  */
 class Chain extends TreeRouteStack implements HttpRouteInterface
 {
@@ -62,6 +64,7 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -100,7 +103,8 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
      * @inheritDoc
      * @param int|null $pathOffset
      */
-    public function match(Request $request, $pathOffset = null, array $options = [])
+    #[Override]
+    public function match(RequestInterface $request, $pathOffset = null, array $options = [])
     {
         if (! method_exists($request, 'getUri')) {
             return null;
@@ -144,6 +148,7 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         if ($this->chainRoutes !== null) {
@@ -175,6 +180,7 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return $this->assembledParams;

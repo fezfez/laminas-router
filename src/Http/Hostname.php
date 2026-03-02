@@ -6,8 +6,9 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\UriInterface;
+use Override;
 use Traversable;
 
 use function array_merge;
@@ -38,6 +39,7 @@ use function strlen;
  *      list<array{'literal', string, string|null}|array{'parameter', string}|array{'optional', array}>
  *     }
  * >
+ * @final
  */
 class Hostname implements HttpRouteInterface
 {
@@ -100,6 +102,7 @@ class Hostname implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -303,7 +306,8 @@ class Hostname implements HttpRouteInterface
     /**
      * @inheritDoc
      */
-    public function match(Request $request)
+    #[Override]
+    public function match(RequestInterface $request)
     {
         if (! method_exists($request, 'getUri')) {
             return null;
@@ -333,6 +337,7 @@ class Hostname implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         $this->assembledParams = [];
@@ -354,6 +359,7 @@ class Hostname implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return $this->assembledParams;

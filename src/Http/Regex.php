@@ -7,7 +7,8 @@ namespace Laminas\Router\Http;
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function array_merge;
@@ -25,6 +26,8 @@ use function strlen;
 
 /**
  * Regex route.
+ *
+ * @final
  */
 class Regex implements HttpRouteInterface
 {
@@ -76,6 +79,7 @@ class Regex implements HttpRouteInterface
      * @inheritDoc
      * @throws InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -106,7 +110,8 @@ class Regex implements HttpRouteInterface
      * @inheritDoc
      * @param int|null $pathOffset
      */
-    public function match(Request $request, $pathOffset = null)
+    #[Override]
+    public function match(RequestInterface $request, $pathOffset = null)
     {
         if (! method_exists($request, 'getUri')) {
             return null;
@@ -141,6 +146,7 @@ class Regex implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         $url                   = $this->spec;
@@ -163,6 +169,7 @@ class Regex implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return $this->assembledParams;

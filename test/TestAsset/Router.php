@@ -7,7 +7,7 @@ namespace LaminasTest\Router\TestAsset;
 
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteStackInterface;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 
 /**
  * @template TRoute of RouteInterface
@@ -26,7 +26,7 @@ final class Router implements RouteStackInterface
     /**
      * @inheritDoc
      */
-    public function match(Request $request)
+    public function match(RequestInterface $request)
     {
         return null;
     }

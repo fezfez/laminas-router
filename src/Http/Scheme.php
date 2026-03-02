@@ -6,7 +6,8 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function is_array;
@@ -15,6 +16,8 @@ use function sprintf;
 
 /**
  * Scheme route.
+ *
+ * @final
  */
 class Scheme implements HttpRouteInterface
 {
@@ -52,6 +55,7 @@ class Scheme implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -77,7 +81,8 @@ class Scheme implements HttpRouteInterface
     /**
      * @inheritDoc
      */
-    public function match(Request $request)
+    #[Override]
+    public function match(RequestInterface $request)
     {
         if (! method_exists($request, 'getUri')) {
             return null;
@@ -96,6 +101,7 @@ class Scheme implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         if (isset($options['uri'])) {
@@ -109,6 +115,7 @@ class Scheme implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return [];

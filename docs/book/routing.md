@@ -14,12 +14,12 @@ The base unit of routing is a `Route`:
 ```php
 namespace Laminas\Router;
 
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 
 interface RouteInterface
 {
     public static function factory(array $options = []);
-    public function match(Request $request);
+    public function match(RequestInterface $request);
     public function assemble(array $params = [], array $options = []);
 }
 ```

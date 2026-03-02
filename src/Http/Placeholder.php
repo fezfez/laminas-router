@@ -6,7 +6,8 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Stdlib\ArrayUtils;
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
+use Override;
 use Traversable;
 
 use function is_array;
@@ -14,6 +15,8 @@ use function sprintf;
 
 /**
  * Placeholder route.
+ *
+ * @final
  */
 class Placeholder implements HttpRouteInterface
 {
@@ -33,6 +36,7 @@ class Placeholder implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory($options = [])
     {
         if ($options instanceof Traversable) {
@@ -61,7 +65,8 @@ class Placeholder implements HttpRouteInterface
      * @inheritDoc
      * @param int|null $pathOffset
      */
-    public function match(Request $request, $pathOffset = null)
+    #[Override]
+    public function match(RequestInterface $request, $pathOffset = null)
     {
         return new HttpRouteMatch($this->defaults);
     }
@@ -69,6 +74,7 @@ class Placeholder implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function assemble(array $params = [], array $options = [])
     {
         return '';
@@ -77,6 +83,7 @@ class Placeholder implements HttpRouteInterface
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getAssembledParams()
     {
         return [];
