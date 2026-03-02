@@ -123,7 +123,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
     public function testTranslatorIsPassedThroughAssembleMethod(): void
     {
-        $translator = $this->createMock(TranslatorInterface::class);
+        $translator = $this->createStub(TranslatorInterface::class);
         $uri        = new HttpUri();
 
         $route = $this->createMock(HttpRouteInterface::class);
