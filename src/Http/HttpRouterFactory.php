@@ -11,9 +11,11 @@ use Laminas\ServiceManager\ServiceLocatorInterface;
 use Psr\Container\ContainerInterface;
 
 /**
- * @final
+ * @internal
+ * @psalm-internal LaminasTest\Router
+ * @psalm-internal Laminas\Router
  */
-class HttpRouterFactory implements FactoryInterface
+final class HttpRouterFactory implements FactoryInterface
 {
     use RouterConfigTrait;
 
@@ -28,7 +30,7 @@ class HttpRouterFactory implements FactoryInterface
         ContainerInterface $container,
         string $requestedName,
         ?array $options = null
-    ): RouteStackInterface {
+    ): TreeRouteStack {
         $config = $container->has('config') ? $container->get('config') : [];
 
         // Defaults

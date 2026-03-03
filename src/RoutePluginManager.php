@@ -125,26 +125,6 @@ class RoutePluginManager extends AbstractPluginManager
     }
 
     /**
-     * Validate a route plugin. (v2)
-     *
-     * @param InstanceType $plugin
-     * @throws Exception\RuntimeException
-     * @psalm-assert InstanceType $instance
-     */
-    public function validatePlugin($plugin)
-    {
-        try {
-            $this->validate($plugin);
-        } catch (InvalidServiceException $e) {
-            throw new Exception\RuntimeException(
-                $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
-    }
-
-    /**
      * Pre-process configuration. (v3)
      *
      * Checks for invokables, and, if found, maps them to the
