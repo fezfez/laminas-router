@@ -6,6 +6,7 @@ namespace LaminasTest\Router\Http\TestAsset;
 
 use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\HttpRouteMatch;
+use Laminas\Router\RouteMatch;
 use Laminas\Stdlib\RequestInterface;
 
 /**
@@ -18,15 +19,16 @@ class DummyRoute implements HttpRouteInterface
      */
     public function match(
         RequestInterface $request,
-        int|null $pathOffset = null
-    ) {
+        int|null $pathOffset = null,
+        array $options = []
+    ): RouteMatch {
         return new HttpRouteMatch(['offset' => $pathOffset], -4);
     }
 
     /**
      * @inheritDoc
      */
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): mixed
     {
         return '';
     }
@@ -34,7 +36,7 @@ class DummyRoute implements HttpRouteInterface
     /**
      * @inheritDoc
      */
-    public static function factory($options = [])
+    public static function factory(iterable $options = []): static
     {
         return new static();
     }
@@ -42,7 +44,7 @@ class DummyRoute implements HttpRouteInterface
     /**
      * @inheritDoc
      */
-    public function getAssembledParams()
+    public function getAssembledParams(): array
     {
         return [];
     }

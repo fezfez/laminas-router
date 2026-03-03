@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
 use Override;
 use Traversable;
 
 use function is_array;
-use function sprintf;
 
 /**
  * Placeholder route.
@@ -23,10 +23,8 @@ class Placeholder implements HttpRouteInterface
     /**
      * @internal
      * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     *
-     * @var int|null
      */
-    public $priority;
+    public int|null $priority = null;
 
     public function __construct(private readonly array $defaults)
     {
@@ -37,17 +35,10 @@ class Placeholder implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory($options = [])
+    public static function factory(iterable $options = []): static
     {
         if ($options instanceof Traversable) {
             $options = ArrayUtils::iteratorToArray($options);
-        }
-
-        if (! is_array($options)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                '%s expects an array or Traversable set of options',
-                __METHOD__
-            ));
         }
 
         if (! isset($options['defaults'])) {
@@ -63,11 +54,13 @@ class Placeholder implements HttpRouteInterface
 
     /**
      * @inheritDoc
-     * @param int|null $pathOffset
      */
     #[Override]
-    public function match(RequestInterface $request, $pathOffset = null)
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): HttpRouteMatch|null {
         return new HttpRouteMatch($this->defaults);
     }
 
@@ -75,7 +68,7 @@ class Placeholder implements HttpRouteInterface
      * @inheritDoc
      */
     #[Override]
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): string
     {
         return '';
     }
@@ -84,7 +77,7 @@ class Placeholder implements HttpRouteInterface
      * @inheritDoc
      */
     #[Override]
-    public function getAssembledParams()
+    public function getAssembledParams(): array
     {
         return [];
     }

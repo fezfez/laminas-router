@@ -6,20 +6,19 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\InvalidArgumentException;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
 use Override;
 use Traversable;
 
 use function array_merge;
-use function is_array;
 use function is_int;
 use function is_numeric;
 use function method_exists;
 use function preg_match;
 use function rawurldecode;
 use function rawurlencode;
-use function sprintf;
 use function str_contains;
 use function str_replace;
 use function strlen;
@@ -32,47 +31,35 @@ use function strlen;
 class Regex implements HttpRouteInterface
 {
     /**
-     * Default values.
-     *
-     * @var array
-     */
-    protected $defaults;
-
-    /**
      * List of assembled parameters.
-     *
-     * @var array
      */
-    protected $assembledParams = [];
+    protected array $assembledParams = [];
 
     /**
      * @internal
      * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     *
-     * @var int|null
      */
-    public $priority;
+    public int|null $priority = null;
 
     /**
      * Create a new regex route.
-     *
-     * @param  string $regex
-     * @param  string $spec
      */
     public function __construct(
         /**
          * Regex to match.
          */
-        protected $regex,
+        protected string $regex,
         /**
          * Specification for URL assembly.
          *
          * Parameters accepting substitutions should be denoted as "%key%"
          */
-        protected $spec,
-        array $defaults = []
+        protected string $spec,
+        /**
+         * Default values.
+         */
+        protected array $defaults = []
     ) {
-        $this->defaults = $defaults;
     }
 
     /**
@@ -80,15 +67,10 @@ class Regex implements HttpRouteInterface
      * @throws InvalidArgumentException
      */
     #[Override]
-    public static function factory($options = [])
+    public static function factory(iterable $options = []): static
     {
         if ($options instanceof Traversable) {
             $options = ArrayUtils::iteratorToArray($options);
-        } elseif (! is_array($options)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                '%s expects an array or Traversable set of options',
-                __METHOD__
-            ));
         }
 
         if (! isset($options['regex'])) {
@@ -108,10 +90,9 @@ class Regex implements HttpRouteInterface
 
     /**
      * @inheritDoc
-     * @param int|null $pathOffset
      */
     #[Override]
-    public function match(RequestInterface $request, $pathOffset = null)
+    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
             return null;
@@ -121,9 +102,9 @@ class Regex implements HttpRouteInterface
         $path = $uri->getPath();
 
         if ($pathOffset !== null) {
-            $result = preg_match('(\G' . $this->regex . ')', $path, $matches, 0, $pathOffset);
+            $result = preg_match('(\G' . $this->regex . ')', (string) $path, $matches, 0, $pathOffset);
         } else {
-            $result = preg_match('(^' . $this->regex . '$)', $path, $matches);
+            $result = preg_match('(^' . $this->regex . '$)', (string) $path, $matches);
         }
 
         if (! $result) {
@@ -147,7 +128,7 @@ class Regex implements HttpRouteInterface
      * @inheritDoc
      */
     #[Override]
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): mixed
     {
         $url                   = $this->spec;
         $mergedParams          = array_merge($this->defaults, $params);
@@ -170,7 +151,7 @@ class Regex implements HttpRouteInterface
      * @inheritDoc
      */
     #[Override]
-    public function getAssembledParams()
+    public function getAssembledParams(): array
     {
         return $this->assembledParams;
     }

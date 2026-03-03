@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
 use Override;
@@ -13,10 +14,9 @@ use Traversable;
 use function array_map;
 use function explode;
 use function in_array;
-use function is_array;
 use function method_exists;
-use function sprintf;
 use function strtoupper;
+use function trim;
 
 /**
  * Method route.
@@ -26,33 +26,24 @@ use function strtoupper;
 class Method implements HttpRouteInterface
 {
     /**
-     * Default values.
-     *
-     * @var array
-     */
-    protected $defaults;
-
-    /**
      * @internal
      * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     *
-     * @var int|null
      */
-    public $priority;
+    public int|null $priority = null;
 
     /**
      * Create a new method route.
-     *
-     * @param  string $verb
      */
     public function __construct(
         /**
          * Verb to match.
          */
-        protected $verb,
-        array $defaults = []
+        protected string $verb,
+        /**
+         * Default values.
+         */
+        protected array $defaults = []
     ) {
-        $this->defaults = $defaults;
     }
 
     /**
@@ -60,15 +51,10 @@ class Method implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory($options = [])
+    public static function factory(iterable $options = []): static
     {
         if ($options instanceof Traversable) {
             $options = ArrayUtils::iteratorToArray($options);
-        } elseif (! is_array($options)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                '%s expects an array or Traversable set of options',
-                __METHOD__
-            ));
         }
 
         if (! isset($options['verb'])) {
@@ -86,15 +72,15 @@ class Method implements HttpRouteInterface
      * @inheritDoc
      */
     #[Override]
-    public function match(RequestInterface $request)
+    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getMethod')) {
             return null;
         }
 
-        $requestVerb = strtoupper($request->getMethod());
+        $requestVerb = strtoupper((string) $request->getMethod());
         $matchVerbs  = explode(',', strtoupper($this->verb));
-        $matchVerbs  = array_map('trim', $matchVerbs);
+        $matchVerbs  = array_map(trim(...), $matchVerbs);
 
         if (in_array($requestVerb, $matchVerbs)) {
             return new HttpRouteMatch($this->defaults);
@@ -107,7 +93,7 @@ class Method implements HttpRouteInterface
      * @inheritDoc
      */
     #[Override]
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): string
     {
         // The request method does not contribute to the path, thus nothing is returned.
         return '';
@@ -117,7 +103,7 @@ class Method implements HttpRouteInterface
      * @inheritDoc
      */
     #[Override]
-    public function getAssembledParams()
+    public function getAssembledParams(): array
     {
         return [];
     }

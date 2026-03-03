@@ -28,21 +28,13 @@ final class FactoryTester
 
     /**
      * Test a factory.
+     *
+     * @psalm-param class-string $classname
      */
     public function testFactory(string $classname, array $requiredOptions, array $options): void
     {
-        $factory = sprintf('%s::factory', $classname);
-
-        // Test that the factory does not allow a scalar option.
-        try {
-            $factory(0);
-            $this->testCase->fail('An expected exception was not thrown');
-        } catch (InvalidArgumentException $e) {
-            $this->testCase->assertStringContainsString(
-                'factory expects an array or Traversable set of options',
-                $e->getMessage()
-            );
-        }
+        $testCase = $this->testCase; // hack for phpcs ...
+        $factory  = sprintf('%s::factory', $classname);
 
         // Test required options.
         foreach ($requiredOptions as $option => $exceptionMessage) {
@@ -52,16 +44,16 @@ final class FactoryTester
 
             try {
                 $factory($testOptions);
-                $this->testCase->fail('An expected exception was not thrown');
+                $testCase::fail('An expected exception was not thrown');
             } catch (InvalidArgumentException $e) {
-                $this->testCase->assertStringContainsString($exceptionMessage, $e->getMessage());
+                $testCase::assertStringContainsString($exceptionMessage, $e->getMessage());
             }
         }
 
         // Create the route, will throw an exception if something goes wrong.
-        $factory($options);
+        $testCase::assertInstanceOf($classname, $factory($options));
 
         // Try the same with an iterator.
-        $factory(new ArrayIterator($options));
+        $testCase::assertInstanceOf($classname, $factory(new ArrayIterator($options)));
     }
 }

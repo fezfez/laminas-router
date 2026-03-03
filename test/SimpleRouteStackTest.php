@@ -35,15 +35,6 @@ final class SimpleRouteStackTest extends TestCase
         ]);
     }
 
-    public function testAddRoutesWithInvalidArgument(): void
-    {
-        $stack = new SimpleRouteStack();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('addRoutes expects an array or Traversable set of routes');
-        $stack->addRoutes('foo');
-    }
-
     public function testAddRoutesAsArray(): void
     {
         $stack = new SimpleRouteStack();
@@ -62,15 +53,6 @@ final class SimpleRouteStackTest extends TestCase
         ]));
 
         $this->assertInstanceOf(RouteMatch::class, $stack->match(new Request()));
-    }
-
-    public function testSetRoutesWithInvalidArgument(): void
-    {
-        $stack = new SimpleRouteStack();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('addRoutes expects an array or Traversable set of routes');
-        $stack->setRoutes('foo');
     }
 
     public function testSetRoutesAsArray(): void
@@ -110,16 +92,6 @@ final class SimpleRouteStackTest extends TestCase
 
         $this->assertEquals($stack, $stack->removeRoute('foo'));
         $this->assertNull($stack->match(new Request()));
-    }
-
-    public function testAddRouteWithInvalidArgument(): void
-    {
-        $stack = new SimpleRouteStack();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Route definition must be an array or Traversable object');
-        /** @psalm-suppress InvalidArgument we're explicitly verifying runtime type checks here */
-        $stack->addRoute('foo', 'bar');
     }
 
     public function testAddRouteAsArrayWithoutOptions(): void

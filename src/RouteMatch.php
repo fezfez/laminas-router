@@ -12,34 +12,25 @@ use function array_key_exists;
 class RouteMatch
 {
     /**
-     * Match parameters.
-     *
-     * @var array
-     */
-    protected $params = [];
-
-    /**
      * Matched route name.
-     *
-     * @var string
      */
-    protected $matchedRouteName;
+    protected string|null $matchedRouteName = null;
 
     /**
      * Create a RouteMatch with given parameters.
      */
-    public function __construct(array $params)
-    {
-        $this->params = $params;
+    public function __construct(
+        /**
+         * Match parameters.
+         */
+        protected array $params
+    ) {
     }
 
     /**
      * Set name of matched route.
-     *
-     * @param  string $name
-     * @return RouteMatch
      */
-    public function setMatchedRouteName($name)
+    public function setMatchedRouteName(string $name): static
     {
         $this->matchedRouteName = $name;
         return $this;
@@ -47,22 +38,16 @@ class RouteMatch
 
     /**
      * Get name of matched route.
-     *
-     * @return string
      */
-    public function getMatchedRouteName()
+    public function getMatchedRouteName(): string|null
     {
         return $this->matchedRouteName;
     }
 
     /**
      * Set a parameter.
-     *
-     * @param  string $name
-     * @param  mixed  $value
-     * @return RouteMatch
      */
-    public function setParam($name, $value)
+    public function setParam(string $name, mixed $value): static
     {
         $this->params[$name] = $value;
         return $this;
@@ -70,22 +55,16 @@ class RouteMatch
 
     /**
      * Get all parameters.
-     *
-     * @return array
      */
-    public function getParams()
+    public function getParams(): array
     {
         return $this->params;
     }
 
     /**
      * Get a specific parameter.
-     *
-     * @param  string $name
-     * @param  mixed  $default
-     * @return mixed
      */
-    public function getParam($name, $default = null)
+    public function getParam(string $name, mixed $default = null): mixed
     {
         if (array_key_exists($name, $this->params)) {
             return $this->params[$name];

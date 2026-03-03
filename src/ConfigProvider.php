@@ -30,7 +30,7 @@ class ConfigProvider
      *
      * @return RouterConfigShape
      */
-    public function __invoke()
+    public function __invoke(): array
     {
         return [
             'dependencies' => $this->getDependencyConfig(),
@@ -42,7 +42,7 @@ class ConfigProvider
      *
      * @return ServiceManagerConfiguration
      */
-    public function getDependencyConfig()
+    public function getDependencyConfig(): array
     {
         return [
             'aliases'   => [

@@ -15,7 +15,7 @@ final class DummyRouteWithParam extends DummyRoute
     /**
      * @inheritDoc
      */
-    public function match(RequestInterface $request)
+    public function match(RequestInterface $request): RouteMatch
     {
         return new RouteMatch(['foo' => 'bar']);
     }
@@ -23,7 +23,7 @@ final class DummyRouteWithParam extends DummyRoute
     /**
      * @inheritDoc
      */
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): mixed
     {
         return $params['foo'] ?? '';
     }

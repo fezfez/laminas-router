@@ -15,28 +15,21 @@ interface RouteInterface
      * Priority used for route stacks.
      *
      * @var int
-     * public $priority;
+     * public int|null $priority = null;
      */
 
     /**
      * Create a new route with given options.
-     *
-     * @param iterable $options
-     * @return RouteInterface
      */
-    public static function factory($options = []);
+    public static function factory(iterable $options = []): static;
 
     /**
      * Match a given request.
-     *
-     * @return RouteMatch|null
      */
-    public function match(RequestInterface $request);
+    public function match(RequestInterface $request): RouteMatch|null;
 
     /**
      * Assemble the route.
-     *
-     * @return mixed
      */
-    public function assemble(array $params = [], array $options = []);
+    public function assemble(array $params = [], array $options = []): mixed;
 }

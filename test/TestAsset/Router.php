@@ -18,7 +18,7 @@ final class Router implements RouteStackInterface
     /**
      * @inheritDoc
      */
-    public static function factory($options = [])
+    public static function factory(iterable $options = []): static
     {
         return new static();
     }
@@ -26,7 +26,7 @@ final class Router implements RouteStackInterface
     /**
      * @inheritDoc
      */
-    public function match(RequestInterface $request)
+    public function match(RequestInterface $request): null
     {
         return null;
     }
@@ -34,31 +34,31 @@ final class Router implements RouteStackInterface
     /**
      * @inheritDoc
      */
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): null
     {
         return null;
     }
 
     /** @inheritDoc */
-    public function addRoute($name, $route, $priority = null)
+    public function addRoute(string $name, iterable|RouteInterface $route, ?int $priority = null): static
     {
         return $this;
     }
 
     /** @inheritDoc */
-    public function addRoutes($routes)
+    public function addRoutes(iterable $routes): static
     {
         return $this;
     }
 
     /** @inheritDoc */
-    public function removeRoute($name)
+    public function removeRoute(string $name): static
     {
         return $this;
     }
 
     /** @inheritDoc */
-    public function setRoutes($routes)
+    public function setRoutes(iterable $routes): static
     {
         return $this;
     }

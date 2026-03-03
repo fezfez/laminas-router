@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
 use Override;
 use Traversable;
 
-use function is_array;
 use function method_exists;
-use function sprintf;
 use function strlen;
 use function strpos;
 
@@ -24,33 +23,24 @@ use function strpos;
 class Literal implements HttpRouteInterface
 {
     /**
-     * Default values.
-     *
-     * @var array
-     */
-    protected $defaults;
-
-    /**
      * @internal
      * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     *
-     * @var int|null
      */
-    public $priority;
+    public int|null $priority = null;
 
     /**
      * Create a new literal route.
-     *
-     * @param  string $route
      */
     public function __construct(
         /**
          * RouteInterface to match.
          */
-        protected $route,
-        array $defaults = []
+        protected string $route,
+        /**
+         * Default values.
+         */
+        protected array $defaults = []
     ) {
-        $this->defaults = $defaults;
     }
 
     /**
@@ -58,15 +48,10 @@ class Literal implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory($options = [])
+    public static function factory(iterable $options = []): static
     {
         if ($options instanceof Traversable) {
             $options = ArrayUtils::iteratorToArray($options);
-        } elseif (! is_array($options)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                '%s expects an array or Traversable set of options',
-                __METHOD__
-            ));
         }
 
         if (! isset($options['route'])) {
@@ -82,10 +67,9 @@ class Literal implements HttpRouteInterface
 
     /**
      * @inheritDoc
-     * @param int|null $pathOffset
      */
     #[Override]
-    public function match(RequestInterface $request, $pathOffset = null)
+    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
             return null;
@@ -96,7 +80,7 @@ class Literal implements HttpRouteInterface
 
         if ($pathOffset !== null) {
             if ($pathOffset >= 0 && strlen((string) $path) >= $pathOffset && ! empty($this->route)) {
-                if (strpos($path, $this->route, $pathOffset) === $pathOffset) {
+                if (strpos((string) $path, $this->route, $pathOffset) === $pathOffset) {
                     return new HttpRouteMatch($this->defaults, strlen($this->route));
                 }
             }
@@ -115,7 +99,7 @@ class Literal implements HttpRouteInterface
      * @inheritDoc
      */
     #[Override]
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): mixed
     {
         return $this->route;
     }
@@ -124,7 +108,7 @@ class Literal implements HttpRouteInterface
      * @inheritDoc
      */
     #[Override]
-    public function getAssembledParams()
+    public function getAssembledParams(): array
     {
         return [];
     }

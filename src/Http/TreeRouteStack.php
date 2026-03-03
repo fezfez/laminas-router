@@ -6,6 +6,8 @@ namespace Laminas\Router\Http;
 
 use ArrayObject;
 use Laminas\Router\Exception;
+use Laminas\Router\RouteInterface;
+use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\Stdlib\ArrayUtils;
@@ -33,17 +35,13 @@ class TreeRouteStack extends SimpleRouteStack
 {
     /**
      * Base URL.
-     *
-     * @var string
      */
-    protected $baseUrl;
+    protected string|null $baseUrl = null;
 
     /**
      * Request URI.
-     *
-     * @var HttpUri
      */
-    protected $requestUri;
+    protected HttpUri|null $requestUri = null;
 
     /**
      * Prototype routes.
@@ -53,20 +51,20 @@ class TreeRouteStack extends SimpleRouteStack
      *
      * @var ArrayObject<string, TRoute>
      */
-    protected $prototypes;
+    protected ArrayObject $prototypes;
 
     /**
      * @internal
      * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     *
-     * @var int|null
      */
-    public $priority;
+    public int|null $priority = null;
 
-    public function __construct(?RoutePluginManager $routePluginManager = null)
-    {
+    public function __construct(
+        ?RoutePluginManager $routePluginManager = null,
+        ?ArrayObject $prototypes = null
+    ) {
         /** @var ArrayObject<string, TRoute> $this->prototypes */
-        $this->prototypes = new ArrayObject();
+        $this->prototypes = $prototypes ?? new ArrayObject();
         parent::__construct($routePluginManager);
     }
 
@@ -75,17 +73,10 @@ class TreeRouteStack extends SimpleRouteStack
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory($options = [])
+    public static function factory(iterable $options = []): static
     {
         if ($options instanceof Traversable) {
             $options = ArrayUtils::iteratorToArray($options);
-        }
-
-        if (! is_array($options)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                '%s expects an array or Traversable set of options',
-                __METHOD__
-            ));
         }
 
         $instance = parent::factory($options);
@@ -101,8 +92,11 @@ class TreeRouteStack extends SimpleRouteStack
      * @inheritDoc
      */
     #[Override]
-    public function addRoute($name, $route, $priority = null)
+    public function addRoute(string|int $name, int|string|iterable|RouteInterface $route, ?int $priority = null): static
     {
+        if (! $route instanceof HttpRouteInterface && $route instanceof RouteInterface) {
+            throw new Exception\InvalidArgumentException('Route definition must be an array or Traversable object');
+        }
         if (! $route instanceof HttpRouteInterface) {
             $route = $this->routeFromArray($route);
         }
@@ -119,7 +113,7 @@ class TreeRouteStack extends SimpleRouteStack
      * @throws Exception\RuntimeException         When a generated routes does not implement the HTTP route interface.
      */
     #[Override]
-    protected function routeFromArray($specs)
+    protected function routeFromArray(string|iterable $specs): RouteInterface
     {
         if (is_string($specs)) {
             if (null === ($route = $this->getPrototype($specs))) {
@@ -129,8 +123,6 @@ class TreeRouteStack extends SimpleRouteStack
             return $route;
         } elseif ($specs instanceof Traversable) {
             $specs = ArrayUtils::iteratorToArray($specs);
-        } elseif (! is_array($specs)) {
-            throw new Exception\InvalidArgumentException('Route definition must be an array or Traversable object');
         }
 
         if (isset($specs['chain_routes'])) {
@@ -185,12 +177,8 @@ class TreeRouteStack extends SimpleRouteStack
      * @return $this
      * @throws Exception\InvalidArgumentException
      */
-    public function addPrototypes($routes)
+    public function addPrototypes(iterable $routes): static
     {
-        if (! is_array($routes) && ! $routes instanceof Traversable) {
-            throw new Exception\InvalidArgumentException('addPrototypes expects an array or Traversable set of routes');
-        }
-
         foreach ($routes as $name => $route) {
             $this->addPrototype($name, $route);
         }
@@ -201,11 +189,9 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Add a prototype.
      *
-     * @param string                 $name
      * @param string|iterable|TRoute $route
-     * @return $this
      */
-    public function addPrototype($name, $route)
+    public function addPrototype(string $name, string|iterable|RouteInterface $route): static
     {
         if (! $route instanceof HttpRouteInterface) {
             $route = $this->routeFromArray($route);
@@ -219,10 +205,9 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Get a prototype.
      *
-     * @param  string $name
      * @return TRoute|null
      */
-    public function getPrototype($name)
+    public function getPrototype(string $name): ?RouteInterface
     {
         return $this->prototypes[$name] ?? null;
     }
@@ -232,8 +217,11 @@ class TreeRouteStack extends SimpleRouteStack
      * @param int|null $pathOffset
      */
     #[Override]
-    public function match(RequestInterface $request, $pathOffset = null, array $options = [])
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?RouteMatch {
         if (! method_exists($request, 'getUri')) {
             return null;
         }
@@ -260,10 +248,8 @@ class TreeRouteStack extends SimpleRouteStack
         }
 
         foreach ($this->routes as $name => $route) {
-            if (
-                ($match = $route->match($request, $baseUrlLength, $options)) instanceof RouteMatch
-                && ($pathLength === null || $match->getLength() === $pathLength)
-            ) {
+            $match = $route->match($request, $baseUrlLength, $options);
+            if ($match instanceof HttpRouteMatch && ($pathLength === null || $match->getLength() === $pathLength)) {
                 $match->setMatchedRouteName($name);
 
                 foreach ($this->defaultParams as $paramName => $value) {
@@ -285,7 +271,7 @@ class TreeRouteStack extends SimpleRouteStack
      * @throws Exception\RuntimeException
      */
     #[Override]
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): mixed
     {
         if (! isset($options['name'])) {
             throw new Exception\InvalidArgumentException('Missing "name" option');
@@ -382,11 +368,8 @@ class TreeRouteStack extends SimpleRouteStack
 
     /**
      * Set the base URL.
-     *
-     * @param  string $baseUrl
-     * @return self
      */
-    public function setBaseUrl($baseUrl)
+    public function setBaseUrl(string $baseUrl): static
     {
         $this->baseUrl = rtrim($baseUrl, '/');
         return $this;
@@ -394,20 +377,16 @@ class TreeRouteStack extends SimpleRouteStack
 
     /**
      * Get the base URL.
-     *
-     * @return string
      */
-    public function getBaseUrl()
+    public function getBaseUrl(): ?string
     {
         return $this->baseUrl;
     }
 
     /**
      * Set the request URI.
-     *
-     * @return TreeRouteStack
      */
-    public function setRequestUri(HttpUri $uri)
+    public function setRequestUri(HttpUri $uri): static
     {
         $this->requestUri = $uri;
         return $this;
@@ -415,10 +394,8 @@ class TreeRouteStack extends SimpleRouteStack
 
     /**
      * Get the request URI.
-     *
-     * @return HttpUri
      */
-    public function getRequestUri()
+    public function getRequestUri(): ?HttpUri
     {
         return $this->requestUri;
     }

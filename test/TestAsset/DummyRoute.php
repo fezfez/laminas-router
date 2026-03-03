@@ -22,7 +22,7 @@ class DummyRoute implements RouteInterface
     /**
      * @inheritDoc
      */
-    public function match(RequestInterface $request)
+    public function match(RequestInterface $request): RouteMatch
     {
         return new RouteMatch([]);
     }
@@ -30,7 +30,7 @@ class DummyRoute implements RouteInterface
     /**
      * @inheritDoc
      */
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): mixed
     {
         return '';
     }
@@ -38,7 +38,7 @@ class DummyRoute implements RouteInterface
     /**
      * @inheritDoc
      */
-    public static function factory($options = [])
+    public static function factory(iterable $options = []): static
     {
         return new static();
     }
