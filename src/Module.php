@@ -21,7 +21,7 @@ class Module
         $provider = new ConfigProvider();
         return [
             'service_manager' => $provider->getDependencyConfig(),
-            'route_manager'   => $provider->getRouteManagerConfig(),
+            'route_manager'   => [],
             'router'          => ['routes' => []],
         ];
     }

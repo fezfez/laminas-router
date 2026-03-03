@@ -19,7 +19,6 @@ use Laminas\ServiceManager\ServiceManager;
  * @psalm-import-type ServiceManagerConfiguration from ServiceManager
  * @psalm-type RouterConfigShape = array{
  *      dependencies: ServiceManagerConfiguration,
- *      route_manager: array
  *  }
  *
  * @final
@@ -34,8 +33,7 @@ class ConfigProvider
     public function __invoke()
     {
         return [
-            'dependencies'  => $this->getDependencyConfig(),
-            'route_manager' => $this->getRouteManagerConfig(),
+            'dependencies' => $this->getDependencyConfig(),
         ];
     }
 
@@ -59,15 +57,5 @@ class ConfigProvider
                 RouteStackInterface::class => RouterFactory::class,
             ],
         ];
-    }
-
-    /**
-     * Provide default route plugin manager configuration.
-     *
-     * @return array
-     */
-    public function getRouteManagerConfig()
-    {
-        return [];
     }
 }
