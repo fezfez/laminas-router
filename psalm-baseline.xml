@@ -403,12 +403,9 @@
       <code><![CDATA[is_array($options)]]></code>
       <code><![CDATA[is_array($specs)]]></code>
     </DocblockTypeContradiction>
-    <InvalidReturnStatement>
+    <LessSpecificReturnStatement>
       <code><![CDATA[$route]]></code>
-    </InvalidReturnStatement>
-    <InvalidReturnType>
-      <code><![CDATA[TRoute]]></code>
-    </InvalidReturnType>
+    </LessSpecificReturnStatement>
     <MixedArgument>
       <code><![CDATA[$name]]></code>
       <code><![CDATA[$options['fragment']]]></code>
@@ -438,6 +435,9 @@
       <code><![CDATA[$route->assemble(array_merge($this->defaultParams, $params), $options)]]></code>
       <code><![CDATA[$route->assemble(array_merge($this->defaultParams, $params), $options)]]></code>
     </MixedOperand>
+    <MoreSpecificReturnType>
+      <code><![CDATA[TRoute]]></code>
+    </MoreSpecificReturnType>
     <NoInterfaceProperties>
       <code><![CDATA[$route->priority]]></code>
       <code><![CDATA[$route->priority]]></code>
@@ -486,15 +486,9 @@
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/RoutePluginManager.php">
-    <MissingReturnType>
-      <code><![CDATA[validatePlugin]]></code>
-    </MissingReturnType>
     <MixedArgument>
       <code><![CDATA[$config['factories']]]></code>
     </MixedArgument>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[validatePlugin]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/RouteStackInterface.php">
     <PossiblyUnusedReturnValue>
@@ -612,26 +606,6 @@
     </MixedAssignment>
   </file>
   <file src="test/Http/PartTest.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[new RoutePluginManager(new ServiceManager())]]></code>
-    </ArgumentTypeCoercion>
-    <LessSpecificReturnStatement>
-      <code><![CDATA[new RoutePluginManager(new ServiceManager(), [
-            'aliases'   => [
-                'literal' => Literal::class,
-                'Literal' => Literal::class,
-                'part'    => Part::class,
-                'Part'    => Part::class,
-                'segment' => Segment::class,
-                'Segment' => Segment::class,
-            ],
-            'factories' => [
-                Literal::class => RouteInvokableFactory::class,
-                Part::class    => RouteInvokableFactory::class,
-                Segment::class => RouteInvokableFactory::class,
-            ],
-        ])]]></code>
-    </LessSpecificReturnStatement>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$key]]></code>
     </MixedArgumentTypeCoercion>
@@ -639,9 +613,6 @@
       <code><![CDATA[$result]]></code>
       <code><![CDATA[$value]]></code>
     </MixedAssignment>
-    <MoreSpecificReturnType>
-      <code><![CDATA[RoutePluginManager<HttpRouteInterface>]]></code>
-    </MoreSpecificReturnType>
   </file>
   <file src="test/Http/RegexTest.php">
     <MixedArgumentTypeCoercion>
@@ -687,20 +658,9 @@
     </UnsafeInstantiation>
   </file>
   <file src="test/Http/TreeRouteStackTest.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[$plugins]]></code>
-    </ArgumentTypeCoercion>
     <InvalidArgument>
       <code><![CDATA['bar']]></code>
     </InvalidArgument>
-    <LessSpecificReturnStatement>
-      <code><![CDATA[new RoutePluginManager(new ServiceManager(), [
-            'invokables' => [
-                TestAsset\DummyRoute::class          => TestAsset\DummyRoute::class,
-                TestAsset\DummyRouteWithParam::class => TestAsset\DummyRouteWithParam::class,
-            ],
-        ])]]></code>
-    </LessSpecificReturnStatement>
     <MixedAssignment>
       <code><![CDATA[$routes]]></code>
     </MixedAssignment>
@@ -710,9 +670,6 @@
     <MixedPropertyFetch>
       <code><![CDATA[$routes->get('foo')->priority]]></code>
     </MixedPropertyFetch>
-    <MoreSpecificReturnType>
-      <code><![CDATA[RoutePluginManager<HttpRouteInterface>]]></code>
-    </MoreSpecificReturnType>
     <PossiblyNullReference>
       <code><![CDATA[getParam]]></code>
       <code><![CDATA[getParam]]></code>

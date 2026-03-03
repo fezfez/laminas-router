@@ -63,9 +63,6 @@ class TreeRouteStack extends SimpleRouteStack
      */
     public $priority;
 
-    /**
-     * @param RoutePluginManager<TRoute>|null $routePluginManager
-     */
     public function __construct(?RoutePluginManager $routePluginManager = null)
     {
         /** @var ArrayObject<string, TRoute> $this->prototypes */

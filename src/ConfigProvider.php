@@ -52,11 +52,6 @@ class ConfigProvider
                 'router'             => RouteStackInterface::class,
                 'Router'             => RouteStackInterface::class,
                 'RoutePluginManager' => RoutePluginManager::class,
-
-                // Legacy Zend Framework aliases
-                'Zend\Router\Http\TreeRouteStack' => Http\TreeRouteStack::class,
-                'Zend\Router\RoutePluginManager'  => RoutePluginManager::class,
-                'Zend\Router\RouteStackInterface' => RouteStackInterface::class,
             ],
             'factories' => [
                 Http\TreeRouteStack::class => Http\HttpRouterFactory::class,

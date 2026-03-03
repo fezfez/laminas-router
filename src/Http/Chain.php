@@ -48,7 +48,6 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
     /**
      * Create a new part route.
      *
-     * @param RoutePluginManager<TRoute>       $routePlugins
      * @param ArrayObject<string, TRoute>|null $prototypes
      */
     public function __construct(array $routes, RoutePluginManager $routePlugins, ?ArrayObject $prototypes = null)

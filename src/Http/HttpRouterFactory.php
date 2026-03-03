@@ -12,6 +12,7 @@ use Psr\Container\ContainerInterface;
 
 /**
  * @internal
+ *
  * @psalm-internal LaminasTest\Router
  * @psalm-internal Laminas\Router
  */
@@ -30,7 +31,7 @@ final class HttpRouterFactory implements FactoryInterface
         ContainerInterface $container,
         string $requestedName,
         ?array $options = null
-    ): TreeRouteStack {
+    ): RouteStackInterface {
         $config = $container->has('config') ? $container->get('config') : [];
 
         // Defaults

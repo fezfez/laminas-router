@@ -10,7 +10,6 @@ use Laminas\Http\Request;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\Hostname;
-use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\TreeRouteStack;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
@@ -23,9 +22,6 @@ use ReflectionClass;
 
 final class TreeRouteStackTest extends TestCase
 {
-    /**
-     * @return RoutePluginManager<HttpRouteInterface>
-     */
     private function createRoutePluginManager(): RoutePluginManager
     {
         return new RoutePluginManager(new ServiceManager(), [
@@ -48,8 +44,6 @@ final class TreeRouteStackTest extends TestCase
 
     public function testAddRouteViaStringRequiresHttpSpecificRoute(): void
     {
-        // phpcs:disable SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration.MissingVariable
-        /** @var RoutePluginManager<HttpRouteInterface> $routePlugins */
         $plugins = new RoutePluginManager(new ServiceManager(), [
             'invokables' => [
                 DummyRoute::class => DummyRoute::class,

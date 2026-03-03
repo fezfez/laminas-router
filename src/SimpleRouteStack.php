@@ -32,7 +32,7 @@ class SimpleRouteStack implements RouteStackInterface
     /**
      * Route plugin manager
      *
-     * @var RoutePluginManager<TRoute>
+     * @var RoutePluginManager
      */
     protected $routePluginManager;
 
@@ -43,14 +43,10 @@ class SimpleRouteStack implements RouteStackInterface
      */
     protected $defaultParams = [];
 
-    /**
-     * @param RoutePluginManager<TRoute>|null $routePluginManager
-     */
     public function __construct(?RoutePluginManager $routePluginManager = null)
     {
         /** @var PriorityList<string, TRoute> $this->routes */
-        $this->routes = new PriorityList();
-        /** @var RoutePluginManager<TRoute> $this->routePluginManager */
+        $this->routes             = new PriorityList();
         $this->routePluginManager = $routePluginManager ?? new RoutePluginManager(new ServiceManager());
     }
 
@@ -86,26 +82,6 @@ class SimpleRouteStack implements RouteStackInterface
         }
 
         return $instance;
-    }
-
-    /**
-     * @param RoutePluginManager<TRoute> $routePlugins
-     * @return $this
-     */
-    public function setRoutePluginManager(RoutePluginManager $routePlugins)
-    {
-        $this->routePluginManager = $routePlugins;
-        return $this;
-    }
-
-    /**
-     * Get the route plugin manager.
-     *
-     * @return RoutePluginManager<TRoute>
-     */
-    public function getRoutePluginManager()
-    {
-        return $this->routePluginManager;
     }
 
     /** @inheritDoc */
@@ -238,7 +214,7 @@ class SimpleRouteStack implements RouteStackInterface
             $specs['options'] = [];
         }
 
-        $route = $this->getRoutePluginManager()->build($specs['type'], $specs['options']);
+        $route = $this->routePluginManager->build($specs['type'], $specs['options']);
 
         if (isset($specs['priority'])) {
             $route->priority = $specs['priority'];

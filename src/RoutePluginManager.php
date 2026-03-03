@@ -35,8 +35,7 @@ use function sprintf;
  *
  * @see ServiceManager for expected configuration shape
  *
- * @template InstanceType of RouteInterface
-* @extends AbstractPluginManager<RouteInterface>
+ * @extends AbstractPluginManager<RouteInterface>
  * @psalm-import-type ServiceManagerConfiguration from ServiceManager
  * @final
  */

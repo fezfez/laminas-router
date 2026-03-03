@@ -35,15 +35,6 @@ final class SimpleRouteStackTest extends TestCase
         ]);
     }
 
-    public function testSetRoutePluginManager(): void
-    {
-        $routes = new RoutePluginManager(new ServiceManager());
-        $stack  = new SimpleRouteStack();
-        $stack->setRoutePluginManager($routes);
-
-        $this->assertEquals($routes, $stack->getRoutePluginManager());
-    }
-
     public function testAddRoutesWithInvalidArgument(): void
     {
         $stack = new SimpleRouteStack();
