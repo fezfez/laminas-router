@@ -32,7 +32,7 @@ final class RoutePluginManagerFactoryTest extends TestCase
     {
         $options = [
             'factories' => [
-                'TestRoute' => fn($container): MockObject&RouteInterface => $this->createMock(RouteInterface::class),
+                'TestRoute' => fn(): MockObject&RouteInterface => $this->createMock(RouteInterface::class),
             ],
         ];
         $plugins = $this->factory->__invoke(

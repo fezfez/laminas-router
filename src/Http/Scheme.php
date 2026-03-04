@@ -6,19 +6,17 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
+use Laminas\Uri\Http;
 use Override;
-use Traversable;
 
+use function is_string;
 use function method_exists;
 
 /**
  * Scheme route.
- *
- * @final
  */
-class Scheme implements HttpRouteInterface
+final class Scheme implements HttpRouteInterface
 {
     /**
      * @internal
@@ -28,44 +26,38 @@ class Scheme implements HttpRouteInterface
 
     /**
      * Create a new scheme route.
+     *
+     * @param array<string, string> $defaults
      */
     public function __construct(
         /**
          * Scheme to match.
          */
-        protected string $scheme,
+        private readonly string $scheme,
         /**
          * Default values.
          */
-        protected array $defaults = []
+        private readonly array $defaults = []
     ) {
     }
 
     /**
-     * @inheritDoc
-     * @throws Exception\InvalidArgumentException
+     * @param array{'scheme'?:string, 'defaults'?: array<string, string>} $options
      */
     #[Override]
-    public static function factory(iterable $options = []): static
+    public static function factory(array $options = []): static
     {
-        if ($options instanceof Traversable) {
-            $options = ArrayUtils::iteratorToArray($options);
-        }
+        $scheme   = $options['scheme'] ?? null;
+        $defaults = $options['defaults'] ?? [];
 
-        if (! isset($options['scheme'])) {
+        if (! is_string($scheme) || $scheme === '') {
             throw new Exception\InvalidArgumentException('Missing "scheme" in options array');
         }
 
-        if (! isset($options['defaults'])) {
-            $options['defaults'] = [];
-        }
-
-        return new static($options['scheme'], $options['defaults']);
+        return new self($scheme, $defaults);
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
@@ -73,6 +65,7 @@ class Scheme implements HttpRouteInterface
             return null;
         }
 
+        /** @var Http $uri */
         $uri    = $request->getUri();
         $scheme = $uri->getScheme();
 
@@ -83,13 +76,11 @@ class Scheme implements HttpRouteInterface
         return new HttpRouteMatch($this->defaults);
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
-        if (isset($options['uri'])) {
+        if (isset($options['uri']) && $options['uri'] instanceof Http) {
             $options['uri']->setScheme($this->scheme);
         }
 
@@ -97,9 +88,7 @@ class Scheme implements HttpRouteInterface
         return '';
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function getAssembledParams(): array
     {

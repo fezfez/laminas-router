@@ -14,9 +14,7 @@ use Laminas\Stdlib\RequestInterface;
  */
 class DummyRoute implements HttpRouteInterface
 {
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -25,25 +23,19 @@ class DummyRoute implements HttpRouteInterface
         return new HttpRouteMatch(['offset' => $pathOffset], -4);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function assemble(array $params = [], array $options = []): mixed
+    /** @inheritDoc */
+    public function assemble(array $params = [], array $options = []): string
     {
         return '';
     }
 
-    /**
-     * @inheritDoc
-     */
-    public static function factory(iterable $options = []): static
+    /** @inheritDoc */
+    public static function factory(array $options = []): static
     {
         return new static();
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     public function getAssembledParams(): array
     {
         return [];

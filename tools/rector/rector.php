@@ -9,7 +9,7 @@ use Rector\Config\RectorConfig;
 return RectorConfig::configure()
     ->withPhpSets(php82: true)
     ->withPaths([
-        // __DIR__ . '/../../src', false positive
+         __DIR__ . '/../../src',
         __DIR__ . '/../../test',
     ])
     ->withPreparedSets(

@@ -7,14 +7,14 @@ namespace Laminas\Router\Http;
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
+use Laminas\Uri\Http;
 use Override;
-use Traversable;
 
 use function array_merge;
-use function is_int;
-use function is_numeric;
+use function assert;
+use function is_array;
+use function is_string;
 use function method_exists;
 use function preg_match;
 use function rawurldecode;
@@ -25,15 +25,15 @@ use function strlen;
 
 /**
  * Regex route.
- *
- * @final
  */
-class Regex implements HttpRouteInterface
+final class Regex implements HttpRouteInterface
 {
     /**
      * List of assembled parameters.
+     *
+     * @var list<non-empty-string>
      */
-    protected array $assembledParams = [];
+    private array $assembledParams = [];
 
     /**
      * @internal
@@ -43,22 +43,28 @@ class Regex implements HttpRouteInterface
 
     /**
      * Create a new regex route.
+     *
+     * @param non-empty-string $regex
+     * @param non-empty-string $spec
+     * @param array<non-empty-string, non-empty-string> $defaults
      */
     public function __construct(
         /**
          * Regex to match.
          */
-        protected string $regex,
+        private readonly string $regex,
         /**
          * Specification for URL assembly.
          *
          * Parameters accepting substitutions should be denoted as "%key%"
          */
-        protected string $spec,
+        private readonly string $spec,
         /**
          * Default values.
+         *
+         * @var array<non-empty-string, non-empty-string>
          */
-        protected array $defaults = []
+        private readonly array $defaults = []
     ) {
     }
 
@@ -67,30 +73,26 @@ class Regex implements HttpRouteInterface
      * @throws InvalidArgumentException
      */
     #[Override]
-    public static function factory(iterable $options = []): static
+    public static function factory(array $options = []): static
     {
-        if ($options instanceof Traversable) {
-            $options = ArrayUtils::iteratorToArray($options);
-        }
+        $regex    = $options['regex'] ?? null;
+        $spec     = $options['spec'] ?? null;
+        $defaults = $options['defaults'] ?? [];
 
-        if (! isset($options['regex'])) {
+        if (! is_string($regex) || $regex === '') {
             throw new Exception\InvalidArgumentException('Missing "regex" in options array');
         }
-
-        if (! isset($options['spec'])) {
+        if (! is_string($spec) || $spec === '') {
             throw new Exception\InvalidArgumentException('Missing "spec" in options array');
         }
+        assert(is_array($defaults));
 
-        if (! isset($options['defaults'])) {
-            $options['defaults'] = [];
-        }
+        /** @psalm-var array<non-empty-string, non-empty-string> $defaults */
 
-        return new static($options['regex'], $options['spec'], $options['defaults']);
+        return new self($regex, $spec, $defaults);
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
@@ -98,6 +100,7 @@ class Regex implements HttpRouteInterface
             return null;
         }
 
+        /** @var Http $uri */
         $uri  = $request->getUri();
         $path = $uri->getPath();
 
@@ -112,23 +115,21 @@ class Regex implements HttpRouteInterface
         }
 
         $matchedLength = strlen($matches[0]);
+        $cleanMatches  = [];
 
         foreach ($matches as $key => $value) {
-            if (is_numeric($key) || is_int($key) || $value === '') {
+            if (is_string($key) && $value !== '') {
                 unset($matches[$key]);
-            } else {
-                $matches[$key] = rawurldecode($value);
+                $cleanMatches[$key] = rawurldecode($value);
             }
         }
 
-        return new HttpRouteMatch(array_merge($this->defaults, $matches), $matchedLength);
+        return new HttpRouteMatch(array_merge($this->defaults, $cleanMatches), $matchedLength);
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = []): mixed
+    public function assemble(array $params = [], array $options = []): string
     {
         $url                   = $this->spec;
         $mergedParams          = array_merge($this->defaults, $params);
@@ -147,9 +148,7 @@ class Regex implements HttpRouteInterface
         return $url;
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function getAssembledParams(): array
     {

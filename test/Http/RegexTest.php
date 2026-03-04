@@ -22,7 +22,7 @@ final class RegexTest extends TestCase
      *     0: Regex,
      *     1: string,
      *     2: null|int,
-     *     3: null|array<string, string|int|float>
+     *     3: null|array<non-empty-string, string|int|float>
      * }>
      */
     public static function routeProvider(): array
@@ -79,6 +79,9 @@ final class RegexTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<non-empty-string, float|int|string>|null $params
+     */
     #[DataProvider('routeProvider')]
     public function testMatching(Regex $route, string $path, int|null $offset, ?array $params = null): void
     {
@@ -101,6 +104,9 @@ final class RegexTest extends TestCase
         }
     }
 
+    /**
+     * @param array<non-empty-string, float|int|string>|null $params
+     */
     #[DataProvider('routeProvider')]
     public function testAssembling(Regex $route, string $path, int|null $offset, ?array $params = null): void
     {
@@ -113,7 +119,7 @@ final class RegexTest extends TestCase
         $result = $route->assemble($params);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, (string) $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result, $offset));
         } else {
             $this->assertEquals($path, $result);
         }
@@ -137,7 +143,7 @@ final class RegexTest extends TestCase
 
     public function testFactory(): void
     {
-        $tester = new FactoryTester($this);
+        $tester = new FactoryTester();
         $tester->testFactory(
             Regex::class,
             [
@@ -161,6 +167,7 @@ final class RegexTest extends TestCase
         $route = new Regex('/(?<foo>[^/]+)', '/%foo%');
         $match = $route->match($request);
 
+        $this->assertNotNull($match);
         $this->assertSame($raw, $match->getParam('foo'));
     }
 
@@ -177,6 +184,7 @@ final class RegexTest extends TestCase
         $route = new Regex('/(?<foo>[^/]+)', '/%foo%');
         $match = $route->match($request);
 
+        $this->assertNotNull($match);
         $this->assertSame($out, $match->getParam('foo'));
     }
 }

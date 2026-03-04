@@ -92,7 +92,7 @@ final class LiteralTest extends TestCase
         $result = $route->assemble();
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, (string) $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result, $offset));
         } else {
             $this->assertEquals($path, $result);
         }
@@ -116,7 +116,7 @@ final class LiteralTest extends TestCase
 
     public function testFactory(): void
     {
-        $tester = new FactoryTester($this);
+        $tester = new FactoryTester();
         $tester->testFactory(
             Literal::class,
             [

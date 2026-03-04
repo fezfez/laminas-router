@@ -10,10 +10,8 @@ use Psr\Container\ContainerInterface;
 
 /**
  * @internal
- *
- * @final
  */
-class RouterFactory implements FactoryInterface
+final class RouterFactory implements FactoryInterface
 {
     /**
      * Create and return the router
@@ -26,6 +24,6 @@ class RouterFactory implements FactoryInterface
         string $requestedName,
         ?array $options = null
     ): RouteStackInterface {
-        return $container->get('HttpRouter');
+        return $container->get(Http\TreeRouteStack::class);
     }
 }

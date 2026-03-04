@@ -35,11 +35,11 @@ use function sprintf;
  *
  * @see ServiceManager for expected configuration shape
  *
- * @extends AbstractPluginManager<RouteInterface>
+ * @psalm-type InstanceType = RouteInterface
+ * @extends AbstractPluginManager<InstanceType>
  * @psalm-import-type ServiceManagerConfiguration from ServiceManager
- * @final
  */
-class RoutePluginManager extends AbstractPluginManager
+final class RoutePluginManager extends AbstractPluginManager
 {
     /**
      * @psalm-var ServiceManagerConfiguration
@@ -101,7 +101,7 @@ class RoutePluginManager extends AbstractPluginManager
      */
     public function __construct(ContainerInterface $container, array $config = [])
     {
-        /** @var ServiceManagerConfiguration $config */
+        /** @psalm-var ServiceManagerConfiguration $config Psalm cannot infer this after merge */
         $config = array_replace_recursive(self::CONFIG, $config);
         parent::__construct($container, $config);
     }
@@ -156,6 +156,32 @@ class RoutePluginManager extends AbstractPluginManager
         parent::configure($config);
 
         return $this;
+    }
+
+    /**
+     * @template InstanceParam of RouteInterface
+     * @param class-string<InstanceParam>|string $id Service name of plugin to retrieve.
+     * @return ($id is class-string<InstanceParam> ? InstanceParam : InstanceType)
+     */
+    public function get(string $id): mixed
+    {
+        /** @psalm-var InstanceType $plugin Unfortunately this type needs forcing */
+        $plugin = parent::get($id);
+
+        return $plugin;
+    }
+
+    /**
+     * @template InstanceParam of RouteInterface
+     * @param class-string<InstanceParam>|string $name Service name of plugin to retrieve.
+     * @return ($name is class-string<InstanceParam> ? InstanceParam : InstanceType)
+     */
+    public function build(string $name, ?array $options = null): mixed
+    {
+        /** @psalm-var InstanceType $build Unfortunately this type needs forcing */
+        $build = parent::build($name, $options);
+
+        return $build;
     }
 
      /**

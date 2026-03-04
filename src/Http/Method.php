@@ -6,24 +6,21 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
 use Override;
-use Traversable;
 
 use function array_map;
 use function explode;
 use function in_array;
+use function is_string;
 use function method_exists;
 use function strtoupper;
 use function trim;
 
 /**
  * Method route.
- *
- * @final
  */
-class Method implements HttpRouteInterface
+final class Method implements HttpRouteInterface
 {
     /**
      * @internal
@@ -33,16 +30,18 @@ class Method implements HttpRouteInterface
 
     /**
      * Create a new method route.
+     *
+     * @param array<string, string> $defaults
      */
     public function __construct(
         /**
          * Verb to match.
          */
-        protected string $verb,
+        private readonly string $verb,
         /**
          * Default values.
          */
-        protected array $defaults = []
+        private readonly array $defaults = []
     ) {
     }
 
@@ -51,26 +50,21 @@ class Method implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(iterable $options = []): static
+    public static function factory(array $options = []): static
     {
-        if ($options instanceof Traversable) {
-            $options = ArrayUtils::iteratorToArray($options);
-        }
+        /** @var mixed $verb */
+        $verb = $options['verb'] ?? null;
+        /** @psalm-var array<string, string> $defaults */
+        $defaults = $options['defaults'] ?? [];
 
-        if (! isset($options['verb'])) {
+        if (! is_string($verb)) {
             throw new Exception\InvalidArgumentException('Missing "verb" in options array');
         }
 
-        if (! isset($options['defaults'])) {
-            $options['defaults'] = [];
-        }
-
-        return new static($options['verb'], $options['defaults']);
+        return new self($verb, $defaults);
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
@@ -89,9 +83,7 @@ class Method implements HttpRouteInterface
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
@@ -99,9 +91,7 @@ class Method implements HttpRouteInterface
         return '';
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function getAssembledParams(): array
     {

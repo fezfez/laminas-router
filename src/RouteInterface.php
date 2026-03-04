@@ -21,7 +21,7 @@ interface RouteInterface
     /**
      * Create a new route with given options.
      */
-    public static function factory(iterable $options = []): static;
+    public static function factory(array $options = []): static;
 
     /**
      * Match a given request.
@@ -30,6 +30,8 @@ interface RouteInterface
 
     /**
      * Assemble the route.
+     *
+     * @param array<non-empty-string, string|null|int|float> $params
      */
-    public function assemble(array $params = [], array $options = []): mixed;
+    public function assemble(array $params = [], array $options = []): string;
 }

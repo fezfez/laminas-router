@@ -63,7 +63,7 @@ final class MethodTest extends TestCase
 
     public function testFactory(): void
     {
-        $tester = new FactoryTester($this);
+        $tester = new FactoryTester();
         $tester->testFactory(
             HttpMethod::class,
             [

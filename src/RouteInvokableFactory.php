@@ -20,8 +20,7 @@ use function sprintf;
  *
  * @internal
  */
-class RouteInvokableFactory implements
-    AbstractFactoryInterface
+final class RouteInvokableFactory implements AbstractFactoryInterface
 {
     /**
      * Can we create a route instance with the given name? (v3)

@@ -11,27 +11,28 @@ use function array_merge;
 
 /**
  * Part route match.
- *
- * @final
  */
-class HttpRouteMatch extends RouteMatch
+final class HttpRouteMatch extends RouteMatch
 {
     /**
      * Create a part RouteMatch with given parameters and length.
+     *
+     * @param array<string, string|int|null> $params
      */
     public function __construct(
+        /**
+         * Match parameters.
+         */
         array $params,
         /**
          * Length of the matched path.
          */
-        protected int $length = 0
+        private int $length = 0
     ) {
         parent::__construct($params);
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function setMatchedRouteName(string $name): static
     {

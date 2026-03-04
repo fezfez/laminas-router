@@ -1,5 +1,4 @@
-<?php // phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
-
+<?php
 
 declare(strict_types=1);
 
@@ -15,51 +14,41 @@ use Laminas\Stdlib\RequestInterface;
  */
 final class Router implements RouteStackInterface
 {
-    /**
-     * @inheritDoc
-     */
-    public static function factory(iterable $options = []): static
+    /** @inheritDoc */
+    public static function factory(array $options = []): static
     {
-        return new static();
+        return new self();
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     public function match(RequestInterface $request): null
     {
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function assemble(array $params = [], array $options = []): null
+    /** @inheritDoc */
+    public function assemble(array $params = [], array $options = []): string
     {
-        return null;
+        return '';
     }
 
     /** @inheritDoc */
-    public function addRoute(string $name, iterable|RouteInterface $route, ?int $priority = null): static
+    public function addRoute(string|int $name, array|RouteInterface $route, ?int $priority = null): void
     {
-        return $this;
     }
 
     /** @inheritDoc */
-    public function addRoutes(iterable $routes): static
+    public function addRoutes(array $routes): void
     {
-        return $this;
     }
 
     /** @inheritDoc */
-    public function removeRoute(string $name): static
+    public function removeRoute(string $name): void
     {
-        return $this;
     }
 
     /** @inheritDoc */
-    public function setRoutes(iterable $routes): static
+    public function setRoutes(array $routes): void
     {
-        return $this;
     }
 }

@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace LaminasTest\Router;
 
 use Laminas\Router\Http\HttpRouterFactory;
-use Laminas\Router\RouteInterface;
+use Laminas\Router\Http\TreeRouteStack;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Router\RouterFactory;
 use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 
 use function array_merge_recursive;
 
@@ -21,19 +22,23 @@ use function array_merge_recursive;
 class RouterFactoryTest extends TestCase
 {
     /** @psalm-var ServiceManagerConfiguration */
-    protected $defaultServiceConfig;
-    /** @var HttpRouterFactory|RouterFactory */
-    protected $factory;
+    protected array $defaultServiceConfig;
+    protected HttpRouterFactory|RouterFactory $factory;
 
     public function setUp(): void
     {
         $this->defaultServiceConfig = [
+            'services'  => [
+                'config' => [
+                    'router' => [
+                        'route_plugins' => RoutePluginManager::class,
+                    ],
+                ],
+            ],
             'factories' => [
-                'HttpRouter' => HttpRouterFactory::class,
-                /**
-                 * @psalm-return RoutePluginManager<RouteInterface>
-                 */
-                'RoutePluginManager' => static fn($services): RoutePluginManager => new RoutePluginManager($services),
+                TreeRouteStack::class => HttpRouterFactory::class,
+                // @phpcs:disable Generic.Files.LineLength.TooLong
+                RoutePluginManager::class => static fn(ContainerInterface $services): RoutePluginManager => new RoutePluginManager($services),
             ],
         ];
 

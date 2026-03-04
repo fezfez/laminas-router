@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
-use Laminas\Router\RouterConfigTrait;
+use Laminas\Router\ConfigProvider;
+use Laminas\Router\RoutePluginManager;
 use Laminas\Router\RouteStackInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Laminas\ServiceManager\ServiceLocatorInterface;
 use Psr\Container\ContainerInterface;
 
 /**
  * @internal
  *
  * @psalm-internal LaminasTest\Router
- * @psalm-internal Laminas\Router
+ * @psalm-import-type RouterConfigShape from ConfigProvider
  */
 final class HttpRouterFactory implements FactoryInterface
 {
-    use RouterConfigTrait;
-
     /**
      * Create and return the HTTP router
      *
@@ -32,24 +30,17 @@ final class HttpRouterFactory implements FactoryInterface
         string $requestedName,
         ?array $options = null
     ): RouteStackInterface {
-        $config = $container->has('config') ? $container->get('config') : [];
+        /** @psalm-var RouterConfigShape $config */
+        $config = $container->has('config') ? $container->get('config') : [
+            'router' => [
+                'router_class'  => TreeRouteStack::class,
+                'route_plugins' => RoutePluginManager::class,
+            ],
+        ];
 
-        // Defaults
-        $class  = TreeRouteStack::class;
-        $config = $config['router'] ?? [];
+        $class                   = $config['router']['router_class'];
+        $config['route_plugins'] = $config['router']['route_plugins'];
 
-        return $this->createRouter($class, $config, $container);
-    }
-
-    /**
-     * Create and return RouteStackInterface instance
-     *
-     * For use with laminas-servicemanager v2; proxies to __invoke().
-     *
-     * @return RouteStackInterface
-     */
-    public function createService(ServiceLocatorInterface $serviceLocator)
-    {
-        return $this($serviceLocator, RouteStackInterface::class);
+        return $class::factory($config);
     }
 }

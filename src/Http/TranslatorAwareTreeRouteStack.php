@@ -15,24 +15,23 @@ use Override;
  *
  * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
- * @final
  */
-class TranslatorAwareTreeRouteStack extends TreeRouteStack
+final class TranslatorAwareTreeRouteStack extends TreeRouteStack
 {
     /**
      * Translator used for translatable segments.
      */
-    protected ?TranslatorInterface $translator = null;
+    private ?TranslatorInterface $translator = null;
 
     /**
      * Whether the translator is enabled.
      */
-    protected bool $translatorEnabled = true;
+    private bool $translatorEnabled = true;
 
     /**
      * Translator text domain to use.
      */
-    protected string $translatorTextDomain = 'default';
+    private string $translatorTextDomain = 'default';
 
     /**
      * @inheritDoc
@@ -58,7 +57,7 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack
      * @throws Exception\RuntimeException
      */
     #[Override]
-    public function assemble(array $params = [], array $options = []): mixed
+    public function assemble(array $params = [], array $options = []): string
     {
         if ($this->hasTranslator() && $this->isTranslatorEnabled() && ! isset($options['translator'])) {
             $options['translator'] = $this->getTranslator();

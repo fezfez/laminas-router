@@ -6,19 +6,13 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
 use Override;
-use Traversable;
-
-use function is_array;
 
 /**
  * Placeholder route.
- *
- * @final
  */
-class Placeholder implements HttpRouteInterface
+final class Placeholder implements HttpRouteInterface
 {
     /**
      * @internal
@@ -26,8 +20,13 @@ class Placeholder implements HttpRouteInterface
      */
     public int|null $priority = null;
 
-    public function __construct(private readonly array $defaults)
-    {
+    /**
+     * @param array<string, string> $defaults
+     */
+    public function __construct(
+        /** @var array<string, string> */
+        private readonly array $defaults
+    ) {
     }
 
     /**
@@ -35,26 +34,15 @@ class Placeholder implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(iterable $options = []): static
+    public static function factory(array $options = []): static
     {
-        if ($options instanceof Traversable) {
-            $options = ArrayUtils::iteratorToArray($options);
-        }
+        /** @var array<string, string> $defaults */
+        $defaults = $options['defaults'] ?? [];
 
-        if (! isset($options['defaults'])) {
-            $options['defaults'] = [];
-        }
-
-        if (! is_array($options['defaults'])) {
-            throw new Exception\InvalidArgumentException('options[defaults] expected to be an array if set');
-        }
-
-        return new static($options['defaults']);
+        return new self($defaults);
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function match(
         RequestInterface $request,
@@ -64,18 +52,14 @@ class Placeholder implements HttpRouteInterface
         return new HttpRouteMatch($this->defaults);
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         return '';
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
     public function getAssembledParams(): array
     {

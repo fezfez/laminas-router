@@ -9,11 +9,10 @@ use Laminas\Router\RouteInterface;
 use PHPUnit\Framework\TestCase;
 
 use function array_keys;
-use function iterator_to_array;
 
 final class PriorityListTest extends TestCase
 {
-    /** @var PriorityList<string, RouteInterface> */
+    /** @var PriorityList<non-empty-string|array-key, RouteInterface> */
     private PriorityList $list;
 
     public function setUp(): void
@@ -26,9 +25,7 @@ final class PriorityListTest extends TestCase
         $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
 
         $this->assertCount(1, $this->list);
-
-        $list = iterator_to_array($this->list);
-        $this->assertSame(['foo'], array_keys($list));
+        $this->assertSame(['foo'], array_keys([...$this->list]));
     }
 
     public function testRemove(): void
@@ -78,9 +75,7 @@ final class PriorityListTest extends TestCase
         $this->list->insert('bar', new TestAsset\DummyRoute(), 0);
         $this->list->insert('baz', new TestAsset\DummyRoute(), 0);
 
-        $list = iterator_to_array($this->list);
-
-        $this->assertEquals(['baz', 'bar', 'foo'], array_keys($list));
+        $this->assertEquals(['baz', 'bar', 'foo'], array_keys([...$this->list]));
     }
 
     public function testPriorityOnly(): void
@@ -89,9 +84,7 @@ final class PriorityListTest extends TestCase
         $this->list->insert('bar', new TestAsset\DummyRoute(), 0);
         $this->list->insert('baz', new TestAsset\DummyRoute(), 2);
 
-        $list = iterator_to_array($this->list);
-
-        $this->assertEquals(['baz', 'foo', 'bar'], array_keys($list));
+        $this->assertEquals(['baz', 'foo', 'bar'], array_keys([...$this->list]));
     }
 
     public function testLIFOWithPriority(): void
@@ -100,19 +93,16 @@ final class PriorityListTest extends TestCase
         $this->list->insert('bar', new TestAsset\DummyRoute(), 0);
         $this->list->insert('baz', new TestAsset\DummyRoute(), 1);
 
-        $list = iterator_to_array($this->list);
-
-        $this->assertEquals(['baz', 'bar', 'foo'], array_keys($list));
+        $this->assertEquals(['baz', 'bar', 'foo'], array_keys([...$this->list]));
     }
 
     public function testPriorityWithNegativesAndNull(): void
     {
+        /** @psalm-suppress NullArgument */
         $this->list->insert('foo', new TestAsset\DummyRoute(), null);
         $this->list->insert('bar', new TestAsset\DummyRoute(), 1);
         $this->list->insert('baz', new TestAsset\DummyRoute(), -1);
 
-        $list = iterator_to_array($this->list);
-
-        $this->assertEquals(['bar', 'foo', 'baz'], array_keys($list));
+        $this->assertEquals(['bar', 'foo', 'baz'], array_keys([...$this->list]));
     }
 }

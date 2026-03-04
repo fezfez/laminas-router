@@ -7,14 +7,14 @@ namespace LaminasTest\Router\Http\TestAsset;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\RequestInterface;
 
+use function array_key_exists;
+
 /**
  * Dummy route.
  */
 final class DummyRouteWithParam extends DummyRoute
 {
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -23,11 +23,15 @@ final class DummyRouteWithParam extends DummyRoute
         return new HttpRouteMatch(['foo' => 'bar'], -4);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function assemble(array $params = [], array $options = []): mixed
+    /** @inheritDoc */
+    public function assemble(array $params = [], array $options = []): string
     {
-        return $params['foo'] ?? '';
+        return array_key_exists('foo', $params) ? (string) $params['foo'] : '';
+    }
+
+    /** @inheritDoc */
+    public static function factory(array $options = []): static
+    {
+        return new self();
     }
 }

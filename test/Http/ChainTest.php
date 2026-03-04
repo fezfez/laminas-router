@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http;
 
+use ArrayObject;
 use Laminas\Http\Request;
 use Laminas\Router\Http\Chain;
+use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Segment;
 use Laminas\Router\RoutePluginManager;
@@ -22,6 +24,8 @@ final class ChainTest extends TestCase
     public static function getRoute(): Chain
     {
         $routePlugins = new RoutePluginManager(new ServiceManager());
+        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        $prototypes = new ArrayObject();
 
         return new Chain(
             [
@@ -44,13 +48,16 @@ final class ChainTest extends TestCase
                     ],
                 ],
             ],
-            $routePlugins
+            $routePlugins,
+            $prototypes
         );
     }
 
     public static function getRouteWithOptionalParam(): Chain
     {
         $routePlugins = new RoutePluginManager(new ServiceManager());
+        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        $prototypes = new ArrayObject();
 
         return new Chain(
             [
@@ -73,7 +80,8 @@ final class ChainTest extends TestCase
                     ],
                 ],
             ],
-            $routePlugins
+            $routePlugins,
+            $prototypes
         );
     }
 
@@ -82,7 +90,7 @@ final class ChainTest extends TestCase
      *     0: Chain,
      *     1: string,
      *     2: null|int,
-     *     3: array<string, string>
+     *     3: array<non-empty-string, non-empty-string>
      * }>
      */
     public static function routeProvider(): array
@@ -136,6 +144,9 @@ final class ChainTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<non-empty-string, non-empty-string>|null $params
+     */
     #[DataProvider('routeProvider')]
     public function testMatching(Chain $route, string $path, int|null $offset, ?array $params = null): void
     {
@@ -158,6 +169,9 @@ final class ChainTest extends TestCase
         }
     }
 
+    /**
+     * @param array<non-empty-string, non-empty-string>|null $params
+     */
     #[DataProvider('routeProvider')]
     public function testAssembling(Chain $route, string $path, int|null $offset, ?array $params = null): void
     {
@@ -177,7 +191,7 @@ final class ChainTest extends TestCase
 
     public function testFactory(): void
     {
-        $tester = new FactoryTester($this);
+        $tester = new FactoryTester();
         $tester->testFactory(
             Chain::class,
             [

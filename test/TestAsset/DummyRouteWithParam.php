@@ -7,24 +7,28 @@ namespace LaminasTest\Router\TestAsset;
 use Laminas\Router\RouteMatch;
 use Laminas\Stdlib\RequestInterface;
 
+use function array_key_exists;
+
 /**
  * Dummy route.
  */
 final class DummyRouteWithParam extends DummyRoute
 {
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     public function match(RequestInterface $request): RouteMatch
     {
         return new RouteMatch(['foo' => 'bar']);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function assemble(array $params = [], array $options = []): mixed
+    /** @inheritDoc */
+    public function assemble(array $params = [], array $options = []): string
     {
-        return $params['foo'] ?? '';
+        return array_key_exists('foo', $params) ? (string) $params['foo'] : '';
+    }
+
+    /** @inheritDoc */
+    public static function factory(array $options = []): static
+    {
+        return new self();
     }
 }

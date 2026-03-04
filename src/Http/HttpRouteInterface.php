@@ -15,6 +15,8 @@ interface HttpRouteInterface extends RouteInterface
 {
     /**
      * Get a list of parameters used while assembling.
+     *
+     * @return list<non-empty-string>
      */
     public function getAssembledParams(): array;
 

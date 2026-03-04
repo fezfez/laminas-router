@@ -18,6 +18,8 @@ class RouteMatch
 
     /**
      * Create a RouteMatch with given parameters.
+     *
+     * @param  array<string, string|int|null> $params
      */
     public function __construct(
         /**
@@ -29,6 +31,8 @@ class RouteMatch
 
     /**
      * Set name of matched route.
+     *
+     * @param non-empty-string $name
      */
     public function setMatchedRouteName(string $name): static
     {
@@ -47,7 +51,7 @@ class RouteMatch
     /**
      * Set a parameter.
      */
-    public function setParam(string $name, mixed $value): static
+    public function setParam(string $name, string $value): static
     {
         $this->params[$name] = $value;
         return $this;
@@ -55,6 +59,8 @@ class RouteMatch
 
     /**
      * Get all parameters.
+     *
+     * @return array<string, string|int|null>
      */
     public function getParams(): array
     {
@@ -64,7 +70,7 @@ class RouteMatch
     /**
      * Get a specific parameter.
      */
-    public function getParam(string $name, mixed $default = null): mixed
+    public function getParam(string $name, ?string $default = null): int|string|null
     {
         if (array_key_exists($name, $this->params)) {
             return $this->params[$name];

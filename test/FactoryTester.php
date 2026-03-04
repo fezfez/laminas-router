@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router;
 
-use ArrayIterator;
+use Laminas\Router\ConfigProvider;
 use Laminas\Router\Exception\InvalidArgumentException;
+use Laminas\Router\RouteInterface;
+use Laminas\Router\RoutePluginManager;
+use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
 
-use function sprintf;
+use function array_key_exists;
 
 /**
  * Helper to test route factories.
@@ -16,26 +19,13 @@ use function sprintf;
 final class FactoryTester
 {
     /**
-     * Create a new factory tester.
-     */
-    public function __construct(
-        /**
-         * Test case to call assertions to.
-         */
-        protected TestCase $testCase
-    ) {
-    }
-
-    /**
      * Test a factory.
      *
-     * @psalm-param class-string $classname
+     * @param array<string, string> $requiredOptions
+     * @param class-string<RouteInterface> $classname
      */
     public function testFactory(string $classname, array $requiredOptions, array $options): void
     {
-        $testCase = $this->testCase; // hack for phpcs ...
-        $factory  = sprintf('%s::factory', $classname);
-
         // Test required options.
         foreach ($requiredOptions as $option => $exceptionMessage) {
             $testOptions = $options;
@@ -43,17 +33,18 @@ final class FactoryTester
             unset($testOptions[$option]);
 
             try {
-                $factory($testOptions);
-                $testCase::fail('An expected exception was not thrown');
-            } catch (InvalidArgumentException $e) {
-                $testCase::assertStringContainsString($exceptionMessage, $e->getMessage());
+                $classname::factory($testOptions);
+                TestCase::fail('An expected exception was not thrown');
+            } catch (InvalidArgumentException $exception) {
+                TestCase::assertStringContainsString($exceptionMessage, $exception->getMessage());
             }
         }
 
-        // Create the route, will throw an exception if something goes wrong.
-        $testCase::assertInstanceOf($classname, $factory($options));
+        if (! array_key_exists('route_plugins', $options)) {
+            $options['route_plugins'] = new RoutePluginManager(new ServiceManager((new ConfigProvider())->__invoke()));
+        }
 
-        // Try the same with an iterator.
-        $testCase::assertInstanceOf($classname, $factory(new ArrayIterator($options)));
+        // Create the route, will throw an exception if something goes wrong.
+        TestCase::assertInstanceOf($classname, $classname::factory($options));
     }
 }

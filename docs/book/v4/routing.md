@@ -20,7 +20,7 @@ interface RouteInterface
 {
     public static function factory(array $options = []): static;
     public function match(RequestInterface $request): RouteMatch|null;
-    public function assemble(array $params = [], array $options = []): mixed;
+    public function assemble(array $params = [], array $options = []): string;
 }
 ```
 
@@ -37,7 +37,7 @@ class RouteMatch
     public function getMatchedRouteName(): string|null;
     public function setParam(string $name, mixed $value): static;
     public function getParams(): array;
-    public function getParam(string $name, mixed $default = null): mixed;
+    public function getParam(string $name, string $default = null): int|string|null;
 }
 ```
 
@@ -62,10 +62,10 @@ namespace Laminas\Router;
 
 interface RouteStackInterface extends RouteInterface
 {
-    public function addRoute(string $name, iterable|RouteInterface $route, int $priority = null): static;
-    public function addRoutes(iterable $routes): static;
-    public function removeRoute(string $name): static;
-    public function setRoutes(iterable $routes): static;
+    public function addRoute(string $name, array|RouteInterface $route, int $priority = null): void;
+    public function addRoutes(array $routes): void;
+    public function removeRoute(string $name): void;
+    public function setRoutes(array $routes): void;
 }
 ```
 
