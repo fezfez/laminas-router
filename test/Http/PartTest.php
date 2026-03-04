@@ -225,7 +225,8 @@ final class PartTest extends TestCase
         $this->assertEquals($routeName, $match->getMatchedRouteName());
 
         foreach ($params as $key => $value) {
-            $this->assertEquals($value, $match->getParam($key));
+            $this->assertIsString($key);
+            $this->assertSame($value, $match->getParam($key));
         }
     }
 
