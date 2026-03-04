@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
-use Laminas\Router\RouterConfigTrait;
 use Laminas\Router\RouteStackInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
+
+use function class_exists;
+use function sprintf;
 
 /**
  * @internal
@@ -17,8 +19,6 @@ use Psr\Container\ContainerInterface;
  */
 final class HttpRouterFactory implements FactoryInterface
 {
-    use RouterConfigTrait;
-
     /**
      * Create and return the HTTP router
      *
@@ -37,6 +37,19 @@ final class HttpRouterFactory implements FactoryInterface
         $class  = TreeRouteStack::class;
         $config = $config['router'] ?? [];
 
-        return $this->createRouter($class, $config, $container);
+        // Obtain the configured router class, if any
+        if (isset($config['router_class']) && class_exists($config['router_class'])) {
+            $class = $config['router_class'];
+        }
+
+        // Inject the route plugins
+        if (! isset($config['route_plugins'])) {
+            $routePluginManager      = $container->get('RoutePluginManager');
+            $config['route_plugins'] = $routePluginManager;
+        }
+
+        // Obtain an instance
+        $factory = sprintf('%s::factory', $class);
+        return $factory($config);
     }
 }
