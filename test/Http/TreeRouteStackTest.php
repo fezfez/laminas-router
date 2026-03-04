@@ -11,6 +11,8 @@ use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\Hostname;
 use Laminas\Router\Http\TreeRouteStack;
+use Laminas\Router\RoutePluginManager;
+use Laminas\ServiceManager\ServiceManager;
 use Laminas\Stdlib\Request as BaseRequest;
 use Laminas\Uri\Http as HttpUri;
 use LaminasTest\Router\FactoryTester;
@@ -20,6 +22,16 @@ use ReflectionClass;
 
 final class TreeRouteStackTest extends TestCase
 {
+    private function createRoutePluginManager(): RoutePluginManager
+    {
+        return new RoutePluginManager(new ServiceManager(), [
+            'invokables' => [
+                TestAsset\DummyRoute::class          => TestAsset\DummyRoute::class,
+                TestAsset\DummyRouteWithParam::class => TestAsset\DummyRouteWithParam::class,
+            ],
+        ]);
+    }
+
     public function testAddRouteRequiresHttpSpecificRoute(): void
     {
         $stack = new TreeRouteStack();
@@ -32,7 +44,12 @@ final class TreeRouteStackTest extends TestCase
 
     public function testAddRouteViaStringRequiresHttpSpecificRoute(): void
     {
-        $stack = new TreeRouteStack();
+        $plugins = new RoutePluginManager(new ServiceManager(), [
+            'invokables' => [
+                DummyRoute::class => DummyRoute::class,
+            ],
+        ]);
+        $stack   = new TreeRouteStack($plugins);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Given route does not implement HTTP route interface');
@@ -43,7 +60,7 @@ final class TreeRouteStackTest extends TestCase
 
     public function testAddRouteAcceptsTraversable(): void
     {
-        $stack = new TreeRouteStack();
+        $stack = new TreeRouteStack($this->createRoutePluginManager());
         $stack->addRoute('foo', new ArrayIterator([
             'type' => TestAsset\DummyRoute::class,
         ]));
@@ -52,7 +69,7 @@ final class TreeRouteStackTest extends TestCase
 
     public function testNoMatchWithoutUriMethod(): void
     {
-        $stack   = new TreeRouteStack();
+        $stack   = new TreeRouteStack($this->createRoutePluginManager());
         $request = new BaseRequest();
 
         $this->assertNull($stack->match($request));
@@ -60,7 +77,7 @@ final class TreeRouteStackTest extends TestCase
 
     public function testSetBaseUrlFromFirstMatch(): void
     {
-        $stack = new TreeRouteStack();
+        $stack = new TreeRouteStack($this->createRoutePluginManager());
 
         $request = new PhpRequest();
         $request->setBaseUrl('/foo');
@@ -75,7 +92,7 @@ final class TreeRouteStackTest extends TestCase
 
     public function testBaseUrlLengthIsPassedAsOffset(): void
     {
-        $stack = new TreeRouteStack();
+        $stack = new TreeRouteStack($this->createRoutePluginManager());
         $stack->setBaseUrl('/foo');
         $stack->addRoute('foo', [
             'type' => TestAsset\DummyRoute::class,
@@ -86,7 +103,7 @@ final class TreeRouteStackTest extends TestCase
 
     public function testNoOffsetIsPassedWithoutBaseUrl(): void
     {
-        $stack = new TreeRouteStack();
+        $stack = new TreeRouteStack($this->createRoutePluginManager());
         $stack->addRoute('foo', [
             'type' => TestAsset\DummyRoute::class,
         ]);
@@ -96,14 +113,14 @@ final class TreeRouteStackTest extends TestCase
 
     public function testAssemble(): void
     {
-        $stack = new TreeRouteStack();
+        $stack = new TreeRouteStack($this->createRoutePluginManager());
         $stack->addRoute('foo', new TestAsset\DummyRoute());
         $this->assertEquals('', $stack->assemble([], ['name' => 'foo']));
     }
 
     public function testAssembleCanonicalUriWithoutRequestUri(): void
     {
-        $stack = new TreeRouteStack();
+        $stack = new TreeRouteStack($this->createRoutePluginManager());
         $stack->addRoute('foo', new TestAsset\DummyRoute());
 
         $this->expectException(RuntimeException::class);

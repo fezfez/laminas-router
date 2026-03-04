@@ -47,7 +47,6 @@ class Part extends TreeRouteStack implements HttpRouteInterface
      * @param TRoute|iterable|string           $route
      * @param bool                             $mayTerminate
      * @param array|null                       $childRoutes
-     * @param RoutePluginManager<TRoute>       $routePlugins
      * @param ArrayObject<string, TRoute>|null $prototypes
      * @throws Exception\InvalidArgumentException
      */

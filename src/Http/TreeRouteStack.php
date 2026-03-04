@@ -6,9 +6,8 @@ namespace Laminas\Router\Http;
 
 use ArrayObject;
 use Laminas\Router\Exception;
-use Laminas\Router\RouteInvokableFactory;
+use Laminas\Router\RoutePluginManager;
 use Laminas\Router\SimpleRouteStack;
-use Laminas\ServiceManager\Config;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http as HttpUri;
@@ -64,6 +63,13 @@ class TreeRouteStack extends SimpleRouteStack
      */
     public $priority;
 
+    public function __construct(?RoutePluginManager $routePluginManager = null)
+    {
+        /** @var ArrayObject<string, TRoute> $this->prototypes */
+        $this->prototypes = new ArrayObject();
+        parent::__construct($routePluginManager);
+    }
+
     /**
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
@@ -89,49 +95,6 @@ class TreeRouteStack extends SimpleRouteStack
         }
 
         return $instance;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    protected function init()
-    {
-        /** @var ArrayObject<string, TRoute> $this->prototypes */
-        $this->prototypes = new ArrayObject();
-
-        (new Config([
-            'aliases'   => [
-                'chain'    => Chain::class,
-                'Chain'    => Chain::class,
-                'hostname' => Hostname::class,
-                'Hostname' => Hostname::class,
-                'hostName' => Hostname::class,
-                'HostName' => Hostname::class,
-                'literal'  => Literal::class,
-                'Literal'  => Literal::class,
-                'method'   => Method::class,
-                'Method'   => Method::class,
-                'part'     => Part::class,
-                'Part'     => Part::class,
-                'regex'    => Regex::class,
-                'Regex'    => Regex::class,
-                'scheme'   => Scheme::class,
-                'Scheme'   => Scheme::class,
-                'segment'  => Segment::class,
-                'Segment'  => Segment::class,
-            ],
-            'factories' => [
-                Chain::class    => RouteInvokableFactory::class,
-                Hostname::class => RouteInvokableFactory::class,
-                Literal::class  => RouteInvokableFactory::class,
-                Method::class   => RouteInvokableFactory::class,
-                Part::class     => RouteInvokableFactory::class,
-                Regex::class    => RouteInvokableFactory::class,
-                Scheme::class   => RouteInvokableFactory::class,
-                Segment::class  => RouteInvokableFactory::class,
-            ],
-        ]))->configureServiceManager($this->routePluginManager);
     }
 
     /**
@@ -188,7 +151,7 @@ class TreeRouteStack extends SimpleRouteStack
                 'prototypes'    => $this->prototypes,
             ];
 
-            $route = $this->routePluginManager->get('chain', $options);
+            $route = $this->routePluginManager->build('chain', $options);
         } else {
             $route = parent::routeFromArray($specs);
         }
@@ -208,7 +171,7 @@ class TreeRouteStack extends SimpleRouteStack
 
             $priority = $route->priority ?? null;
 
-            $route           = $this->routePluginManager->get('part', $options);
+            $route           = $this->routePluginManager->build('part', $options);
             $route->priority = $priority;
         }
 

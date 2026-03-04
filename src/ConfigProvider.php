@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Laminas\Router;
 
-use Laminas\ServiceManager\ConfigInterface;
+use Laminas\ServiceManager\ServiceManager;
 
 /**
  * Provide base configuration for using the component.
@@ -16,7 +16,11 @@ use Laminas\ServiceManager\ConfigInterface;
  *
  * @see ConfigInterface
  *
- * @psalm-import-type ServiceManagerConfigurationType from ConfigInterface
+ * @psalm-import-type ServiceManagerConfiguration from ServiceManager
+ * @psalm-type RouterConfigShape = array{
+ *      dependencies: ServiceManagerConfiguration,
+ *  }
+ *
  * @final
  */
 class ConfigProvider
@@ -24,20 +28,19 @@ class ConfigProvider
     /**
      * Provide default configuration.
      *
-     * @return array<string, array>
+     * @return RouterConfigShape
      */
     public function __invoke()
     {
         return [
-            'dependencies'  => $this->getDependencyConfig(),
-            'route_manager' => $this->getRouteManagerConfig(),
+            'dependencies' => $this->getDependencyConfig(),
         ];
     }
 
     /**
      * Provide default container dependency configuration.
      *
-     * @return ServiceManagerConfigurationType
+     * @return ServiceManagerConfiguration
      */
     public function getDependencyConfig()
     {
@@ -47,11 +50,6 @@ class ConfigProvider
                 'router'             => RouteStackInterface::class,
                 'Router'             => RouteStackInterface::class,
                 'RoutePluginManager' => RoutePluginManager::class,
-
-                // Legacy Zend Framework aliases
-                'Zend\Router\Http\TreeRouteStack' => Http\TreeRouteStack::class,
-                'Zend\Router\RoutePluginManager'  => RoutePluginManager::class,
-                'Zend\Router\RouteStackInterface' => RouteStackInterface::class,
             ],
             'factories' => [
                 Http\TreeRouteStack::class => Http\HttpRouterFactory::class,
@@ -59,15 +57,5 @@ class ConfigProvider
                 RouteStackInterface::class => RouterFactory::class,
             ],
         ];
-    }
-
-    /**
-     * Provide default route plugin manager configuration.
-     *
-     * @return array
-     */
-    public function getRouteManagerConfig()
-    {
-        return [];
     }
 }

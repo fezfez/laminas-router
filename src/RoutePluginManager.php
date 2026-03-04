@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Laminas\Router;
 
+use Laminas\Router\Http\Chain;
+use Laminas\Router\Http\Hostname;
+use Laminas\Router\Http\Literal;
+use Laminas\Router\Http\Method;
+use Laminas\Router\Http\Part;
+use Laminas\Router\Http\Placeholder;
+use Laminas\Router\Http\Regex;
+use Laminas\Router\Http\Scheme;
+use Laminas\Router\Http\Segment;
 use Laminas\ServiceManager\AbstractPluginManager;
-use Laminas\ServiceManager\ConfigInterface;
 use Laminas\ServiceManager\Exception\InvalidServiceException;
 use Laminas\ServiceManager\ServiceManager;
 use Psr\Container\ContainerInterface;
 
 use function array_merge;
+use function array_replace_recursive;
 use function get_debug_type;
 use function sprintf;
 
@@ -26,33 +35,61 @@ use function sprintf;
  *
  * @see ServiceManager for expected configuration shape
  *
- * @template InstanceType of RouteInterface
- * @extends AbstractPluginManager<InstanceType>
+ * @extends AbstractPluginManager<RouteInterface>
  * @psalm-import-type ServiceManagerConfiguration from ServiceManager
  * @final
  */
 class RoutePluginManager extends AbstractPluginManager
 {
     /**
+     * @psalm-var ServiceManagerConfiguration
+     */
+    private const CONFIG = [
+        'aliases'   => [
+            'chain'       => Chain::class,
+            'Chain'       => Chain::class,
+            'hostname'    => Hostname::class,
+            'Hostname'    => Hostname::class,
+            'hostName'    => Hostname::class,
+            'HostName'    => Hostname::class,
+            'literal'     => Literal::class,
+            'Literal'     => Literal::class,
+            'method'      => Method::class,
+            'Method'      => Method::class,
+            'part'        => Part::class,
+            'Part'        => Part::class,
+            'regex'       => Regex::class,
+            'Regex'       => Regex::class,
+            'scheme'      => Scheme::class,
+            'Scheme'      => Scheme::class,
+            'segment'     => Segment::class,
+            'Segment'     => Segment::class,
+            'Placeholder' => Placeholder::class,
+            'placeholder' => Placeholder::class,
+        ],
+        'factories' => [
+            Chain::class       => RouteInvokableFactory::class,
+            Hostname::class    => RouteInvokableFactory::class,
+            Literal::class     => RouteInvokableFactory::class,
+            Method::class      => RouteInvokableFactory::class,
+            Part::class        => RouteInvokableFactory::class,
+            Regex::class       => RouteInvokableFactory::class,
+            Scheme::class      => RouteInvokableFactory::class,
+            Segment::class     => RouteInvokableFactory::class,
+            Placeholder::class => RouteInvokableFactory::class,
+        ],
+    ];
+    /**
      * Only RouteInterface instances are valid
      *
      * @var class-string
      */
-    protected $instanceOf = RouteInterface::class;
+    protected string $instanceOf = RouteInterface::class;
 
     /**
-     * Do not share instances. (v3)
-     *
-     * @var bool
+     * Do not share instances.
      */
-    protected $shareByDefault = false;
-
-    /**
-     * Do not share instances. (v2)
-     *
-     * @var bool
-     */
-    protected $sharedByDefault = false;
+    protected bool $sharedByDefault = false;
 
     /**
      * Constructor
@@ -60,13 +97,13 @@ class RoutePluginManager extends AbstractPluginManager
      * Ensure that the instance is seeded with the RouteInvokableFactory as an
      * abstract factory.
      *
-     * @param ContainerInterface|ConfigInterface $configOrContainerInstance
-     * @psalm-param ServiceManagerConfiguration $v3config
+     * @param ServiceManagerConfiguration $config
      */
-    public function __construct($configOrContainerInstance, array $v3config = [])
+    public function __construct(ContainerInterface $container, array $config = [])
     {
-        $this->addAbstractFactory(RouteInvokableFactory::class);
-        parent::__construct($configOrContainerInstance, $v3config);
+        /** @var ServiceManagerConfiguration $config */
+        $config = array_replace_recursive(self::CONFIG, $config);
+        parent::__construct($container, $config);
     }
 
     /**
@@ -75,7 +112,7 @@ class RoutePluginManager extends AbstractPluginManager
      * @throws InvalidServiceException
      * @psalm-assert InstanceType $instance
      */
-    public function validate(mixed $instance)
+    public function validate(mixed $instance): void
     {
         if (! $instance instanceof $this->instanceOf) {
             throw new InvalidServiceException(sprintf(
@@ -87,36 +124,15 @@ class RoutePluginManager extends AbstractPluginManager
     }
 
     /**
-     * Validate a route plugin. (v2)
-     *
-     * @param InstanceType $plugin
-     * @throws Exception\RuntimeException
-     * @psalm-assert InstanceType $instance
-     */
-    public function validatePlugin($plugin)
-    {
-        try {
-            $this->validate($plugin);
-        } catch (InvalidServiceException $e) {
-            throw new Exception\RuntimeException(
-                $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
-    }
-
-    /**
      * Pre-process configuration. (v3)
      *
      * Checks for invokables, and, if found, maps them to the
      * component-specific RouteInvokableFactory; removes the invokables entry
      * before passing to the parent.
      *
-     * @psalm-param ServiceManagerConfiguration $config
-     * @return $this
+     * @param ServiceManagerConfiguration $config
      */
-    public function configure(array $config)
+    public function configure(array $config): static
     {
         if (isset($config['invokables']) && ! empty($config['invokables'])) {
             $aliases   = $this->createAliasesForInvokables($config['invokables']);
@@ -135,6 +151,8 @@ class RoutePluginManager extends AbstractPluginManager
             unset($config['invokables']);
         }
 
+        // phpcs:disable SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration.MissingVariable
+        /** @var ServiceManagerConfiguration $config */
         parent::configure($config);
 
         return $this;
@@ -150,7 +168,7 @@ class RoutePluginManager extends AbstractPluginManager
       * @param array<string, class-string> $invokables
       * @return array<string, class-string>
       */
-    protected function createAliasesForInvokables(array $invokables)
+    protected function createAliasesForInvokables(array $invokables): array
     {
         $aliases = [];
         foreach ($invokables as $name => $class) {
@@ -172,7 +190,7 @@ class RoutePluginManager extends AbstractPluginManager
      * @param array<string, class-string> $invokables
      * @return array<class-string, class-string>
      */
-    protected function createFactoriesForInvokables(array $invokables)
+    protected function createFactoriesForInvokables(array $invokables): array
     {
         $factories = [];
         foreach ($invokables as $name => $class) {

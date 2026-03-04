@@ -27,11 +27,8 @@ class RouteInvokableFactory implements
      * Can we create a route instance with the given name? (v3)
      *
      * Only works for FQCN $routeName values, for classes that implement RouteInterface.
-     *
-     * @param string $requestedName
-     * @return bool
      */
-    public function canCreate(ContainerInterface $container, $requestedName)
+    public function canCreate(ContainerInterface $container, string $requestedName): bool
     {
         if (! class_exists($requestedName)) {
             return false;
@@ -53,12 +50,13 @@ class RouteInvokableFactory implements
      * Otherwise, it uses the class' `factory()` method with the provided
      * $options to produce an instance.
      *
-     * @param string $requestedName
-     * @param null|array $options
-     * @return RouteInterface
+     * @inheritDoc
      */
-    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
-    {
+    public function __invoke(
+        ContainerInterface $container,
+        string $requestedName,
+        ?array $options = null
+    ): RouteInterface {
         $options ??= [];
 
         if (! class_exists($requestedName)) {

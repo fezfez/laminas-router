@@ -118,9 +118,6 @@
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/Http/HttpRouterFactory.php">
-    <DeprecatedInterface>
-      <code><![CDATA[HttpRouterFactory]]></code>
-    </DeprecatedInterface>
     <LessSpecificReturnStatement>
       <code><![CDATA[$this->createRouter($class, $config, $container)]]></code>
     </LessSpecificReturnStatement>
@@ -137,6 +134,9 @@
     <MoreSpecificReturnType>
       <code><![CDATA[RouteStackInterface]]></code>
     </MoreSpecificReturnType>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[createService]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="src/Http/Literal.php">
     <DocblockTypeContradiction>
@@ -393,40 +393,6 @@
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/Http/TreeRouteStack.php">
-    <DeprecatedClass>
-      <code><![CDATA[new Config([
-            'aliases'   => [
-                'chain'    => Chain::class,
-                'Chain'    => Chain::class,
-                'hostname' => Hostname::class,
-                'Hostname' => Hostname::class,
-                'hostName' => Hostname::class,
-                'HostName' => Hostname::class,
-                'literal'  => Literal::class,
-                'Literal'  => Literal::class,
-                'method'   => Method::class,
-                'Method'   => Method::class,
-                'part'     => Part::class,
-                'Part'     => Part::class,
-                'regex'    => Regex::class,
-                'Regex'    => Regex::class,
-                'scheme'   => Scheme::class,
-                'Scheme'   => Scheme::class,
-                'segment'  => Segment::class,
-                'Segment'  => Segment::class,
-            ],
-            'factories' => [
-                Chain::class    => RouteInvokableFactory::class,
-                Hostname::class => RouteInvokableFactory::class,
-                Literal::class  => RouteInvokableFactory::class,
-                Method::class   => RouteInvokableFactory::class,
-                Part::class     => RouteInvokableFactory::class,
-                Regex::class    => RouteInvokableFactory::class,
-                Scheme::class   => RouteInvokableFactory::class,
-                Segment::class  => RouteInvokableFactory::class,
-            ],
-        ])]]></code>
-    </DeprecatedClass>
     <DocblockTypeContradiction>
       <code><![CDATA[! is_array($routes) && ! $routes instanceof Traversable]]></code>
       <code><![CDATA[$this->baseUrl === null]]></code>
@@ -437,6 +403,9 @@
       <code><![CDATA[is_array($options)]]></code>
       <code><![CDATA[is_array($specs)]]></code>
     </DocblockTypeContradiction>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$route]]></code>
+    </LessSpecificReturnStatement>
     <MixedArgument>
       <code><![CDATA[$name]]></code>
       <code><![CDATA[$options['fragment']]]></code>
@@ -456,8 +425,6 @@
     <MixedAssignment>
       <code><![CDATA[$name]]></code>
       <code><![CDATA[$priority]]></code>
-      <code><![CDATA[$route]]></code>
-      <code><![CDATA[$route]]></code>
       <code><![CDATA[$uri]]></code>
       <code><![CDATA[$value]]></code>
     </MixedAssignment>
@@ -468,14 +435,11 @@
       <code><![CDATA[$route->assemble(array_merge($this->defaultParams, $params), $options)]]></code>
       <code><![CDATA[$route->assemble(array_merge($this->defaultParams, $params), $options)]]></code>
     </MixedOperand>
-    <MixedPropertyAssignment>
-      <code><![CDATA[$route]]></code>
-    </MixedPropertyAssignment>
-    <MixedReturnStatement>
-      <code><![CDATA[$route]]></code>
-      <code><![CDATA[$route]]></code>
-    </MixedReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[TRoute]]></code>
+    </MoreSpecificReturnType>
     <NoInterfaceProperties>
+      <code><![CDATA[$route->priority]]></code>
       <code><![CDATA[$route->priority]]></code>
     </NoInterfaceProperties>
     <PossiblyInvalidArgument>
@@ -522,29 +486,9 @@
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/RoutePluginManager.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[$config]]></code>
-      <code><![CDATA[$config['invokables']]]></code>
-      <code><![CDATA[$config['invokables']]]></code>
-    </ArgumentTypeCoercion>
-    <DeprecatedInterface>
-      <code><![CDATA[ContainerInterface|ConfigInterface]]></code>
-    </DeprecatedInterface>
-    <MissingReturnType>
-      <code><![CDATA[validatePlugin]]></code>
-    </MissingReturnType>
     <MixedArgument>
       <code><![CDATA[$config['factories']]]></code>
     </MixedArgument>
-    <NonInvariantDocblockPropertyType>
-      <code><![CDATA[$instanceOf]]></code>
-    </NonInvariantDocblockPropertyType>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[validatePlugin]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedProperty>
-      <code><![CDATA[$shareByDefault]]></code>
-    </PossiblyUnusedProperty>
   </file>
   <file src="src/RouteStackInterface.php">
     <PossiblyUnusedReturnValue>
@@ -662,26 +606,6 @@
     </MixedAssignment>
   </file>
   <file src="test/Http/PartTest.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[new RoutePluginManager(new ServiceManager())]]></code>
-    </ArgumentTypeCoercion>
-    <LessSpecificReturnStatement>
-      <code><![CDATA[new RoutePluginManager(new ServiceManager(), [
-            'aliases'   => [
-                'literal' => Literal::class,
-                'Literal' => Literal::class,
-                'part'    => Part::class,
-                'Part'    => Part::class,
-                'segment' => Segment::class,
-                'Segment' => Segment::class,
-            ],
-            'factories' => [
-                Literal::class => RouteInvokableFactory::class,
-                Part::class    => RouteInvokableFactory::class,
-                Segment::class => RouteInvokableFactory::class,
-            ],
-        ])]]></code>
-    </LessSpecificReturnStatement>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$key]]></code>
     </MixedArgumentTypeCoercion>
@@ -689,9 +613,6 @@
       <code><![CDATA[$result]]></code>
       <code><![CDATA[$value]]></code>
     </MixedAssignment>
-    <MoreSpecificReturnType>
-      <code><![CDATA[RoutePluginManager<HttpRouteInterface>]]></code>
-    </MoreSpecificReturnType>
   </file>
   <file src="test/Http/RegexTest.php">
     <MixedArgumentTypeCoercion>
@@ -787,26 +708,6 @@
     </UnusedClosureParam>
   </file>
   <file src="test/RouterFactoryTest.php">
-    <DeprecatedClass>
-      <code><![CDATA[new Config(array_merge_recursive($this->defaultServiceConfig, [
-            'services' => [
-                'config' => [
-                    'router' => [
-                        'router_class' => TestAsset\Router::class,
-                    ],
-                ],
-            ],
-        ]))]]></code>
-      <code><![CDATA[new Config(array_merge_recursive($this->defaultServiceConfig, [
-            'services' => [
-                'config' => [
-                    'router' => [
-                        'router_class' => TestAsset\Router::class,
-                    ],
-                ],
-            ],
-        ]))]]></code>
-    </DeprecatedClass>
     <InternalClass>
       <code><![CDATA[new RouterFactory()]]></code>
     </InternalClass>
