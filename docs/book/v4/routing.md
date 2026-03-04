@@ -62,10 +62,10 @@ namespace Laminas\Router;
 
 interface RouteStackInterface extends RouteInterface
 {
-    public function addRoute(string $name, iterable|RouteInterface $route, int $priority = null):static;
-    public function addRoutes(iterable $routes):static;
-    public function removeRoute(string $name):static;
-    public function setRoutes(iterable $routes):static;
+    public function addRoute(string $name, iterable|RouteInterface $route, int $priority = null): static;
+    public function addRoutes(iterable $routes): static;
+    public function removeRoute(string $name): static;
+    public function setRoutes(iterable $routes): static;
 }
 ```
 
