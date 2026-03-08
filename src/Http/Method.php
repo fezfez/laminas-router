@@ -4,30 +4,24 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
+use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\RequestInterface;
 use Override;
+use Psr\Http\Message\RequestInterface;
 
 use function array_map;
 use function explode;
 use function in_array;
 use function is_string;
-use function method_exists;
 use function strtoupper;
 use function trim;
 
 /**
  * Method route.
  */
-final class Method implements HttpRouteInterface
+final readonly class Method implements HttpRouteInterface
 {
-    /**
-     * @internal
-     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     */
-    public int|null $priority = null;
-
     /**
      * Create a new method route.
      *
@@ -37,11 +31,12 @@ final class Method implements HttpRouteInterface
         /**
          * Verb to match.
          */
-        private readonly string $verb,
+        private string $verb,
         /**
          * Default values.
          */
-        private readonly array $defaults = []
+        private array $defaults = [],
+        private int|null $priority = null
     ) {
     }
 
@@ -56,23 +51,21 @@ final class Method implements HttpRouteInterface
         $verb = $options['verb'] ?? null;
         /** @psalm-var array<string, string> $defaults */
         $defaults = $options['defaults'] ?? [];
+        /** @psalm-var int|null $priority */
+        $priority = $options['priority'] ?? null;
 
         if (! is_string($verb)) {
             throw new Exception\InvalidArgumentException('Missing "verb" in options array');
         }
 
-        return new self($verb, $defaults);
+        return new self($verb, $defaults, $priority);
     }
 
     /** @inheritDoc */
     #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
-        if (! method_exists($request, 'getMethod')) {
-            return null;
-        }
-
-        $requestVerb = strtoupper((string) $request->getMethod());
+        $requestVerb = strtoupper($request->getMethod());
         $matchVerbs  = explode(',', strtoupper($this->verb));
         $matchVerbs  = array_map(trim(...), $matchVerbs);
 
@@ -85,10 +78,10 @@ final class Method implements HttpRouteInterface
 
     /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = []): string
+    public function assemble(array $params = [], array $options = []): AssembledUrl
     {
         // The request method does not contribute to the path, thus nothing is returned.
-        return '';
+        return new AssembledUrl();
     }
 
     /** @inheritDoc */
@@ -96,5 +89,11 @@ final class Method implements HttpRouteInterface
     public function getAssembledParams(): array
     {
         return [];
+    }
+
+    #[Override]
+    public function getPriority(): ?int
+    {
+        return $this->priority;
     }
 }

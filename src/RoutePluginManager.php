@@ -151,8 +151,7 @@ final class RoutePluginManager extends AbstractPluginManager
             unset($config['invokables']);
         }
 
-        // phpcs:disable SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration.MissingVariable
-        /** @var ServiceManagerConfiguration $config */
+        /** @psalm-var ServiceManagerConfiguration $config */
         parent::configure($config);
 
         return $this;

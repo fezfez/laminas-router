@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http;
 
-use ArrayObject;
-use Laminas\Http\Request;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Uri;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
-use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Part;
@@ -17,8 +16,6 @@ use Laminas\Router\RouteInvokableFactory;
 use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
-use Laminas\Stdlib\Parameters;
-use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -50,12 +47,8 @@ final class PartTest extends TestCase
 
     public static function getRoute(): Part
     {
-        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
-        $prototypes = new ArrayObject();
-
         return new Part(
             self::getRoutePlugins(),
-            $prototypes,
             [
                 'type'    => Literal::class,
                 'options' => [
@@ -66,6 +59,7 @@ final class PartTest extends TestCase
                 ],
             ],
             [],
+            null,
             true,
             [
                 'bar' => [
@@ -116,7 +110,7 @@ final class PartTest extends TestCase
                         ],
                     ],
                 ],
-            ],
+            ]
         );
     }
 
@@ -217,8 +211,8 @@ final class PartTest extends TestCase
         ?array $params = null
     ): void {
         $request = new Request();
-        $request->setUri('http://example.com' . $path);
-        $match = $route->match($request, $offset);
+        $request = $request->withUri(new Uri('http://example.com' . $path));
+        $match   = $route->match($request, $offset);
 
         if ($params === null) {
             $this->assertNull($match);
@@ -257,9 +251,9 @@ final class PartTest extends TestCase
         $result = $route->assemble($params, ['name' => $routeName]);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, $result, $offset));
+            $this->assertEquals($offset, strpos($path, (string) $result, $offset));
         } else {
-            $this->assertEquals($path, $result);
+            $this->assertEquals($path, (string) $result);
         }
     }
 
@@ -275,23 +269,19 @@ final class PartTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Base route may not be a part route');
 
-        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
-        $prototypes = new ArrayObject();
-
         new Part(
             new RoutePluginManager(new ServiceManager()),
-            $prototypes,
             self::getRoute(),
             [],
-            true,
-            [],
+            null,
+            true
         );
     }
 
     public function testNoMatchWithoutUriMethod(): void
     {
         $route   = self::getRoute();
-        $request = new BaseRequest();
+        $request = new Request();
 
         $this->assertNull($route->match($request));
     }
@@ -351,10 +341,9 @@ final class PartTest extends TestCase
 
         $route   = Part::factory($options);
         $request = new Request();
-        $request->setUri('http://example.com/resource?foo=bar');
-        $query = new Parameters(['foo' => 'bar']);
-        $request->setQuery($query);
-        $request->getQuery();
+        $uri     = new Uri('http://example.com/resource?foo=bar');
+        $uri     = $uri->withQuery('foo');
+        $request = $request->withUri($uri);
 
         $match = $route->match($request);
         $this->assertInstanceOf(RouteMatch::class, $match);

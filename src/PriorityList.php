@@ -12,7 +12,7 @@ use Laminas\Stdlib\PriorityList as StdlibPriorityList;
  * @psalm-internal \Laminas\Router
  * @psalm-internal \LaminasTest\Router
  *
- * @template TKey of non-empty-string|array-key
+ * @template TKey of non-empty-string
  * @template TValue of RouteInterface
  * @template-extends StdlibPriorityList<TKey, TValue>
  */

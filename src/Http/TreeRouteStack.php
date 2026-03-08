@@ -4,25 +4,23 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
-use ArrayObject;
+use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Router\SimpleRouteStack;
-use Laminas\Stdlib\RequestInterface;
-use Laminas\Uri\Http as HttpUri;
 use Override;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\UriInterface;
 
+use function array_key_exists;
 use function array_merge;
 use function assert;
 use function explode;
 use function is_array;
 use function is_string;
-use function method_exists;
-use function property_exists;
-use function rtrim;
 use function sprintf;
 use function strlen;
 
@@ -36,37 +34,19 @@ use function strlen;
 class TreeRouteStack extends SimpleRouteStack
 {
     /**
-     * Base URL.
-     */
-    private string|null $baseUrl = null;
-
-    /**
      * Request URI.
      */
-    private HttpUri|null $requestUri = null;
+    private UriInterface|null $requestUri = null;
 
     /**
-     * @internal
-     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     */
-    public int|null $priority = null;
-
-    /**
-     * @param ArrayObject<string, TRoute> $prototypes
      * @param array<non-empty-string, array|TRoute> $routes
      * @param array<non-empty-string, non-empty-string> $defaultParams
      */
     public function __construct(
         private readonly RoutePluginManager $routePluginManager,
-        /**
-         * Prototype routes.
-         *
-         * We use an ArrayObject in this case so we can easily pass it down the tree
-         * by reference.
-         */
-        private readonly ArrayObject $prototypes,
         array $routes = [],
-        array $defaultParams = []
+        array $defaultParams = [],
+        protected readonly int|null $priority = null,
     ) {
         parent::__construct($this->routePluginManager, $routes, $defaultParams);
     }
@@ -79,9 +59,7 @@ class TreeRouteStack extends SimpleRouteStack
     public static function factory(array $options = []): static
     {
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
-        $routes = $options['routes'] ?? [];
-        /** @var ArrayObject<string, TRoute> $prototypes */
-        $prototypes   = $options['prototypes'] ?? new ArrayObject();
+        $routes       = $options['routes'] ?? [];
         $routePlugins = $options['route_plugins'] ?? null;
         /** @psalm-var array<non-empty-string, non-empty-string> $defaultParams */
         $defaultParams = $options['default_params'] ?? [];
@@ -92,43 +70,42 @@ class TreeRouteStack extends SimpleRouteStack
 
         return new static(
             $routePlugins,
-            $prototypes,
             $routes,
-            $defaultParams
+            $defaultParams,
         );
     }
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     */
     #[Override]
-    public function addRoute(string|int $name, int|string|array|RouteInterface $route, ?int $priority = null): void
+    public function addRoute(string $name, array|RouteInterface $route, ?int $priority = null): void
     {
-        if (! $route instanceof HttpRouteInterface && $route instanceof RouteInterface) {
+        if ($route instanceof RouteInterface && ! $route instanceof HttpRouteInterface) {
             throw new Exception\InvalidArgumentException(
                 'Only HttpRouteInterface instances or array/string specifications are allowed.'
             );
         }
-        if (! $route instanceof HttpRouteInterface) {
+        if (is_array($route)) {
             $route = $this->routeFromArray($route);
         }
+
+        assert($route instanceof HttpRouteInterface);
 
         parent::addRoute($name, $route, $priority);
     }
 
     /**
      * @inheritDoc
-     * @param  string|array $specs
+     * @param  array $specs
      * @return TRoute
      * @throws Exception\InvalidArgumentException When route definition is not an array nor traversable.
      * @throws Exception\InvalidArgumentException When chain routes are not an array nor traversable.
      * @throws Exception\RuntimeException         When a generated routes does not implement the HTTP route interface.
      */
     #[Override]
-    final protected function routeFromArray(string|array $specs): RouteInterface
+    final protected function routeFromArray(array $specs): RouteInterface
     {
-        if (is_string($specs)) {
-            return $this->getPrototype($specs);
-        }
-
         if (isset($specs['chain_routes'])) {
             if (! is_array($specs['chain_routes'])) {
                 throw new Exception\InvalidArgumentException('Chain routes must be an array');
@@ -146,7 +123,6 @@ class TreeRouteStack extends SimpleRouteStack
             $options = [
                 'routes'        => $chainRoutes,
                 'route_plugins' => $this->routePluginManager,
-                'prototypes'    => $this->prototypes,
             ];
 
             $route = $this->routePluginManager->build(Chain::class, $options);
@@ -164,29 +140,18 @@ class TreeRouteStack extends SimpleRouteStack
                 'may_terminate' => isset($specs['may_terminate']) && $specs['may_terminate'] === true,
                 'child_routes'  => $specs['child_routes'],
                 'route_plugins' => $this->routePluginManager,
-                'prototypes'    => $this->prototypes,
             ];
 
-            $priority = $route->priority ?? null;
-
-            $route           = $this->routePluginManager->build(Part::class, $options);
-            $route->priority = $priority;
+            $route = $this->routePluginManager->build(Part::class, [
+                ...$options,
+                'priority' => $route->getPriority(),
+            ]);
         }
 
+        assert($route instanceof HttpRouteInterface);
+
+        /** @psalm-var TRoute $route */
         return $route;
-    }
-
-    /**
-     * Get a prototype.
-     *
-     * @return TRoute
-     */
-    private function getPrototype(string $name): RouteInterface
-    {
-        if (! property_exists($this->prototypes, $name)) {
-            throw new Exception\RuntimeException(sprintf('Could not find prototype with name %s', $name));
-        }
-        return $this->prototypes[$name];
     }
 
     /**
@@ -199,36 +164,23 @@ class TreeRouteStack extends SimpleRouteStack
         int|null $pathOffset = null,
         array $options = []
     ): ?RouteMatch {
-        if (! method_exists($request, 'getUri')) {
-            return null;
-        }
-
-        if ($this->baseUrl === null && method_exists($request, 'getBaseUrl')) {
-            $this->setBaseUrl((string) $request->getBaseUrl());
-        }
-
-        /** @var HttpUri $uri */
-        $uri           = $request->getUri();
-        $baseUrlLength = strlen((string) $this->baseUrl) ?: null;
-
-        if ($pathOffset !== null) {
-            $baseUrlLength = $baseUrlLength !== null ? $baseUrlLength + $pathOffset : $pathOffset;
-        }
+        $baseUrlLength = $pathOffset;
 
         if ($this->requestUri === null) {
-            $this->setRequestUri($uri);
+            $this->setRequestUri($request->getUri());
         }
 
         $pathLength = null;
         if ($baseUrlLength !== null) {
-            $pathLength = strlen((string) $uri->getPath()) - $baseUrlLength;
+            $pathLength = strlen($request->getUri()->getPath()) - $baseUrlLength;
         }
 
         foreach ($this->routes as $name => $route) {
+            assert(is_string($name));
             assert($route instanceof HttpRouteInterface);
             $match = $route->match($request, $baseUrlLength, $options);
             if ($match instanceof HttpRouteMatch && ($pathLength === null || $match->getLength() === $pathLength)) {
-                $match->setMatchedRouteName((string) $name);
+                $match->setMatchedRouteName($name);
 
                 foreach ($this->defaultParams as $paramName => $value) {
                     if ($match->getParam($paramName) === null) {
@@ -244,12 +196,9 @@ class TreeRouteStack extends SimpleRouteStack
     }
 
     /**
-     * @inheritDoc
-     * @throws Exception\InvalidArgumentException
-     * @throws Exception\RuntimeException
+     * @return array{name : non-empty-string, child : string|null}
      */
-    #[Override]
-    public function assemble(array $params = [], array $options = []): string
+    private function getRouteName(array $options): array
     {
         $name = $options['name'] ?? '';
         if (! is_string($name) || $name === '') {
@@ -262,114 +211,94 @@ class TreeRouteStack extends SimpleRouteStack
             throw new Exception\RuntimeException('Invalid route name');
         }
 
-        $route = $this->routes->get($names[0]);
+        return [
+            'name'  => $names[0],
+            'child' => $names[1] ?? null,
+        ];
+    }
+
+    /**
+     * @inheritDoc
+     * @throws Exception\InvalidArgumentException
+     * @throws Exception\RuntimeException
+     */
+    #[Override]
+    public function assemble(array $params = [], array $options = []): AssembledUrl
+    {
+        $names = $this->getRouteName($options);
+        $route = $this->routes->get($names['name']);
 
         if (! $route) {
-            throw new Exception\RuntimeException(sprintf('Route with name "%s" not found', $names[0]));
+            throw new Exception\RuntimeException(sprintf('Route with name "%s" not found', $names['name']));
         }
 
-        if (isset($names[1])) {
+        if ($names['child'] !== null) {
             if (! $route instanceof TreeRouteStack) {
                 throw new Exception\RuntimeException(sprintf(
                     'Route with name "%s" does not have child routes',
-                    $names[0]
+                    $names['name']
                 ));
             }
-            $options['name'] = $names[1];
+            $options['name'] = $names['child'];
         } else {
             unset($options['name']);
         }
 
+        $assembledUrl = $route->assemble(array_merge($this->defaultParams, $params), $options);
+
         if (isset($options['only_return_path']) && $options['only_return_path'] === true) {
-            return ($this->baseUrl ?? '') . $route->assemble(array_merge($this->defaultParams, $params), $options);
+            return $assembledUrl;
         }
 
-        if (! isset($options['uri']) || ! $options['uri'] instanceof HttpUri) {
-            $uri = new HttpUri();
+        $forceCanonical = isset($options['force_canonical']) && $options['force_canonical'] === true;
+        $contextUri     = isset($options['uri']) && $options['uri'] instanceof UriInterface ? $options['uri'] : null;
+        $fallbackUri    = $contextUri ?? $this->requestUri;
 
-            if (isset($options['force_canonical']) && $options['force_canonical'] === true) {
-                if ($this->requestUri === null) {
-                    throw new Exception\RuntimeException('Request URI has not been set');
-                }
-
-                $uri->setScheme($this->requestUri->getScheme())
-                    ->setHost($this->requestUri->getHost())
-                    ->setPort($this->requestUri->getPort());
-            }
-
-            $options['uri'] = $uri;
-        } else {
-            $uri = $options['uri'];
+        if ($forceCanonical && $fallbackUri === null) {
+            throw new RuntimeException('Request URI has not been set');
         }
 
-        $path = ($this->baseUrl ?? '') . $route->assemble(array_merge($this->defaultParams, $params), $options);
+        $normalizeNonEmpty = static fn(?string $value): ?string => $value === '' ? null : $value;
+        $resolvedPort      = $assembledUrl->port ?? $fallbackUri?->getPort();
+        $resolvedScheme    = $assembledUrl->scheme ?? $normalizeNonEmpty($fallbackUri?->getScheme());
+        $resolvedHost      = $assembledUrl->host ?? $normalizeNonEmpty($fallbackUri?->getHost());
 
-        if (isset($options['query']) && (is_string($options['query']) || is_array($options['query']))) {
-            $uri->setQuery($options['query']);
+        if ($resolvedHost !== null && $resolvedScheme === null) {
+            throw new RuntimeException('Request URI has not been set');
         }
 
-        if (isset($options['fragment']) && is_string($options['fragment'])) {
-            $uri->setFragment($options['fragment']);
+        $query    = $assembledUrl->query;
+        $fragment = $assembledUrl->fragment;
+
+        if (array_key_exists('query', $options) && is_array($options['query'])) {
+            $query = $options['query'];
         }
 
-        if (
-            (isset($options['force_canonical'])
-            && $options['force_canonical'] === true)
-            || $uri->getHost() !== null
-            || $uri->getScheme() !== null
-        ) {
-            if (($uri->getHost() === null || $uri->getScheme() === null) && $this->requestUri === null) {
-                throw new Exception\RuntimeException('Request URI has not been set');
-            }
-
-            if ($uri->getHost() === null && $this->requestUri !== null) {
-                $uri->setHost($this->requestUri->getHost());
-            }
-
-            if ($uri->getScheme() === null && $this->requestUri !== null) {
-                $uri->setScheme($this->requestUri->getScheme());
-            }
-
-            $uri->setPath($path);
-
-            if (! isset($options['normalize_path']) || $options['normalize_path'] === true) {
-                $uri->normalize();
-            }
-
-            return $uri->toString();
-        } elseif (! $uri->isAbsolute() && $uri->isValidRelative()) {
-            $uri->setPath($path);
-
-            if (! isset($options['normalize_path']) || $options['normalize_path'] === true) {
-                $uri->normalize();
-            }
-
-            return $uri->toString();
+        if (array_key_exists('fragment', $options) && is_string($options['fragment'])) {
+            $fragment = $options['fragment'];
         }
 
-        return $path;
+        return new AssembledUrl(
+            $assembledUrl->path,
+            $query,
+            $resolvedHost,
+            $resolvedScheme,
+            $fragment,
+            $forceCanonical || $assembledUrl->host !== null || $assembledUrl->scheme !== null,
+            $resolvedPort,
+        );
     }
 
-    /**
-     * Set the base URL.
-     */
-    public function setBaseUrl(string $baseUrl): void
+    #[Override]
+    public function getPriority(): ?int
     {
-        $this->baseUrl = rtrim($baseUrl, '/');
-    }
-
-    /**
-     * Get the base URL.
-     */
-    public function getBaseUrl(): ?string
-    {
-        return $this->baseUrl;
+        return $this->priority;
     }
 
     /**
      * Set the request URI.
      */
-    public function setRequestUri(HttpUri $uri): void
+    public function setRequestUri(UriInterface $uri): void
     {
         $this->requestUri = $uri;
     }
@@ -377,7 +306,7 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Get the request URI.
      */
-    public function getRequestUri(): ?HttpUri
+    public function getRequestUri(): ?UriInterface
     {
         return $this->requestUri;
     }

@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http;
 
-use ArrayObject;
-use Laminas\Http\Request;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Uri;
 use Laminas\Router\Http\Chain;
-use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Segment;
 use Laminas\Router\RoutePluginManager;
@@ -24,12 +23,9 @@ final class ChainTest extends TestCase
     public static function getRoute(): Chain
     {
         $routePlugins = new RoutePluginManager(new ServiceManager());
-        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
-        $prototypes = new ArrayObject();
 
         return new Chain(
             $routePlugins,
-            $prototypes,
             [
                 [
                     'type'    => Segment::class,
@@ -49,19 +45,16 @@ final class ChainTest extends TestCase
                         ],
                     ],
                 ],
-            ],
+            ]
         );
     }
 
     public static function getRouteWithOptionalParam(): Chain
     {
         $routePlugins = new RoutePluginManager(new ServiceManager());
-        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
-        $prototypes = new ArrayObject();
 
         return new Chain(
             $routePlugins,
-            $prototypes,
             [
                 [
                     'type'    => Segment::class,
@@ -81,7 +74,7 @@ final class ChainTest extends TestCase
                         ],
                     ],
                 ],
-            ],
+            ]
         );
     }
 
@@ -151,8 +144,8 @@ final class ChainTest extends TestCase
     public function testMatching(Chain $route, string $path, int|null $offset, ?array $params = null): void
     {
         $request = new Request();
-        $request->setUri('http://example.com' . $path);
-        $match = $route->match($request, $offset);
+        $request = $request->withUri(new Uri('http://example.com' . $path));
+        $match   = $route->match($request, $offset);
 
         if ($params === null) {
             $this->assertNull($match);
@@ -183,7 +176,7 @@ final class ChainTest extends TestCase
         $result = $route->assemble($params);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, $result, $offset));
+            $this->assertEquals($offset, strpos($path, (string) $result, $offset));
         } else {
             $this->assertEquals($path, $result);
         }

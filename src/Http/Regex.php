@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
+use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\RequestInterface;
-use Laminas\Uri\Http;
 use Override;
+use Psr\Http\Message\RequestInterface;
 
 use function array_merge;
 use function assert;
 use function is_array;
 use function is_string;
-use function method_exists;
 use function preg_match;
 use function rawurldecode;
 use function rawurlencode;
@@ -34,12 +33,6 @@ final class Regex implements HttpRouteInterface
      * @var list<non-empty-string>
      */
     private array $assembledParams = [];
-
-    /**
-     * @internal
-     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     */
-    public int|null $priority = null;
 
     /**
      * Create a new regex route.
@@ -64,7 +57,8 @@ final class Regex implements HttpRouteInterface
          *
          * @var array<non-empty-string, string|int>
          */
-        private readonly array $defaults = []
+        private readonly array $defaults = [],
+        private readonly int|null $priority = null
     ) {
     }
 
@@ -78,6 +72,8 @@ final class Regex implements HttpRouteInterface
         $regex    = $options['regex'] ?? null;
         $spec     = $options['spec'] ?? null;
         $defaults = $options['defaults'] ?? [];
+        /** @psalm-var int|null $priority */
+        $priority = $options['priority'] ?? null;
 
         if (! is_string($regex) || $regex === '') {
             throw new Exception\InvalidArgumentException('Missing "regex" in options array');
@@ -89,25 +85,19 @@ final class Regex implements HttpRouteInterface
 
         /** @psalm-var array<non-empty-string, non-empty-string> $defaults */
 
-        return new self($regex, $spec, $defaults);
+        return new self($regex, $spec, $defaults, $priority);
     }
 
     /** @inheritDoc */
     #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
-        if (! method_exists($request, 'getUri')) {
-            return null;
-        }
-
-        /** @var Http $uri */
-        $uri  = $request->getUri();
-        $path = $uri->getPath();
+        $path = $request->getUri()->getPath();
 
         if ($pathOffset !== null) {
-            $result = preg_match('(\G' . $this->regex . ')', (string) $path, $matches, 0, $pathOffset);
+            $result = preg_match('(\G' . $this->regex . ')', $path, $matches, 0, $pathOffset);
         } else {
-            $result = preg_match('(^' . $this->regex . '$)', (string) $path, $matches);
+            $result = preg_match('(^' . $this->regex . '$)', $path, $matches);
         }
 
         if (! $result) {
@@ -129,7 +119,7 @@ final class Regex implements HttpRouteInterface
 
     /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = []): string
+    public function assemble(array $params = [], array $options = []): AssembledUrl
     {
         $url                   = $this->spec;
         $mergedParams          = array_merge($this->defaults, $params);
@@ -145,7 +135,7 @@ final class Regex implements HttpRouteInterface
             }
         }
 
-        return $url;
+        return new AssembledUrl(path:$url);
     }
 
     /** @inheritDoc */
@@ -153,5 +143,11 @@ final class Regex implements HttpRouteInterface
     public function getAssembledParams(): array
     {
         return $this->assembledParams;
+    }
+
+    #[Override]
+    public function getPriority(): ?int
+    {
+        return $this->priority;
     }
 }

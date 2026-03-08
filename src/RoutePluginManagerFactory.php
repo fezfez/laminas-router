@@ -16,7 +16,7 @@ use Psr\Container\ContainerInterface;
  *
  * @psalm-import-type ServiceManagerConfiguration from ServiceManager
  */
-final class RoutePluginManagerFactory implements FactoryInterface
+final readonly class RoutePluginManagerFactory implements FactoryInterface
 {
     /**
      * Create and return a route plugin manager.

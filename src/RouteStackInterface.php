@@ -12,10 +12,10 @@ interface RouteStackInterface extends RouteInterface
     /**
      * Add a route to the stack.
      *
-     * @param non-empty-string|array-key $name
+     * @param non-empty-string $name
      * @param array|TRoute $route
      */
-    public function addRoute(string|int $name, array|RouteInterface $route, ?int $priority = null): void;
+    public function addRoute(string $name, array|RouteInterface $route, ?int $priority = null): void;
 
     /**
      * Add multiple routes to the stack.

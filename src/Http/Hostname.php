@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
+use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\RouteDefinition\RouteDefinition;
@@ -11,14 +12,11 @@ use Laminas\Router\Http\RouteDefinition\RouteDefinitionLiteral;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionOption;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionParameter;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionPartInterface;
-use Laminas\Stdlib\RequestInterface;
-use Laminas\Uri\Http;
-use Laminas\Uri\Http as HttpUri;
 use Override;
+use Psr\Http\Message\RequestInterface;
 
 use function array_merge;
 use function is_string;
-use function method_exists;
 use function preg_match;
 use function preg_quote;
 use function sprintf;
@@ -52,11 +50,6 @@ final class Hostname implements HttpRouteInterface
      * @var list<non-empty-string>
      */
     private array $assembledParams = [];
-    /**
-     * @internal
-     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     */
-    public int|null $priority = null;
 
     /**
      * Create a new hostname route.
@@ -67,7 +60,8 @@ final class Hostname implements HttpRouteInterface
     public function __construct(
         string $route,
         array $constraints = [],
-        private readonly array $defaults = []
+        private readonly array $defaults = [],
+        private readonly int|null $priority = null,
     ) {
         $this->parts = $this->parseRouteDefinition($route);
         $this->regex = $this->buildRegex($this->parts->getParts(), $constraints);
@@ -85,12 +79,14 @@ final class Hostname implements HttpRouteInterface
         $constraints = $options['constraints'] ?? [];
         /** @psalm-var array<string, string> $defaults */
         $defaults = $options['defaults'] ?? [];
+        /** @psalm-var int|null $priority */
+        $priority = $options['priority'] ?? null;
 
         if (! is_string($route)) {
             throw new Exception\InvalidArgumentException('Missing "route" in options array');
         }
 
-        return new self($route, $constraints, $defaults);
+        return new self($route, $constraints, $defaults, $priority);
     }
 
     /**
@@ -192,8 +188,9 @@ final class Hostname implements HttpRouteInterface
      * @param array<string, string|null|int|float> $mergedParams
      * @throws Exception\RuntimeException
      * @throws Exception\InvalidArgumentException
+     * @return non-empty-string|null
      */
-    private function buildHost(array $parts, array $mergedParams, bool $isOptional): string
+    private function buildHost(array $parts, array $mergedParams, bool $isOptional): string|null
     {
         $host      = '';
         $skip      = true;
@@ -213,7 +210,7 @@ final class Hostname implements HttpRouteInterface
                         throw new Exception\InvalidArgumentException(sprintf('Missing parameter "%s"', $part->name));
                     }
 
-                    return '';
+                    return null;
                 } elseif (
                     ! $isOptional
                     || ! isset($this->defaults[$part->name])
@@ -232,7 +229,7 @@ final class Hostname implements HttpRouteInterface
                 $skippable    = true;
                 $optionalPart = $this->buildHost($part->part, $mergedParams, true);
 
-                if ($optionalPart !== '') {
+                if ($optionalPart !== null) {
                     $host .= $optionalPart;
                     $skip  = false;
                 }
@@ -240,24 +237,17 @@ final class Hostname implements HttpRouteInterface
         }
 
         if ($isOptional && $skippable && $skip) {
-            return '';
+            return null;
         }
 
-        return $host;
+        return $host === '' ? null : $host;
     }
 
     /** @inheritDoc */
     #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
-        if (! method_exists($request, 'getUri')) {
-            return null;
-        }
-
-        /** @var Http $uri */
-        $uri  = $request->getUri();
-        $host = $uri->getHost() ?? '';
-
+        $host   = $request->getUri()->getHost();
         $result = preg_match('(^' . $this->regex . '$)', $host, $matches);
 
         if (! $result) {
@@ -277,22 +267,19 @@ final class Hostname implements HttpRouteInterface
 
     /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = []): string
+    public function assemble(array $params = [], array $options = []): AssembledUrl
     {
         $this->assembledParams = [];
 
-        if (isset($options['uri']) && $options['uri'] instanceof HttpUri) {
-            $host = $this->buildHost(
-                $this->parts->getParts(),
-                array_merge($this->defaults, $params),
-                false
-            );
+        $host = $this->buildHost(
+            $this->parts->getParts(),
+            array_merge($this->defaults, $params),
+            false
+        );
 
-            $options['uri']->setHost($host);
-        }
-
-        // A hostname does not contribute to the path, thus nothing is returned.
-        return '';
+        return new AssembledUrl(
+            host: $host,
+        );
     }
 
     /** @inheritDoc */
@@ -300,5 +287,11 @@ final class Hostname implements HttpRouteInterface
     public function getAssembledParams(): array
     {
         return $this->assembledParams;
+    }
+
+    #[Override]
+    public function getPriority(): ?int
+    {
+        return $this->priority;
     }
 }

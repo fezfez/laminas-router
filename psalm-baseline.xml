@@ -1,91 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="6.15.1@28dc127af1b5aecd52314f6f645bafc10d0e11f9">
-  <file src="src/Http/Hostname.php">
-    <PossiblyUnusedProperty>
-      <code><![CDATA[$priority]]></code>
-    </PossiblyUnusedProperty>
-  </file>
-  <file src="src/Http/Literal.php">
-    <PossiblyUnusedProperty>
-      <code><![CDATA[$priority]]></code>
-    </PossiblyUnusedProperty>
-  </file>
-  <file src="src/Http/Method.php">
-    <PossiblyUnusedProperty>
-      <code><![CDATA[$priority]]></code>
-    </PossiblyUnusedProperty>
-  </file>
-  <file src="src/Http/Part.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[(string) $name]]></code>
-    </ArgumentTypeCoercion>
-    <InvalidArgument>
-      <code><![CDATA[new self(
-            $routePlugins,
-            $prototypes,
-            $route,
-            [],
-            $mayTerminate,
-            $childRoutes,
-        )]]></code>
-    </InvalidArgument>
-  </file>
-  <file src="src/Http/Placeholder.php">
-    <PossiblyUnusedProperty>
-      <code><![CDATA[$priority]]></code>
-    </PossiblyUnusedProperty>
-  </file>
-  <file src="src/Http/Regex.php">
-    <PossiblyUnusedProperty>
-      <code><![CDATA[$priority]]></code>
-    </PossiblyUnusedProperty>
-  </file>
-  <file src="src/Http/Scheme.php">
-    <MoreSpecificImplementedParamType>
-      <code><![CDATA[$options]]></code>
-    </MoreSpecificImplementedParamType>
-    <PossiblyUnusedProperty>
-      <code><![CDATA[$priority]]></code>
-    </PossiblyUnusedProperty>
-  </file>
-  <file src="src/Http/Segment.php">
-    <PossiblyUnusedProperty>
-      <code><![CDATA[$priority]]></code>
-    </PossiblyUnusedProperty>
-  </file>
+<files psalm-version="6.16.1@f1f5de594dc76faf8784e02d3dc4716c91c6f6ac">
   <file src="src/Http/TreeRouteStack.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[(string) $name]]></code>
-    </ArgumentTypeCoercion>
-    <DeprecatedProperty>
-      <code><![CDATA[$route->priority]]></code>
-      <code><![CDATA[$route->priority]]></code>
-    </DeprecatedProperty>
-    <InvalidReturnStatement>
-      <code><![CDATA[$route]]></code>
-    </InvalidReturnStatement>
-    <InvalidReturnType>
-      <code><![CDATA[TRoute]]></code>
-    </InvalidReturnType>
-    <NoInterfaceProperties>
-      <code><![CDATA[$route->priority]]></code>
-    </NoInterfaceProperties>
-    <PossiblyInvalidArgument>
-      <code><![CDATA[$route]]></code>
-    </PossiblyInvalidArgument>
     <UnsafeGenericInstantiation>
       <code><![CDATA[new static(
             $routePlugins,
-            $prototypes,
             $routes,
-            $defaultParams
+            $defaultParams,
         )]]></code>
     </UnsafeGenericInstantiation>
-  </file>
-  <file src="src/PriorityList.php">
-    <InvalidTemplateParam>
-      <code><![CDATA[PriorityList]]></code>
-    </InvalidTemplateParam>
   </file>
   <file src="src/RoutePluginManager.php">
     <MethodSignatureMismatch>
@@ -96,48 +18,12 @@
     </MixedArgument>
   </file>
   <file src="src/SimpleRouteStack.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[(string) $name]]></code>
-    </ArgumentTypeCoercion>
-    <MixedAssignment>
-      <code><![CDATA[$route]]></code>
-    </MixedAssignment>
-    <NoInterfaceProperties>
-      <code><![CDATA[$route->priority]]></code>
-      <code><![CDATA[$route->priority]]></code>
-    </NoInterfaceProperties>
-    <UnsafeInstantiation>
+    <UnsafeGenericInstantiation>
       <code><![CDATA[new static(
             $routePlugins,
             $routes,
             $defaultParams
         )]]></code>
-    </UnsafeInstantiation>
-  </file>
-  <file src="test/Http/TestAsset/DummyRoute.php">
-    <UnsafeInstantiation>
-      <code><![CDATA[new static()]]></code>
-    </UnsafeInstantiation>
-  </file>
-  <file src="test/Http/TreeRouteStackTest.php">
-    <NoInterfaceProperties>
-      <code><![CDATA[$foo->priority]]></code>
-    </NoInterfaceProperties>
-  </file>
-  <file src="test/SimpleRouteStackTest.php">
-    <DeprecatedProperty>
-      <code><![CDATA[$route->priority]]></code>
-    </DeprecatedProperty>
-    <NoInterfaceProperties>
-      <code><![CDATA[$route->priority]]></code>
-    </NoInterfaceProperties>
-  </file>
-  <file src="test/TestAsset/DummyRoute.php">
-    <PossiblyUnusedProperty>
-      <code><![CDATA[$priority]]></code>
-    </PossiblyUnusedProperty>
-    <UnsafeInstantiation>
-      <code><![CDATA[new static()]]></code>
-    </UnsafeInstantiation>
+    </UnsafeGenericInstantiation>
   </file>
 </files>

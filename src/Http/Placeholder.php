@@ -4,28 +4,24 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
+use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\RequestInterface;
 use Override;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Placeholder route.
  */
-final class Placeholder implements HttpRouteInterface
+final readonly class Placeholder implements HttpRouteInterface
 {
-    /**
-     * @internal
-     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     */
-    public int|null $priority = null;
-
     /**
      * @param array<string, string> $defaults
      */
     public function __construct(
         /** @var array<string, string> */
-        private readonly array $defaults
+        private array $defaults,
+        private int|null $priority = null
     ) {
     }
 
@@ -38,8 +34,10 @@ final class Placeholder implements HttpRouteInterface
     {
         /** @var array<string, string> $defaults */
         $defaults = $options['defaults'] ?? [];
+        /** @psalm-var int|null $priority */
+        $priority = $options['priority'] ?? null;
 
-        return new self($defaults);
+        return new self($defaults, $priority);
     }
 
     /** @inheritDoc */
@@ -54,9 +52,9 @@ final class Placeholder implements HttpRouteInterface
 
     /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = []): string
+    public function assemble(array $params = [], array $options = []): AssembledUrl
     {
-        return '';
+        return new AssembledUrl();
     }
 
     /** @inheritDoc */
@@ -64,5 +62,11 @@ final class Placeholder implements HttpRouteInterface
     public function getAssembledParams(): array
     {
         return [];
+    }
+
+    #[Override]
+    public function getPriority(): ?int
+    {
+        return $this->priority;
     }
 }

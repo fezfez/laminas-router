@@ -4,26 +4,19 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
+use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\RequestInterface;
-use Laminas\Uri\Http;
 use Override;
+use Psr\Http\Message\RequestInterface;
 
 use function is_string;
-use function method_exists;
 
 /**
  * Scheme route.
  */
-final class Scheme implements HttpRouteInterface
+final readonly class Scheme implements HttpRouteInterface
 {
-    /**
-     * @internal
-     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     */
-    public int|null $priority = null;
-
     /**
      * Create a new scheme route.
      *
@@ -32,44 +25,40 @@ final class Scheme implements HttpRouteInterface
     public function __construct(
         /**
          * Scheme to match.
+         *
+         * @var non-empty-string
          */
-        private readonly string $scheme,
+        private string $scheme,
         /**
          * Default values.
          */
-        private readonly array $defaults = []
+        private array $defaults = [],
+        private int|null $priority = null
     ) {
     }
 
-    /**
-     * @param array{'scheme'?:string, 'defaults'?: array<string, string>} $options
-     */
     #[Override]
     public static function factory(array $options = []): static
     {
-        $scheme   = $options['scheme'] ?? null;
+        /** @psalm-var string|null $scheme */
+        $scheme = $options['scheme'] ?? null;
+        /** @psalm-var array<string, string> $defaults */
         $defaults = $options['defaults'] ?? [];
+        /** @psalm-var int|null $priority */
+        $priority = $options['priority'] ?? null;
 
         if (! is_string($scheme) || $scheme === '') {
             throw new Exception\InvalidArgumentException('Missing "scheme" in options array');
         }
 
-        return new self($scheme, $defaults);
+        return new self($scheme, $defaults, $priority);
     }
 
     /** @inheritDoc */
     #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
-        if (! method_exists($request, 'getUri')) {
-            return null;
-        }
-
-        /** @var Http $uri */
-        $uri    = $request->getUri();
-        $scheme = $uri->getScheme();
-
-        if ($scheme !== $this->scheme) {
+        if ($request->getUri()->getScheme() !== $this->scheme) {
             return null;
         }
 
@@ -78,14 +67,9 @@ final class Scheme implements HttpRouteInterface
 
     /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = []): string
+    public function assemble(array $params = [], array $options = []): AssembledUrl
     {
-        if (isset($options['uri']) && $options['uri'] instanceof Http) {
-            $options['uri']->setScheme($this->scheme);
-        }
-
-        // A scheme does not contribute to the path, thus nothing is returned.
-        return '';
+        return new AssembledUrl(scheme:$this->scheme);
     }
 
     /** @inheritDoc */
@@ -93,5 +77,11 @@ final class Scheme implements HttpRouteInterface
     public function getAssembledParams(): array
     {
         return [];
+    }
+
+    #[Override]
+    public function getPriority(): ?int
+    {
+        return $this->priority;
     }
 }

@@ -14,7 +14,7 @@ use Psr\Container\ContainerInterface;
  * @psalm-internal \Laminas\Router
  * @psalm-internal \LaminasTest\Router
  */
-final class RouterFactory implements FactoryInterface
+final readonly class RouterFactory implements FactoryInterface
 {
     /**
      * Create and return the router
