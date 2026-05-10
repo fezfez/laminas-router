@@ -46,7 +46,7 @@ final class Regex implements HttpRouteInterface
      *
      * @param non-empty-string $regex
      * @param non-empty-string $spec
-     * @param array<non-empty-string, non-empty-string> $defaults
+     * @param array<non-empty-string, string|int> $defaults
      */
     public function __construct(
         /**
@@ -62,7 +62,7 @@ final class Regex implements HttpRouteInterface
         /**
          * Default values.
          *
-         * @var array<non-empty-string, non-empty-string>
+         * @var array<non-empty-string, string|int>
          */
         private readonly array $defaults = []
     ) {
