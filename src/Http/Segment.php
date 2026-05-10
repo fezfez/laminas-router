@@ -194,7 +194,7 @@ final class Segment implements HttpRouteInterface
 
                 $routeDefinition->addPart(new RouteDefinitionTranslatedLiteral($matches['literal']));
             } elseif ($matches['token'] === '[') {
-                $routeDefinition->startOptional();
+                $routeDefinition->assertStartOptional();
             } elseif ($matches['token'] === ']') {
                 $routeDefinition->endOptional();
             } else {
@@ -286,7 +286,9 @@ final class Segment implements HttpRouteInterface
         foreach ($parts as $part) {
             if ($part instanceof RouteDefinitionLiteral) {
                 $path .= $part->literal;
-            } elseif ($part instanceof RouteDefinitionParameter) {
+                continue;
+            }
+            if ($part instanceof RouteDefinitionParameter) {
                 $skippable = true;
 
                 if (! isset($mergedParams[$part->name])) {
@@ -307,7 +309,9 @@ final class Segment implements HttpRouteInterface
                 $path .= $this->encode((string) $mergedParams[$part->name]);
 
                 $this->assembledParams[] = $part->name;
-            } elseif ($part instanceof RouteDefinitionOption) {
+                continue;
+            }
+            if ($part instanceof RouteDefinitionOption) {
                 $skippable    = true;
                 $optionalPart = $this->buildPath($part->part, $mergedParams, true, $hasChild, $options);
 
@@ -315,7 +319,9 @@ final class Segment implements HttpRouteInterface
                     $path .= $optionalPart;
                     $skip  = false;
                 }
-            } elseif ($part instanceof RouteDefinitionTranslatedLiteral) {
+                continue;
+            }
+            if ($part instanceof RouteDefinitionTranslatedLiteral) {
                 if ($translator === null || $textDomain === null) {
                     throw new Exception\RuntimeException('No translator provided');
                 }

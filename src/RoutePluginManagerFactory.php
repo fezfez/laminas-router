@@ -11,6 +11,9 @@ use Psr\Container\ContainerInterface;
 /**
  * @internal
  *
+ * @psalm-internal \Laminas\Router
+ * @psalm-internal \LaminasTest\Router
+ *
  * @psalm-import-type ServiceManagerConfiguration from ServiceManager
  */
 final class RoutePluginManagerFactory implements FactoryInterface

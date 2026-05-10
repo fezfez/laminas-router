@@ -6,6 +6,9 @@ namespace Laminas\Router\Http\RouteDefinition;
 
 /**
  * @internal
+ *
+ * @psalm-internal \Laminas\Router
+ * @psalm-internal \LaminasTest\Router
  */
 final readonly class RouteDefinitionParameter implements RouteDefinitionPartInterface
 {

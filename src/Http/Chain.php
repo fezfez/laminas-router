@@ -47,14 +47,16 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
      *
      * @param array<array-key, array|TRoute> $routes
      * @param ArrayObject<string, TRoute> $prototypes
+     * @param array<non-empty-string, non-empty-string> $defaultParams
      */
     public function __construct(
-        array $routes,
-        RoutePluginManager $routePlugins,
-        ArrayObject $prototypes
+        RoutePluginManager $routePluginManager,
+        ArrayObject $prototypes,
+        array $routes = [],
+        array $defaultParams = []
     ) {
         $this->chainRoutes = array_reverse($routes);
-        parent::__construct($routePlugins, $prototypes);
+        parent::__construct($routePluginManager, $prototypes, [], $defaultParams);
     }
 
     /**
@@ -83,9 +85,9 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
         /** @psalm-var array<non-empty-string, TRoute> $route */
 
         return new self(
-            $route,
             $routePlugins,
-            $prototypes
+            $prototypes,
+            $route,
         );
     }
 

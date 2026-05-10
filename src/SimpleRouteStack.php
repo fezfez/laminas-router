@@ -44,9 +44,9 @@ class SimpleRouteStack implements RouteStackInterface
          */
         protected array $defaultParams = []
     ) {
-        /** @var PriorityList<non-empty-string|array-key, TRoute> $route */
-        $route        = new PriorityList();
-        $this->routes = $route;
+        /** @var PriorityList<non-empty-string|array-key, TRoute> $priorityList */
+        $priorityList = new PriorityList();
+        $this->routes = $priorityList;
         $this->addRoutes($routes);
     }
 
@@ -187,6 +187,7 @@ class SimpleRouteStack implements RouteStackInterface
     public function match(RequestInterface $request): ?RouteMatch
     {
         foreach ($this->routes as $name => $route) {
+            assert($name !== "");
             assert($route instanceof RouteInterface);
             $match = $route->match($request);
             if ($match instanceof RouteMatch) {

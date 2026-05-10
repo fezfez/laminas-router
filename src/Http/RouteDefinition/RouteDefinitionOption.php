@@ -8,6 +8,9 @@ use function array_values;
 
 /**
  * @internal
+ *
+ * @psalm-internal \Laminas\Router
+ * @psalm-internal \LaminasTest\Router
  */
 final readonly class RouteDefinitionOption implements RouteDefinitionPartInterface
 {

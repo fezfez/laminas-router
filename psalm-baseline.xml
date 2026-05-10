@@ -21,16 +21,14 @@
     </ArgumentTypeCoercion>
     <InvalidArgument>
       <code><![CDATA[new self(
-            $route,
-            $mayTerminate,
             $routePlugins,
+            $prototypes,
+            $route,
+            [],
+            $mayTerminate,
             $childRoutes,
-            $prototypes
         )]]></code>
     </InvalidArgument>
-    <PossiblyInvalidArgument>
-      <code><![CDATA[$route]]></code>
-    </PossiblyInvalidArgument>
   </file>
   <file src="src/Http/Placeholder.php">
     <PossiblyUnusedProperty>
@@ -75,14 +73,14 @@
     <PossiblyInvalidArgument>
       <code><![CDATA[$route]]></code>
     </PossiblyInvalidArgument>
-    <UnsafeInstantiation>
+    <UnsafeGenericInstantiation>
       <code><![CDATA[new static(
             $routePlugins,
             $prototypes,
             $routes,
             $defaultParams
         )]]></code>
-    </UnsafeInstantiation>
+    </UnsafeGenericInstantiation>
   </file>
   <file src="src/PriorityList.php">
     <InvalidTemplateParam>

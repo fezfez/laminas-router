@@ -54,6 +54,8 @@ final class PartTest extends TestCase
         $prototypes = new ArrayObject();
 
         return new Part(
+            self::getRoutePlugins(),
+            $prototypes,
             [
                 'type'    => Literal::class,
                 'options' => [
@@ -63,8 +65,8 @@ final class PartTest extends TestCase
                     ],
                 ],
             ],
+            [],
             true,
-            self::getRoutePlugins(),
             [
                 'bar' => [
                     'type'    => Literal::class,
@@ -115,7 +117,6 @@ final class PartTest extends TestCase
                     ],
                 ],
             ],
-            $prototypes
         );
     }
 
@@ -278,11 +279,12 @@ final class PartTest extends TestCase
         $prototypes = new ArrayObject();
 
         new Part(
-            self::getRoute(),
-            true,
             new RoutePluginManager(new ServiceManager()),
+            $prototypes,
+            self::getRoute(),
             [],
-            $prototypes
+            true,
+            [],
         );
     }
 

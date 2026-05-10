@@ -13,6 +13,8 @@ class RouteMatch
 {
     /**
      * Matched route name.
+     *
+     * @var non-empty-string|null
      */
     protected string|null $matchedRouteName = null;
 
@@ -42,6 +44,8 @@ class RouteMatch
 
     /**
      * Get name of matched route.
+     *
+     * @return non-empty-string|null
      */
     public function getMatchedRouteName(): string|null
     {

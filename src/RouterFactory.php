@@ -10,6 +10,9 @@ use Psr\Container\ContainerInterface;
 
 /**
  * @internal
+ *
+ * @psalm-internal \Laminas\Router
+ * @psalm-internal \LaminasTest\Router
  */
 final class RouterFactory implements FactoryInterface
 {

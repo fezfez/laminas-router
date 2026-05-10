@@ -11,6 +11,9 @@ use function count;
 
 /**
  * @internal
+ *
+ * @psalm-internal \Laminas\Router
+ * @psalm-internal \LaminasTest\Router
  */
 final class RouteDefinition
 {
@@ -30,7 +33,7 @@ final class RouteDefinition
         $this->parts[] = $part;
     }
 
-    public function startOptional(): void
+    public function assertStartOptional(): void
     {
         $this->optional[] = [];
     }

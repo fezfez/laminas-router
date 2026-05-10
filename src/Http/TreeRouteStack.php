@@ -31,6 +31,7 @@ use function strlen;
  *
  * @template TRoute of HttpRouteInterface
  * @template-extends SimpleRouteStack<TRoute>
+ * @psalm-consistent-constructor
  */
 class TreeRouteStack extends SimpleRouteStack
 {
@@ -102,7 +103,9 @@ class TreeRouteStack extends SimpleRouteStack
     public function addRoute(string|int $name, int|string|array|RouteInterface $route, ?int $priority = null): void
     {
         if (! $route instanceof HttpRouteInterface && $route instanceof RouteInterface) {
-            throw new Exception\InvalidArgumentException('Route definition must be an array or Traversable object');
+            throw new Exception\InvalidArgumentException(
+                'Only HttpRouteInterface instances or array/string specifications are allowed.'
+            );
         }
         if (! $route instanceof HttpRouteInterface) {
             $route = $this->routeFromArray($route);

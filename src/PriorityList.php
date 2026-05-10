@@ -9,6 +9,9 @@ use Laminas\Stdlib\PriorityList as StdlibPriorityList;
 /**
  * @internal
  *
+ * @psalm-internal \Laminas\Router
+ * @psalm-internal \LaminasTest\Router
+ *
  * @template TKey of non-empty-string|array-key
  * @template TValue of RouteInterface
  * @template-extends StdlibPriorityList<TKey, TValue>

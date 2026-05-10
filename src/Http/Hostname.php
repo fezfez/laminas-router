@@ -29,20 +29,6 @@ use function strlen;
  *
  * Note: the following type is recursive, but Psalm doesn't understand array shape recursion (yet). For now, we only
  *       represented recursion of the 'optional' part type to 1 level, to ease analysis.
- *
- * @psalm-type Parts = list<
- *     array{
- *      'literal',
- *      string,
- *      string|null
- *     }|array{
- *      'parameter',
- *      string
- *     }|array{
- *      'optional',
- *      list<array{'literal', string, string|null}|array{'parameter', string}|array{'optional', array}>
- *     }
- * >
  */
 final class Hostname implements HttpRouteInterface
 {
@@ -150,7 +136,7 @@ final class Hostname implements HttpRouteInterface
                 ));
                 $currentPos += strlen($matches[0]);
             } elseif ($matches['token'] === '[') {
-                $routeDefinition->startOptional();
+                $routeDefinition->assertStartOptional();
             } elseif ($matches['token'] === ']') {
                 $routeDefinition->endOptional();
             } else {

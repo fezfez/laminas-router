@@ -18,6 +18,7 @@ use function assert;
 use function count;
 use function is_array;
 use function is_bool;
+use function is_object;
 use function is_string;
 use function method_exists;
 use function strlen;
@@ -38,32 +39,33 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
     /**
      * Create a new part route.
      *
-     * @param TRoute|array|string           $route
+     * @param TRoute|array|string           $routes
      * @param ArrayObject<string, TRoute> $prototypes
      * @param array<non-empty-string, array|TRoute> $childRoutes
      * @throws Exception\InvalidArgumentException
      */
     public function __construct(
-        HttpRouteInterface|array|string $route,
+        RoutePluginManager $routePluginManager,
+        ArrayObject $prototypes,
+        HttpRouteInterface|array|string $routes = [],
+        array $defaultParams = [],
         /**
          * Whether the route may terminate.
          */
-        private readonly bool $mayTerminate,
-        RoutePluginManager $routePlugins,
-        private array $childRoutes,
-        ArrayObject $prototypes
+        private readonly bool $mayTerminate = false,
+        private array $childRoutes = [],
     ) {
-        parent::__construct($routePlugins, $prototypes);
+        parent::__construct($routePluginManager, $prototypes);
 
-        if (! $route instanceof HttpRouteInterface) {
-            $route = $this->routeFromArray($route);
+        if (! is_object($routes)) {
+            $routes = $this->routeFromArray($routes);
         }
 
-        if ($route instanceof self) {
+        if ($routes instanceof self) {
             throw new Exception\InvalidArgumentException('Base route may not be a part route');
         }
 
-        $this->route = $route;
+        $this->route = $routes;
     }
 
     /**
@@ -93,11 +95,12 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
         assert(is_array($route) || is_string($route) || $route instanceof HttpRouteInterface);
 
         return new self(
-            $route,
-            $mayTerminate,
             $routePlugins,
+            $prototypes,
+            $route,
+            [],
+            $mayTerminate,
             $childRoutes,
-            $prototypes
         );
     }
 
@@ -138,6 +141,7 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
             }
 
             foreach ($this->routes as $name => $route) {
+                assert($name !== '');
                 assert($route instanceof HttpRouteInterface);
                 $subMatch = $route->match($request, $nextOffset, $options);
                 if ($subMatch instanceof HttpRouteMatch) {

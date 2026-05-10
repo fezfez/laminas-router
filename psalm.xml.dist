@@ -26,16 +26,6 @@
                 <directory name="test" />
             </errorLevel>
         </MissingOverrideAttribute>
-        <InternalClass>
-                <errorLevel type="suppress">
-                    <directory name="test" />
-                </errorLevel>
-        </InternalClass>
-        <InternalMethod>
-                <errorLevel type="suppress">
-                    <directory name="test" />
-                </errorLevel>
-        </InternalMethod>
     </issueHandlers>
     <plugins>
         <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>

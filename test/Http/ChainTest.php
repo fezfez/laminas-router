@@ -28,6 +28,8 @@ final class ChainTest extends TestCase
         $prototypes = new ArrayObject();
 
         return new Chain(
+            $routePlugins,
+            $prototypes,
             [
                 [
                     'type'    => Segment::class,
@@ -48,8 +50,6 @@ final class ChainTest extends TestCase
                     ],
                 ],
             ],
-            $routePlugins,
-            $prototypes
         );
     }
 
@@ -60,6 +60,8 @@ final class ChainTest extends TestCase
         $prototypes = new ArrayObject();
 
         return new Chain(
+            $routePlugins,
+            $prototypes,
             [
                 [
                     'type'    => Segment::class,
@@ -80,8 +82,6 @@ final class ChainTest extends TestCase
                     ],
                 ],
             ],
-            $routePlugins,
-            $prototypes
         );
     }
 
