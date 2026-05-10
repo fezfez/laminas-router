@@ -158,32 +158,6 @@ final class RoutePluginManager extends AbstractPluginManager
         return $this;
     }
 
-    /**
-     * @template InstanceParam of RouteInterface
-     * @param class-string<InstanceParam>|string $id Service name of plugin to retrieve.
-     * @return ($id is class-string<InstanceParam> ? InstanceParam : InstanceType)
-     */
-    public function get(string $id): mixed
-    {
-        /** @psalm-var InstanceType $plugin Unfortunately this type needs forcing */
-        $plugin = parent::get($id);
-
-        return $plugin;
-    }
-
-    /**
-     * @template InstanceParam of RouteInterface
-     * @param class-string<InstanceParam>|string $name Service name of plugin to retrieve.
-     * @return ($name is class-string<InstanceParam> ? InstanceParam : InstanceType)
-     */
-    public function build(string $name, ?array $options = null): mixed
-    {
-        /** @psalm-var InstanceType $build Unfortunately this type needs forcing */
-        $build = parent::build($name, $options);
-
-        return $build;
-    }
-
      /**
       * Create aliases for invokable classes.
       *

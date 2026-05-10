@@ -89,7 +89,7 @@
   </file>
   <file src="src/RoutePluginManager.php">
     <MethodSignatureMismatch>
-      <code><![CDATA[$id]]></code>
+      <code><![CDATA[RoutePluginManager]]></code>
     </MethodSignatureMismatch>
     <MixedArgument>
       <code><![CDATA[$config['factories']]]></code>
@@ -99,6 +99,9 @@
     <ArgumentTypeCoercion>
       <code><![CDATA[(string) $name]]></code>
     </ArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$route]]></code>
+    </MixedAssignment>
     <NoInterfaceProperties>
       <code><![CDATA[$route->priority]]></code>
       <code><![CDATA[$route->priority]]></code>
