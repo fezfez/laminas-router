@@ -30,8 +30,7 @@ use function strlen;
  * Tree search implementation.
  *
  * @template TRoute of HttpRouteInterface
- * @template-implements HttpNestedRoutesCapableInterface
- * @psalm-consistent-constructor
+ * @implements HttpNestedRoutesCapableInterface<TRoute>
  */
 final class TreeRouteStack implements HttpNestedRoutesCapableInterface
 {
@@ -100,7 +99,7 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
             throw new RuntimeException('Missing "route_plugins" in options array');
         }
 
-        return new static(
+        return new self(
             $routePlugins,
             $prototypes,
             $routes,
@@ -127,11 +126,14 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
             );
         }
         if (! $route instanceof HttpRouteInterface) {
-            $route = $this->routeSpecificationFactory->createFromSpecification($route);
+            /** @var mixed $routeSpec */
+            $routeSpec = $route;
+            assert(is_string($routeSpec) || is_array($routeSpec));
+            $route = $this->routeSpecificationFactory->createFromSpecification($routeSpec);
         }
 
         assert($route instanceof HttpRouteInterface);
-
+        /** @var TRoute $route */
         $this->stack->addRoute($name, $route, $priority);
     }
 
@@ -146,6 +148,7 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
     #[Override]
     public function setRoutes(array $routes): void
     {
+        /** @var array<non-empty-string, array|TRoute> $routes */
         $this->stack->setRoutes($routes);
     }
 
@@ -219,7 +222,8 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
             assert($route instanceof HttpRouteInterface);
             $match = $route->match($request, $baseUrlLength, $options);
             if ($match instanceof HttpRouteMatch && ($pathLength === null || $match->getLength() === $pathLength)) {
-                $match->setMatchedRouteName((string) $name);
+                assert(is_string($name) && $name !== '');
+                $match->setMatchedRouteName($name);
 
                 foreach ($this->stack->getDefaultParams() as $paramName => $value) {
                     if ($match->getParam($paramName) === null) {

@@ -13,10 +13,6 @@ use Laminas\Stdlib\RequestInterface;
  */
 class DummyRoute implements RouteInterface
 {
-    /**
-     * @internal
-     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     */
     public ?int $priority = null;
 
     /** @inheritDoc */
@@ -31,9 +27,11 @@ class DummyRoute implements RouteInterface
         return '';
     }
 
-    /** @inheritDoc */
-    public static function factory(array $options = []): static
+    /**
+     * @inheritDoc
+     */
+    public static function factory(array $options = []): self
     {
-        return new static();
+        return new self();
     }
 }

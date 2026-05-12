@@ -34,7 +34,7 @@ final class HttpRouteMatch extends RouteMatch
 
     /** @inheritDoc */
     #[Override]
-    public function setMatchedRouteName(string $name): static
+    public function setMatchedRouteName(string $name): self
     {
         if ($this->matchedRouteName === null) {
             $this->matchedRouteName = $name;
@@ -48,7 +48,7 @@ final class HttpRouteMatch extends RouteMatch
     /**
      * Merge parameters from another match.
      */
-    public function merge(HttpRouteMatch $match): static
+    public function merge(HttpRouteMatch $match): self
     {
         $this->params  = array_merge($this->params, $match->getParams());
         $this->length += $match->getLength();

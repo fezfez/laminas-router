@@ -24,7 +24,7 @@ use function method_exists;
 use function strlen;
 
 /**
- * @template TRoute of HttpRouteInterface
+ * @implements HttpNestedRoutesCapableInterface<HttpRouteInterface>
  */
 final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterface
 {
@@ -39,7 +39,7 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
     /**
      * Chain routes.
      *
-     * @var array<array-key, array|TRoute>|null
+     * @var array<array-key, array|HttpRouteInterface>|null
      */
     private array|null $chainRoutes;
 
@@ -51,8 +51,8 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
     private array $assembledParams = [];
 
     /**
-     * @param array<array-key, array|TRoute> $routes
-     * @param ArrayObject<string, TRoute> $prototypes
+     * @param array<array-key, array|HttpRouteInterface> $routes
+     * @param ArrayObject<string, HttpRouteInterface> $prototypes
      * @param array<non-empty-string, non-empty-string> $defaultParams
      */
     public function __construct(
@@ -70,10 +70,10 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         $route = $options['routes'] ?? null;
-        /** @var ArrayObject<string, TRoute> $prototypes */
+        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
         $prototypes   = $options['prototypes'] ?? new ArrayObject();
         $routePlugins = $options['route_plugins'] ?? null;
 
@@ -88,7 +88,7 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
         assert(is_array($route));
 
         /** @psalm-var RoutePluginManager $routePlugins */
-        /** @psalm-var array<non-empty-string, TRoute> $route */
+        /** @psalm-var array<non-empty-string, array|HttpRouteInterface> $route */
 
         return new self(
             $routePlugins,
@@ -140,11 +140,14 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
 
     /**
      * @param non-empty-string $name
-     * @return TRoute|null the route
+     * @return HttpRouteInterface|null the route
      */
-    public function getRoute(string $name): RouteInterface|null
+    public function getRoute(string $name): HttpRouteInterface|null
     {
-        return $this->stack->getRoute($name);
+        $route = $this->stack->getRoute($name);
+        assert($route === null || $route instanceof HttpRouteInterface);
+
+        return $route;
     }
 
     /**

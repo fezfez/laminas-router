@@ -36,7 +36,7 @@ class RouteMatch
      *
      * @param non-empty-string $name
      */
-    public function setMatchedRouteName(string $name): static
+    public function setMatchedRouteName(string $name): self
     {
         $this->matchedRouteName = $name;
         return $this;
@@ -55,7 +55,7 @@ class RouteMatch
     /**
      * Set a parameter.
      */
-    public function setParam(string $name, string $value): static
+    public function setParam(string $name, string $value): self
     {
         $this->params[$name] = $value;
         return $this;

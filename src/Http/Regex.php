@@ -73,7 +73,7 @@ final class Regex implements HttpRouteInterface
      * @throws InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         $regex    = $options['regex'] ?? null;
         $spec     = $options['spec'] ?? null;

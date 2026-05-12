@@ -28,7 +28,7 @@ final class SimpleRouteStack implements RouteStackInterface
     /**
      * Stack containing all routes.
      *
-     * @var PriorityList<non-empty-string|array-key, TRoute>
+     * @var PriorityList<TRoute>
      */
     protected PriorityList $routes;
 
@@ -44,7 +44,7 @@ final class SimpleRouteStack implements RouteStackInterface
          */
         protected array $defaultParams = []
     ) {
-        /** @var PriorityList<non-empty-string|array-key, TRoute> $priorityList */
+        /** @var PriorityList<TRoute> $priorityList */
         $priorityList = new PriorityList();
         $this->routes = $priorityList;
         $this->addRoutes($routes);
@@ -55,7 +55,7 @@ final class SimpleRouteStack implements RouteStackInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
         $routes       = $options['routes'] ?? [];
@@ -67,7 +67,7 @@ final class SimpleRouteStack implements RouteStackInterface
             throw new RuntimeException('Missing "route_plugins" in options array');
         }
 
-        return new static(
+        return new self(
             $routePlugins,
             $routes,
             $defaultParams
@@ -83,7 +83,9 @@ final class SimpleRouteStack implements RouteStackInterface
         }
     }
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     */
     #[Override]
     public function addRoute(string|int $name, array|RouteInterface $route, ?int $priority = null): void
     {
@@ -91,13 +93,16 @@ final class SimpleRouteStack implements RouteStackInterface
             $route = $this->routeFromArray($route);
         }
 
-        if ($priority === null && isset($route->priority) && is_int($route->priority)) {
-            $priority = $route->priority;
+        if ($priority === null) {
+            $routePriority = $route->priority ?? null;
+            if (is_int($routePriority)) {
+                $priority = $routePriority;
+            }
         }
 
         $priority ??= 0;
 
-        $this->routes->insert($name, $route, $priority);
+        $this->routes->insert((string) $name, $route, $priority);
     }
 
     /** @inheritDoc */
@@ -180,12 +185,14 @@ final class SimpleRouteStack implements RouteStackInterface
         }
 
         $route = $this->routePluginManager->build($type, $option);
-
-        /** @psalm-var TRoute $route */
+        /** @var TRoute $route */
+        assert($route instanceof RouteInterface);
 
         if (isset($specs['priority'])) {
             $route->priority = $specs['priority'];
         }
+
+        assert($route instanceof RouteInterface);
 
         return $route;
     }
@@ -195,11 +202,11 @@ final class SimpleRouteStack implements RouteStackInterface
     public function match(RequestInterface $request): ?RouteMatch
     {
         foreach ($this->routes as $name => $route) {
-            assert($name !== "");
+            assert(is_string($name) && $name !== '');
             assert($route instanceof RouteInterface);
             $match = $route->match($request);
             if ($match instanceof RouteMatch) {
-                $match->setMatchedRouteName((string) $name);
+                $match->setMatchedRouteName($name);
 
                 foreach ($this->defaultParams as $paramName => $value) {
                     if ($match->getParam($paramName) === null) {

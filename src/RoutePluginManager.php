@@ -139,13 +139,17 @@ final class RoutePluginManager extends AbstractPluginManager
             $factories = $this->createFactoriesForInvokables($config['invokables']);
 
             if (! empty($aliases)) {
+                /** @var array<array-key, mixed> $existingAliases */
+                $existingAliases   = $config['aliases'] ?? [];
                 $config['aliases'] = isset($config['aliases'])
-                    ? array_merge($config['aliases'], $aliases)
+                    ? array_merge($existingAliases, $aliases)
                     : $aliases;
             }
 
+            /** @var array<array-key, mixed> $existingFactories */
+            $existingFactories   = $config['factories'] ?? [];
             $config['factories'] = isset($config['factories'])
-                ? array_merge($config['factories'], $factories)
+                ? array_merge($existingFactories, $factories)
                 : $factories;
 
             unset($config['invokables']);

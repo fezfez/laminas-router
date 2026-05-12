@@ -26,7 +26,7 @@ use function method_exists;
 use function strlen;
 
 /**
- * @template TRoute of HttpRouteInterface
+ * @implements HttpNestedRoutesCapableInterface<HttpRouteInterface>
  */
 final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
 {
@@ -36,11 +36,6 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
      */
     public int|null $priority = null;
 
-    /**
-     * RouteInterface to match.
-     *
-     * @var TRoute
-     */
     private readonly HttpRouteInterface $route;
 
     private readonly TreeRouteStack $childStack;
@@ -48,9 +43,8 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
     /**
      * Create a new part route.
      *
-     * @param TRoute|array|string           $routes
-     * @param ArrayObject<string, TRoute> $prototypes
-     * @param array<non-empty-string, array|TRoute> $childRoutes
+     * @param ArrayObject<string, HttpRouteInterface> $prototypes
+     * @param array<non-empty-string, array|HttpRouteInterface> $childRoutes
      * @throws Exception\InvalidArgumentException
      */
     public function __construct(
@@ -85,14 +79,14 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         $route        = $options['route'] ?? null;
         $routePlugins = $options['route_plugins'] ?? null;
-        /** @var ArrayObject<string, TRoute> $prototypes */
+        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
         $prototypes   = $options['prototypes'] ?? new ArrayObject();
         $mayTerminate = $options['may_terminate'] ?? false;
-        /** @var array<non-empty-string, TRoute> $childRoutes */
+        /** @var array<non-empty-string, array|HttpRouteInterface> $childRoutes */
         $childRoutes = $options['child_routes'] ?? [];
 
         if (! $routePlugins instanceof RoutePluginManager) {
@@ -159,11 +153,14 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
 
     /**
      * @param non-empty-string $name
-     * @return TRoute|null the route
+     * @return HttpRouteInterface|null the route
      */
-    public function getRoute(string $name): RouteInterface|null
+    public function getRoute(string $name): HttpRouteInterface|null
     {
-        return $this->childStack->getRoute($name);
+        $route = $this->childStack->getRoute($name);
+        assert($route === null || $route instanceof HttpRouteInterface);
+
+        return $route;
     }
 
     /**
@@ -217,7 +214,9 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
                 $subMatch = $route->match($request, $nextOffset, $options);
                 if ($subMatch instanceof HttpRouteMatch) {
                     if (($match->getLength() + $subMatch->getLength() + $pathOffset) === $pathLength) {
-                        return $match->merge($subMatch)->setMatchedRouteName((string) $name);
+                        assert(is_string($name));
+
+                        return $match->merge($subMatch)->setMatchedRouteName($name);
                     }
                 }
             }

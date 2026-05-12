@@ -11,6 +11,7 @@ use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
 
 use function array_merge;
+use function assert;
 use function is_array;
 use function is_string;
 use function property_exists;
@@ -18,13 +19,11 @@ use function sprintf;
 
 /**
  * Turns HTTP route configuration arrays (and prototype names) into route objects.
- *
- * @template TRoute of HttpRouteInterface
  */
 final class HttpRouteSpecificationFactory
 {
     /**
-     * @param ArrayObject<string, TRoute> $prototypes
+     * @param ArrayObject<string, HttpRouteInterface> $prototypes
      */
     public function __construct(
         private readonly RoutePluginManager $routePluginManager,
@@ -33,27 +32,29 @@ final class HttpRouteSpecificationFactory
     }
 
     /**
-     * @return TRoute
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */
-    public function createFromSpecification(string|array $specs): RouteInterface
+    public function createFromSpecification(string|array $specs): HttpRouteInterface
     {
         if (is_string($specs)) {
             return $this->getPrototype($specs);
         }
 
-        if (isset($specs['chain_routes'])) {
-            if (! is_array($specs['chain_routes'])) {
+        /** @var array<string, mixed> $specsArray */
+        $specsArray = $specs;
+
+        if (isset($specsArray['chain_routes'])) {
+            if (! is_array($specsArray['chain_routes'])) {
                 throw new Exception\InvalidArgumentException('Chain routes must be an array');
             }
 
-            $chainRoutes = array_merge([$specs], $specs['chain_routes']);
+            $chainRoutes = array_merge([$specsArray], $specsArray['chain_routes']);
             if (isset($chainRoutes[0]['chain_routes'])) {
                 unset($chainRoutes[0]['chain_routes']);
             }
 
-            if (isset($specs['child_routes']) && isset($chainRoutes[0]['child_routes'])) {
+            if (isset($specsArray['child_routes']) && isset($chainRoutes[0]['child_routes'])) {
                 unset($chainRoutes[0]['child_routes']);
             }
 
@@ -65,47 +66,50 @@ final class HttpRouteSpecificationFactory
 
             $route = $this->routePluginManager->build(Chain::class, $options);
         } else {
-            $route = $this->createFromTypedArray($specs);
+            $route = $this->createFromTypedArray($specsArray);
         }
+
+        assert($route instanceof RouteInterface);
 
         if (! $route instanceof HttpRouteInterface) {
             throw new Exception\RuntimeException('Given route does not implement HTTP route interface');
         }
 
-        if (isset($specs['child_routes'])) {
+        if (isset($specsArray['child_routes'])) {
             $options = [
                 'route'         => $route,
-                'may_terminate' => isset($specs['may_terminate']) && $specs['may_terminate'] === true,
-                'child_routes'  => $specs['child_routes'],
+                'may_terminate' => isset($specsArray['may_terminate']) && $specsArray['may_terminate'] === true,
+                'child_routes'  => $specsArray['child_routes'],
                 'route_plugins' => $this->routePluginManager,
                 'prototypes'    => $this->prototypes,
             ];
 
             $priority = $route->priority ?? null;
 
-            $route           = $this->routePluginManager->build(Part::class, $options);
-            $route->priority = $priority;
+            /** @var Part $builtPart */
+            $builtPart           = $this->routePluginManager->build(Part::class, $options);
+            $builtPart->priority = $priority;
+
+            $route = $builtPart;
         }
 
         return $route;
     }
 
-    /**
-     * @return TRoute
-     * @throws Exception\InvalidArgumentException
-     */
-    private function getPrototype(string $name): RouteInterface
+    private function getPrototype(string $name): HttpRouteInterface
     {
         if (! property_exists($this->prototypes, $name)) {
             throw new RuntimeException(sprintf('Could not find prototype with name %s', $name));
         }
 
-        return $this->prototypes[$name];
+        $route = $this->prototypes[$name];
+        assert($route instanceof HttpRouteInterface);
+
+        return $route;
     }
 
     /**
      * @param array<string, mixed> $specs
-     * @return TRoute
      * @throws Exception\InvalidArgumentException
      */
     private function createFromTypedArray(array $specs): RouteInterface
@@ -119,6 +123,7 @@ final class HttpRouteSpecificationFactory
         }
 
         $route = $this->routePluginManager->build($type, $option);
+        assert($route instanceof RouteInterface);
 
         if (isset($specs['priority'])) {
             $route->priority = $specs['priority'];

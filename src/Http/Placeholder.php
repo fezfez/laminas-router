@@ -34,7 +34,7 @@ final class Placeholder implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         /** @var array<string, string> $defaults */
         $defaults = $options['defaults'] ?? [];

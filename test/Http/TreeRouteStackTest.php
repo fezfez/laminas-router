@@ -11,6 +11,7 @@ use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\Hostname;
 use Laminas\Router\Http\HttpRouteInterface;
+use Laminas\Router\Http\Part;
 use Laminas\Router\Http\TreeRouteStack;
 use Laminas\Router\PriorityList;
 use Laminas\Router\RoutePluginManager;
@@ -33,6 +34,9 @@ final class TreeRouteStackTest extends TestCase
         ]);
     }
 
+    /**
+     * @psalm-suppress InvalidArgument Intentionally passes a non-HTTP route to assert runtime validation.
+     */
     public function testAddRouteRequiresHttpSpecificRoute(): void
     {
         /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
@@ -41,7 +45,6 @@ final class TreeRouteStackTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Only HttpRouteInterface instances or array/string specifications are allowed.');
-        /** @psalm-suppress InvalidArgument we're explicitly testing runtime type validation here */
         $stack->addRoute('foo', new DummyRoute());
     }
 
@@ -465,7 +468,9 @@ final class TreeRouteStackTest extends TestCase
         $foo = $routes->get('foo');
 
         self::assertNotNull($foo);
+        self::assertInstanceOf(Part::class, $foo);
 
+        /** @psalm-suppress DeprecatedProperty, InternalProperty */
         $this->assertEquals(1000, $foo->priority);
     }
 

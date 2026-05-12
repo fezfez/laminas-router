@@ -8,20 +8,15 @@ use Laminas\Stdlib\RequestInterface;
 
 /**
  * RouteInterface interface.
+ *
+ * @property int|null $priority Priority used when registering a route in a stack (optional; not enforced by PHP).
  */
 interface RouteInterface
 {
     /**
-     * Priority used for route stacks.
-     *
-     * @var int
-     * public int|null $priority = null;
-     */
-
-    /**
      * Create a new route with given options.
      */
-    public static function factory(array $options = []): static;
+    public static function factory(array $options = []): self;
 
     /**
      * Match a given request.

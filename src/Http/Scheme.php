@@ -10,6 +10,7 @@ use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http;
 use Override;
 
+use function is_array;
 use function is_string;
 use function method_exists;
 
@@ -42,13 +43,14 @@ final class Scheme implements HttpRouteInterface
     }
 
     /**
-     * @param array{'scheme'?:string, 'defaults'?: array<string, string>} $options
+     * @inheritDoc
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
-        $scheme   = $options['scheme'] ?? null;
-        $defaults = $options['defaults'] ?? [];
+        $scheme = $options['scheme'] ?? null;
+        /** @var array<string, string> $defaults */
+        $defaults = is_array($options['defaults'] ?? null) ? $options['defaults'] : [];
 
         if (! is_string($scheme) || $scheme === '') {
             throw new Exception\InvalidArgumentException('Missing "scheme" in options array');

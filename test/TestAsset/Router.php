@@ -15,7 +15,7 @@ use Laminas\Stdlib\RequestInterface;
 final class Router implements RouteStackInterface
 {
     /** @inheritDoc */
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         return new self();
     }

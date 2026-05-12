@@ -29,10 +29,12 @@ class DummyRoute implements HttpRouteInterface
         return '';
     }
 
-    /** @inheritDoc */
-    public static function factory(array $options = []): static
+    /**
+     * @inheritDoc
+     */
+    public static function factory(array $options = []): self
     {
-        return new static();
+        return new self();
     }
 
     /** @inheritDoc */

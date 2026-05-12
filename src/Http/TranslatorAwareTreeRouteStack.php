@@ -15,10 +15,12 @@ use Laminas\Translator\TranslatorInterface;
 use Laminas\Uri\Http as HttpUri;
 use Override;
 
+use function assert;
+
 /**
  * Translator aware tree route stack (composition around {@see TreeRouteStack}).
  *
- * @template TRoute of HttpRouteInterface
+ * @implements HttpNestedRoutesCapableInterface<HttpRouteInterface>
  */
 final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInterface
 {
@@ -46,8 +48,8 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
     private readonly TreeRouteStack $inner;
 
     /**
-     * @param ArrayObject<string, TRoute> $prototypes
-     * @param array<non-empty-string, array|TRoute> $routes
+     * @param ArrayObject<string, HttpRouteInterface>|null $prototypes
+     * @param array<non-empty-string, array|HttpRouteInterface> $routes
      * @param array<non-empty-string, non-empty-string> $defaultParams
      */
     public function __construct(
@@ -62,9 +64,12 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
             return;
         }
 
+        /** @var ArrayObject<string, HttpRouteInterface> $resolvedPrototypes */
+        $resolvedPrototypes = $prototypes ?? new ArrayObject();
+
         $this->inner = new TreeRouteStack(
             $routePluginManagerOrInner,
-            $prototypes ?? new ArrayObject(),
+            $resolvedPrototypes,
             $routes,
             $defaultParams
         );
@@ -75,7 +80,7 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         return new self(TreeRouteStack::factory($options));
     }
@@ -123,11 +128,14 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
 
     /**
      * @param non-empty-string $name
-     * @return TRoute|null the route
+     * @return HttpRouteInterface|null the route
      */
-    public function getRoute(string $name): RouteInterface|null
+    public function getRoute(string $name): HttpRouteInterface|null
     {
-        return $this->inner->getRoute($name);
+        $route = $this->inner->getRoute($name);
+        assert($route === null || $route instanceof HttpRouteInterface);
+
+        return $route;
     }
 
     /**
