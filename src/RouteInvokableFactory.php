@@ -19,9 +19,11 @@ use function sprintf;
  * abstract factory to map FQCN services to invokables.
  *
  * @internal
+ *
+ * @psalm-internal \Laminas\Router
+ * @psalm-internal \LaminasTest\Router
  */
-class RouteInvokableFactory implements
-    AbstractFactoryInterface
+final class RouteInvokableFactory implements AbstractFactoryInterface
 {
     /**
      * Can we create a route instance with the given name? (v3)

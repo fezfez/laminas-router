@@ -8,6 +8,7 @@ use ArrayObject;
 use Laminas\Http\Request;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
+use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Part;
@@ -49,7 +50,12 @@ final class PartTest extends TestCase
 
     public static function getRoute(): Part
     {
+        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        $prototypes = new ArrayObject();
+
         return new Part(
+            self::getRoutePlugins(),
+            $prototypes,
             [
                 'type'    => Literal::class,
                 'options' => [
@@ -59,8 +65,8 @@ final class PartTest extends TestCase
                     ],
                 ],
             ],
+            [],
             true,
-            self::getRoutePlugins(),
             [
                 'bar' => [
                     'type'    => Literal::class,
@@ -110,7 +116,7 @@ final class PartTest extends TestCase
                         ],
                     ],
                 ],
-            ]
+            ],
         );
     }
 
@@ -120,7 +126,7 @@ final class PartTest extends TestCase
      *     1: string,
      *     2: null|int,
      *     3: null|string,
-     *     4: null|array<string, string>
+     *     4: null|array<non-empty-string, non-empty-string>
      * }>
      */
     public static function routeProvider(): array
@@ -199,6 +205,9 @@ final class PartTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<non-empty-string, non-empty-string>|null $params
+     */
     #[DataProvider('routeProvider')]
     public function testMatching(
         Part $route,
@@ -228,6 +237,9 @@ final class PartTest extends TestCase
         }
     }
 
+    /**
+     * @param array<non-empty-string, non-empty-string>|null $params
+     */
     #[DataProvider('routeProvider')]
     public function testAssembling(
         Part $route,
@@ -245,7 +257,7 @@ final class PartTest extends TestCase
         $result = $route->assemble($params, ['name' => $routeName]);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, (string) $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result, $offset));
         } else {
             $this->assertEquals($path, $result);
         }
@@ -263,7 +275,17 @@ final class PartTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Base route may not be a part route');
 
-        new Part(self::getRoute(), true, new RoutePluginManager(new ServiceManager()));
+        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        $prototypes = new ArrayObject();
+
+        new Part(
+            new RoutePluginManager(new ServiceManager()),
+            $prototypes,
+            self::getRoute(),
+            [],
+            true,
+            [],
+        );
     }
 
     public function testNoMatchWithoutUriMethod(): void
@@ -284,7 +306,7 @@ final class PartTest extends TestCase
 
     public function testFactory(): void
     {
-        $tester = new FactoryTester($this);
+        $tester = new FactoryTester();
         $tester->testFactory(
             Part::class,
             [
@@ -296,41 +318,6 @@ final class PartTest extends TestCase
                 'route_plugins' => self::getRoutePlugins(),
             ]
         );
-    }
-
-    #[Group('Laminas-105')]
-    public function testFactoryShouldAcceptTraversableChildRoutes(): void
-    {
-        $children = new ArrayObject([
-            'create' => [
-                'type'    => 'Literal',
-                'options' => [
-                    'route'    => 'create',
-                    'defaults' => [
-                        'controller' => 'user-admin',
-                        'action'     => 'edit',
-                    ],
-                ],
-            ],
-        ]);
-        $options  = [
-            'route'         => [
-                'type'    => Literal::class,
-                'options' => [
-                    'route'    => '/admin/users',
-                    'defaults' => [
-                        'controller' => 'Admin\UserController',
-                        'action'     => 'index',
-                    ],
-                ],
-            ],
-            'route_plugins' => self::getRoutePlugins(),
-            'may_terminate' => true,
-            'child_routes'  => $children,
-        ];
-
-        $route = Part::factory($options);
-        $this->assertInstanceOf(Part::class, $route);
     }
 
     #[Group('3711')]

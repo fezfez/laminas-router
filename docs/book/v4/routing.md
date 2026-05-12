@@ -14,13 +14,13 @@ The base unit of routing is a `Route`:
 ```php
 namespace Laminas\Router;
 
-use Laminas\Stdlib\RequestInterface as Request;
+use Laminas\Stdlib\RequestInterface;
 
 interface RouteInterface
 {
-    public static function factory(array $options = []);
-    public function match(Request $request);
-    public function assemble(array $params = [], array $options = []);
+    public static function factory(array $options = []): static;
+    public function match(RequestInterface $request): RouteMatch|null;
+    public function assemble(array $params = [], array $options = []): string;
 }
 ```
 
@@ -33,11 +33,11 @@ namespace Laminas\Router;
 class RouteMatch
 {
     public function __construct(array $params);
-    public function setMatchedRouteName($name);
-    public function getMatchedRouteName();
-    public function setParam($name, $value);
-    public function getParams();
-    public function getParam($name, $default = null);
+    public function setMatchedRouteName(string $name): static;
+    public function getMatchedRouteName(): string|null;
+    public function setParam(string $name, mixed $value): static;
+    public function getParams(): array;
+    public function getParam(string $name, string $default = null): int|string|null;
 }
 ```
 
@@ -62,10 +62,10 @@ namespace Laminas\Router;
 
 interface RouteStackInterface extends RouteInterface
 {
-    public function addRoute($name, $route, $priority = null);
-    public function addRoutes(array $routes);
-    public function removeRoute($name);
-    public function setRoutes(array $routes);
+    public function addRoute(string $name, array|RouteInterface $route, int $priority = null): void;
+    public function addRoutes(array $routes): void;
+    public function removeRoute(string $name): void;
+    public function setRoutes(array $routes): void;
 }
 ```
 

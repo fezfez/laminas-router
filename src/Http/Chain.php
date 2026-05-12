@@ -6,12 +6,11 @@ namespace Laminas\Router\Http;
 
 use ArrayObject;
 use Laminas\Router\Exception;
-use Laminas\Router\PriorityList;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\RoutePluginManager;
-use Laminas\Stdlib\ArrayUtils;
 use Laminas\Stdlib\RequestInterface;
+use Laminas\Uri\Http;
 use Override;
-use Traversable;
 
 use function array_diff_key;
 use function array_flip;
@@ -21,42 +20,43 @@ use function assert;
 use function is_array;
 use function is_bool;
 use function method_exists;
-use function sprintf;
 use function strlen;
 
 /**
  * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
- * @final
  */
-class Chain extends TreeRouteStack implements HttpRouteInterface
+final class Chain extends TreeRouteStack implements HttpRouteInterface
 {
     /**
      * Chain routes.
      *
-     * @var array
+     * @var array<array-key, array|TRoute>
      */
-    protected $chainRoutes;
+    private array|null $chainRoutes;
 
     /**
      * List of assembled parameters.
      *
-     * @var array
+     * @var list<non-empty-string>
      */
-    protected $assembledParams = [];
+    private array $assembledParams = [];
 
     /**
      * Create a new part route.
      *
-     * @param ArrayObject<string, TRoute>|null $prototypes
+     * @param array<array-key, array|TRoute> $routes
+     * @param ArrayObject<string, TRoute> $prototypes
+     * @param array<non-empty-string, non-empty-string> $defaultParams
      */
-    public function __construct(array $routes, RoutePluginManager $routePlugins, ?ArrayObject $prototypes = null)
-    {
-        $this->chainRoutes        = array_reverse($routes);
-        $this->routePluginManager = $routePlugins;
-        /** @var PriorityList<string, TRoute> $this->routes */
-        $this->routes     = new PriorityList();
-        $this->prototypes = $prototypes;
+    public function __construct(
+        RoutePluginManager $routePluginManager,
+        ArrayObject $prototypes,
+        array $routes = [],
+        array $defaultParams = []
+    ) {
+        $this->chainRoutes = array_reverse($routes);
+        parent::__construct($routePluginManager, $prototypes, [], $defaultParams);
     }
 
     /**
@@ -64,66 +64,53 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory($options = [])
+    public static function factory(array $options = []): static
     {
-        if ($options instanceof Traversable) {
-            $options = ArrayUtils::iteratorToArray($options);
-        } elseif (! is_array($options)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                '%s expects an array or Traversable set of options',
-                __METHOD__
-            ));
-        }
+        $route = $options['routes'] ?? null;
+        /** @var ArrayObject<string, TRoute> $prototypes */
+        $prototypes   = $options['prototypes'] ?? new ArrayObject();
+        $routePlugins = $options['route_plugins'] ?? null;
 
-        if (! isset($options['routes'])) {
+        if ($route === null) {
             throw new Exception\InvalidArgumentException('Missing "routes" in options array');
         }
 
-        if (! isset($options['prototypes'])) {
-            $options['prototypes'] = null;
-        }
-
-        if ($options['routes'] instanceof Traversable) {
-            $options['routes'] = ArrayUtils::iteratorToArray($options['child_routes']);
-        }
-
-        if (! isset($options['route_plugins'])) {
+        if (! $routePlugins instanceof RoutePluginManager) {
             throw new Exception\InvalidArgumentException('Missing "route_plugins" in options array');
         }
 
-        return new static(
-            $options['routes'],
-            $options['route_plugins'],
-            $options['prototypes']
+        assert(is_array($route));
+
+        /** @psalm-var RoutePluginManager $routePlugins */
+        /** @psalm-var array<non-empty-string, TRoute> $route */
+
+        return new self(
+            $routePlugins,
+            $prototypes,
+            $route,
         );
     }
 
-    /**
-     * @inheritDoc
-     * @param int|null $pathOffset
-     */
+    /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request, $pathOffset = null, array $options = [])
+    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
             return null;
         }
 
-        if ($pathOffset === null) {
-            $mustTerminate = true;
-            $pathOffset    = 0;
-        } else {
-            $mustTerminate = false;
-        }
+        $mustTerminate = $pathOffset === null;
+        $pathOffset  ??= 0;
 
         if ($this->chainRoutes !== null) {
             $this->addRoutes($this->chainRoutes);
             $this->chainRoutes = null;
         }
 
-        $match      = new HttpRouteMatch([]);
+        $match = new HttpRouteMatch([]);
+        /** @var Http $uri */
         $uri        = $request->getUri();
-        $pathLength = strlen($uri->getPath());
+        $pathLength = strlen((string) $uri->getPath());
 
         foreach ($this->routes as $route) {
             assert($route instanceof HttpRouteInterface);
@@ -132,6 +119,8 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
             if ($subMatch === null) {
                 return null;
             }
+
+            assert($subMatch instanceof HttpRouteMatch);
 
             $match->merge($subMatch);
             $pathOffset += $subMatch->getLength();
@@ -144,11 +133,9 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
         return $match;
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): string
     {
         if ($this->chainRoutes !== null) {
             $this->addRoutes($this->chainRoutes);
@@ -157,11 +144,12 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
 
         $this->assembledParams = [];
 
-        $routes       = ArrayUtils::iteratorToArray($this->routes);
+        $routes       = [...$this->routes];
         $lastRouteKey = array_key_last($routes);
         $path         = '';
 
         foreach ($routes as $key => $route) {
+            assert($route instanceof HttpRouteInterface);
             $chainOptions = $options;
             $hasChild     = isset($options['has_child']) && is_bool($options['has_child']) && $options['has_child'];
 
@@ -170,17 +158,18 @@ class Chain extends TreeRouteStack implements HttpRouteInterface
             $path  .= $route->assemble($params, $chainOptions);
             $params = array_diff_key($params, array_flip($route->getAssembledParams()));
 
-            $this->assembledParams += $route->getAssembledParams();
+            $this->assembledParams = [
+                ...$this->assembledParams,
+                ...$route->getAssembledParams(),
+            ];
         }
 
         return $path;
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
-    public function getAssembledParams()
+    public function getAssembledParams(): array
     {
         return $this->assembledParams;
     }

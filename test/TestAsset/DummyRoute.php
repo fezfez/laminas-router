@@ -19,26 +19,20 @@ class DummyRoute implements RouteInterface
      */
     public ?int $priority = null;
 
-    /**
-     * @inheritDoc
-     */
-    public function match(RequestInterface $request)
+    /** @inheritDoc */
+    public function match(RequestInterface $request): RouteMatch
     {
         return new RouteMatch([]);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function assemble(array $params = [], array $options = [])
+    /** @inheritDoc */
+    public function assemble(array $params = [], array $options = []): string
     {
         return '';
     }
 
-    /**
-     * @inheritDoc
-     */
-    public static function factory($options = [])
+    /** @inheritDoc */
+    public static function factory(array $options = []): static
     {
         return new static();
     }

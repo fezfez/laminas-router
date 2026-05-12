@@ -64,7 +64,7 @@ final class SchemeTest extends TestCase
 
     public function testFactory(): void
     {
-        $tester = new FactoryTester($this);
+        $tester = new FactoryTester();
         $tester->testFactory(
             Scheme::class,
             [

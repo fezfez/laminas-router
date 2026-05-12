@@ -5,31 +5,28 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
-use Laminas\Stdlib\ArrayUtils;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\RequestInterface;
 use Override;
-use Traversable;
-
-use function is_array;
-use function sprintf;
 
 /**
  * Placeholder route.
- *
- * @final
  */
-class Placeholder implements HttpRouteInterface
+final class Placeholder implements HttpRouteInterface
 {
     /**
      * @internal
      * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     *
-     * @var int|null
      */
-    public $priority;
+    public int|null $priority = null;
 
-    public function __construct(private readonly array $defaults)
-    {
+    /**
+     * @param array<string, string> $defaults
+     */
+    public function __construct(
+        /** @var array<string, string> */
+        private readonly array $defaults
+    ) {
     }
 
     /**
@@ -37,54 +34,34 @@ class Placeholder implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory($options = [])
+    public static function factory(array $options = []): static
     {
-        if ($options instanceof Traversable) {
-            $options = ArrayUtils::iteratorToArray($options);
-        }
+        /** @var array<string, string> $defaults */
+        $defaults = $options['defaults'] ?? [];
 
-        if (! is_array($options)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                '%s expects an array or Traversable set of options',
-                __METHOD__
-            ));
-        }
-
-        if (! isset($options['defaults'])) {
-            $options['defaults'] = [];
-        }
-
-        if (! is_array($options['defaults'])) {
-            throw new Exception\InvalidArgumentException('options[defaults] expected to be an array if set');
-        }
-
-        return new static($options['defaults']);
+        return new self($defaults);
     }
 
-    /**
-     * @inheritDoc
-     * @param int|null $pathOffset
-     */
+    /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request, $pathOffset = null)
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): HttpRouteMatch|null {
         return new HttpRouteMatch($this->defaults);
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): string
     {
         return '';
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
-    public function getAssembledParams()
+    public function getAssembledParams(): array
     {
         return [];
     }

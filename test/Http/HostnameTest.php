@@ -22,7 +22,7 @@ final class HostnameTest extends TestCase
      * @psalm-return array<string, array{
      *     0: Hostname,
      *     1: string,
-     *     2: null|array<string, null|string>
+     *     2: null|array<non-empty-string, null|non-empty-string>
      * }>
      */
     public static function routeProvider(): array
@@ -90,7 +90,7 @@ final class HostnameTest extends TestCase
             'one-of-two-missing-optional-subdomain'                          => [
                 new Hostname('[:foo.][:bar.]example.com'),
                 'bat.example.com',
-                ['foo' => null, 'foo' => 'bat'],
+                ['foo' => 'bat'],
             ],
             'two-missing-optional-subdomain'                                 => [
                 new Hostname('[:foo.][:bar.]example.com'),
@@ -165,6 +165,9 @@ final class HostnameTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<non-empty-string, non-empty-string|null>|null $params
+     */
     #[DataProvider('routeProvider')]
     public function testMatching(Hostname $route, string $hostname, ?array $params = null): void
     {
@@ -183,6 +186,9 @@ final class HostnameTest extends TestCase
         }
     }
 
+    /**
+     * @param array<non-empty-string, non-empty-string|null>|null $params
+     */
     #[DataProvider('routeProvider')]
     public function testAssembling(Hostname $route, string $hostname, ?array $params = null): void
     {
@@ -257,7 +263,7 @@ final class HostnameTest extends TestCase
 
     public function testFactory(): void
     {
-        $tester = new FactoryTester($this);
+        $tester = new FactoryTester();
         $tester->testFactory(
             Hostname::class,
             [

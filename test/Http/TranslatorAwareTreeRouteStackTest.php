@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http;
 
+use ArrayObject;
 use Laminas\Http\Request;
 use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\TranslatorAwareTreeRouteStack;
+use Laminas\Router\RoutePluginManager;
+use Laminas\ServiceManager\ServiceManager;
 use Laminas\Translator\TranslatorInterface;
 use Laminas\Uri\Http as HttpUri;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -64,7 +67,9 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
     public function testTranslatorAwareInterfaceImplementation(): void
     {
-        $stack = new TranslatorAwareTreeRouteStack();
+        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        $prototypes = new ArrayObject();
+        $stack      = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()), $prototypes);
 
         // Defaults
         $this->assertNull($stack->getTranslator());
@@ -112,7 +117,9 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
                 $this->equalTo(['translator' => $translator, 'text_domain' => 'default'])
             );
 
-        $stack = new TranslatorAwareTreeRouteStack();
+        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        $prototypes = new ArrayObject();
+        $stack      = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()), $prototypes);
         $stack->addRoute('test', $route);
 
         $stack->match($request, null, ['translator' => $translator]);
@@ -131,7 +138,9 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
                 $this->equalTo(['translator' => $translator, 'text_domain' => 'default', 'uri' => $uri])
             );
 
-        $stack = new TranslatorAwareTreeRouteStack();
+                /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        $prototypes = new ArrayObject();
+        $stack      = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()), $prototypes);
         $stack->addRoute('test', $route);
 
         $stack->assemble([], ['name' => 'test', 'translator' => $translator, 'uri' => $uri]);
@@ -139,7 +148,9 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
     public function testAssembleRouteWithParameterLocale(): void
     {
-        $stack = new TranslatorAwareTreeRouteStack();
+                /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        $prototypes = new ArrayObject();
+        $stack      = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()), $prototypes);
         $stack->setTranslator($this->getTranslator(2), 'route');
         $stack->addRoute(
             'foo',
@@ -152,7 +163,9 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
     public function testMatchRouteWithParameterLocale(): void
     {
-        $stack = new TranslatorAwareTreeRouteStack();
+                /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        $prototypes = new ArrayObject();
+        $stack      = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()), $prototypes);
         $stack->setTranslator($this->getTranslator(1), 'route');
         $stack->addRoute(
             'foo',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Laminas\Router;
 
+use Laminas\Router\Http\TreeRouteStack;
 use Laminas\ServiceManager\ServiceManager;
 
 /**
@@ -19,20 +20,26 @@ use Laminas\ServiceManager\ServiceManager;
  * @psalm-import-type ServiceManagerConfiguration from ServiceManager
  * @psalm-type RouterConfigShape = array{
  *      dependencies: ServiceManagerConfiguration,
+ *      router: array{
+ *          router_class: class-string<RouteStackInterface>,
+ *          route_plugins: class-string<RoutePluginManager>,
+ *      }
  *  }
- *
- * @final
  */
-class ConfigProvider
+final class ConfigProvider
 {
     /**
      * Provide default configuration.
      *
      * @return RouterConfigShape
      */
-    public function __invoke()
+    public function __invoke(): array
     {
         return [
+            'router'       => [
+                'router_class'  => TreeRouteStack::class,
+                'route_plugins' => RoutePluginManager::class,
+            ],
             'dependencies' => $this->getDependencyConfig(),
         ];
     }
@@ -42,17 +49,17 @@ class ConfigProvider
      *
      * @return ServiceManagerConfiguration
      */
-    public function getDependencyConfig()
+    public function getDependencyConfig(): array
     {
         return [
             'aliases'   => [
-                'HttpRouter'         => Http\TreeRouteStack::class,
+                'HttpRouter'         => TreeRouteStack::class,
                 'router'             => RouteStackInterface::class,
                 'Router'             => RouteStackInterface::class,
                 'RoutePluginManager' => RoutePluginManager::class,
             ],
             'factories' => [
-                Http\TreeRouteStack::class => Http\HttpRouterFactory::class,
+                TreeRouteStack::class      => Http\HttpRouterFactory::class,
                 RoutePluginManager::class  => RoutePluginManagerFactory::class,
                 RouteStackInterface::class => RouterFactory::class,
             ],

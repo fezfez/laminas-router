@@ -12,34 +12,29 @@ interface RouteStackInterface extends RouteInterface
     /**
      * Add a route to the stack.
      *
-     * @param string          $name
-     * @param iterable|TRoute $route
-     * @param int             $priority
-     * @return static
+     * @param non-empty-string|array-key $name
+     * @param array|TRoute $route
      */
-    public function addRoute($name, $route, $priority = null);
+    public function addRoute(string|int $name, array|RouteInterface $route, ?int $priority = null): void;
 
     /**
      * Add multiple routes to the stack.
      *
-     * @param iterable $routes
-     * @return static
+     * @param array<non-empty-string|array-key, array|TRoute> $routes
      */
-    public function addRoutes($routes);
+    public function addRoutes(array $routes): void;
 
     /**
      * Remove a route from the stack.
      *
-     * @param  string $name
-     * @return static
+     * @param non-empty-string $name
      */
-    public function removeRoute($name);
+    public function removeRoute(string $name): void;
 
     /**
      * Remove all routes from the stack and set new ones.
      *
-     * @param iterable $routes
-     * @return static
+     * @param array<non-empty-string, array|TRoute> $routes
      */
-    public function setRoutes($routes);
+    public function setRoutes(array $routes): void;
 }

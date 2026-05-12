@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\Exception;
-use Laminas\Stdlib\ArrayUtils;
+use Laminas\Router\Http\HttpRouteMatch;
+use Laminas\Router\Http\RouteDefinition\RouteDefinition;
+use Laminas\Router\Http\RouteDefinition\RouteDefinitionLiteral;
+use Laminas\Router\Http\RouteDefinition\RouteDefinitionOption;
+use Laminas\Router\Http\RouteDefinition\RouteDefinitionParameter;
+use Laminas\Router\Http\RouteDefinition\RouteDefinitionPartInterface;
 use Laminas\Stdlib\RequestInterface;
-use Laminas\Uri\UriInterface;
+use Laminas\Uri\Http;
+use Laminas\Uri\Http as HttpUri;
 use Override;
-use Traversable;
 
 use function array_merge;
-use function count;
-use function is_array;
+use function is_string;
 use function method_exists;
 use function preg_match;
 use function preg_quote;
@@ -25,77 +29,48 @@ use function strlen;
  *
  * Note: the following type is recursive, but Psalm doesn't understand array shape recursion (yet). For now, we only
  *       represented recursion of the 'optional' part type to 1 level, to ease analysis.
- *
- * @psalm-type Parts = list<
- *     array{
- *      'literal',
- *      string,
- *      string|null
- *     }|array{
- *      'parameter',
- *      string
- *     }|array{
- *      'optional',
- *      list<array{'literal', string, string|null}|array{'parameter', string}|array{'optional', array}>
- *     }
- * >
- * @final
  */
-class Hostname implements HttpRouteInterface
+final class Hostname implements HttpRouteInterface
 {
     /**
      * Parts of the route.
-     *
-     * @var Parts
      */
-    protected $parts;
-
+    private readonly RouteDefinition $parts;
     /**
      * Regex used for matching the route.
-     *
-     * @var string
      */
-    protected $regex;
-
+    private readonly string $regex;
     /**
      * Map from regex groups to parameter names.
      *
-     * @var array
+     * @var array<string, string>
      */
-    protected $paramMap = [];
-
-    /**
-     * Default values.
-     *
-     * @var array
-     */
-    protected $defaults;
-
+    private array $paramMap = [];
     /**
      * List of assembled parameters.
      *
-     * @var list<string>
+     * @var list<non-empty-string>
      */
-    protected $assembledParams = [];
-
+    private array $assembledParams = [];
     /**
      * @internal
      * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     *
-     * @var int|null
      */
-    public $priority;
+    public int|null $priority = null;
 
     /**
      * Create a new hostname route.
      *
-     * @param  string $route
+     * @param array<non-empty-string, string> $constraints
+     * @param array<string, string> $defaults
      */
-    public function __construct($route, array $constraints = [], array $defaults = [])
-    {
-        $this->defaults = $defaults;
-        $this->parts    = $this->parseRouteDefinition($route);
-        $this->regex    = $this->buildRegex($this->parts, $constraints);
+    public function __construct(
+        string $route,
+        array $constraints = [],
+        private readonly array $defaults = []
+    ) {
+        $this->parts = $this->parseRouteDefinition($route);
+        $this->regex = $this->buildRegex($this->parts->getParts(), $constraints);
     }
 
     /**
@@ -103,46 +78,31 @@ class Hostname implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory($options = [])
+    public static function factory(array $options = []): static
     {
-        if ($options instanceof Traversable) {
-            $options = ArrayUtils::iteratorToArray($options);
-        } elseif (! is_array($options)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                '%s expects an array or Traversable set of options',
-                __METHOD__
-            ));
-        }
+        $route = $options['route'] ?? null;
+        /** @psalm-var array<non-empty-string, string> $constraints */
+        $constraints = $options['constraints'] ?? [];
+        /** @psalm-var array<string, string> $defaults */
+        $defaults = $options['defaults'] ?? [];
 
-        if (! isset($options['route'])) {
+        if (! is_string($route)) {
             throw new Exception\InvalidArgumentException('Missing "route" in options array');
         }
 
-        if (! isset($options['constraints'])) {
-            $options['constraints'] = [];
-        }
-
-        if (! isset($options['defaults'])) {
-            $options['defaults'] = [];
-        }
-
-        return new static($options['route'], $options['constraints'], $options['defaults']);
+        return new self($route, $constraints, $defaults);
     }
 
     /**
      * Parse a route definition.
      *
-     * @param  string $def
-     * @return Parts
      * @throws Exception\RuntimeException
      */
-    protected function parseRouteDefinition($def)
+    private function parseRouteDefinition(string $def): RouteDefinition
     {
-        $currentPos = 0;
-        $length     = strlen($def);
-        $parts      = [];
-        $levelParts = [&$parts];
-        $level      = 0;
+        $currentPos      = 0;
+        $length          = strlen($def);
+        $routeDefinition = new RouteDefinition();
 
         while ($currentPos < $length) {
             if (! preg_match('(\G(?P<literal>[a-z0-9-.]*)(?P<token>[:\[\]]|$))', $def, $matches, 0, $currentPos)) {
@@ -152,7 +112,7 @@ class Hostname implements HttpRouteInterface
             $currentPos += strlen($matches[0]);
 
             if (isset($matches['literal']) && $matches['literal'] !== '') {
-                $levelParts[$level][] = ['literal', $matches['literal']];
+                $routeDefinition->addPart(new RouteDefinitionLiteral($matches['literal']));
             }
 
             if ($matches['token'] === ':') {
@@ -168,72 +128,57 @@ class Hostname implements HttpRouteInterface
                     throw new Exception\RuntimeException('Found empty parameter name');
                 }
 
-                $levelParts[$level][] = [
-                    'parameter',
-                    $matches['name'],
-                    $matches['delimiters'] ?? null,
-                ];
+                /** @psalm-var non-empty-string $matches['name'] */
 
+                $routeDefinition->addPart(new RouteDefinitionParameter(
+                    $matches['name'],
+                    $matches['delimiters'] ?? null
+                ));
                 $currentPos += strlen($matches[0]);
             } elseif ($matches['token'] === '[') {
-                $levelParts[$level][]   = ['optional', []];
-                $levelParts[$level + 1] = &$levelParts[$level][count($levelParts[$level]) - 1][1];
-
-                $level++;
+                $routeDefinition->assertStartOptional();
             } elseif ($matches['token'] === ']') {
-                unset($levelParts[$level]);
-                $level--;
-
-                if ($level < 0) {
-                    throw new Exception\RuntimeException('Found closing bracket without matching opening bracket');
-                }
+                $routeDefinition->endOptional();
             } else {
                 break;
             }
         }
 
-        if ($level > 0) {
-            throw new Exception\RuntimeException('Found unbalanced brackets');
-        }
-
-        return $parts;
+        return $routeDefinition;
     }
 
     /**
      * Build the matching regex from parsed parts.
      *
-     * @param Parts $parts
-     * @param int   $groupIndex
-     * @return string
+     * @psalm-param  list<RouteDefinitionPartInterface> $parts
+     * @param array<string, string> $constraints
      * @throws Exception\RuntimeException
      */
-    protected function buildRegex(array $parts, array $constraints, &$groupIndex = 1)
+    private function buildRegex(array $parts, array $constraints, int &$groupIndex = 1): string
     {
         $regex = '';
 
         foreach ($parts as $part) {
-            switch ($part[0]) {
-                case 'literal':
-                    $regex .= preg_quote($part[1]);
-                    break;
+            if ($part instanceof RouteDefinitionLiteral) {
+                $regex .= preg_quote($part->literal);
+                continue;
+            }
+            if ($part instanceof RouteDefinitionParameter) {
+                $groupName = '?P<param' . $groupIndex . '>';
 
-                case 'parameter':
-                    $groupName = '?P<param' . $groupIndex . '>';
+                if (isset($constraints[$part->name])) {
+                    $regex .= '(' . $groupName . $constraints[$part->name] . ')';
+                } elseif ($part->delimiter === null) {
+                    $regex .= '(' . $groupName . '[^.]+)';
+                } else {
+                    $regex .= '(' . $groupName . '[^' . $part->delimiter . ']+)';
+                }
 
-                    if (isset($constraints[$part[1]])) {
-                        $regex .= '(' . $groupName . $constraints[$part[1]] . ')';
-                    } elseif ($part[2] === null) {
-                        $regex .= '(' . $groupName . '[^.]+)';
-                    } else {
-                        $regex .= '(' . $groupName . '[^' . $part[2] . ']+)';
-                    }
-
-                    $this->paramMap['param' . $groupIndex++] = $part[1];
-                    break;
-
-                case 'optional':
-                    $regex .= '(?:' . $this->buildRegex($part[1], $constraints, $groupIndex) . ')?';
-                    break;
+                $this->paramMap['param' . $groupIndex++] = $part->name;
+                continue;
+            }
+            if ($part instanceof RouteDefinitionOption) {
+                $regex .= '(?:' . $this->buildRegex($part->part, $constraints, $groupIndex) . ')?';
             }
         }
 
@@ -243,56 +188,54 @@ class Hostname implements HttpRouteInterface
     /**
      * Build host.
      *
-     * @param Parts                 $parts
-     * @param array<string, string> $mergedParams
-     * @param bool                  $isOptional
-     * @return string
+     * @psalm-param  list<RouteDefinitionPartInterface>                 $parts
+     * @param array<string, string|null|int|float> $mergedParams
      * @throws Exception\RuntimeException
      * @throws Exception\InvalidArgumentException
      */
-    protected function buildHost(array $parts, array $mergedParams, $isOptional)
+    private function buildHost(array $parts, array $mergedParams, bool $isOptional): string
     {
         $host      = '';
         $skip      = true;
         $skippable = false;
 
         foreach ($parts as $part) {
-            switch ($part[0]) {
-                case 'literal':
-                    $host .= $part[1];
-                    break;
+            if ($part instanceof RouteDefinitionLiteral) {
+                $host .= $part->literal;
+                continue;
+            }
 
-                case 'parameter':
-                    $skippable = true;
+            if ($part instanceof RouteDefinitionParameter) {
+                $skippable = true;
 
-                    if (! isset($mergedParams[$part[1]])) {
-                        if (! $isOptional) {
-                            throw new Exception\InvalidArgumentException(sprintf('Missing parameter "%s"', $part[1]));
-                        }
-
-                        return '';
-                    } elseif (
-                        ! $isOptional
-                        || ! isset($this->defaults[$part[1]])
-                        || $this->defaults[$part[1]] !== $mergedParams[$part[1]]
-                    ) {
-                        $skip = false;
+                if (! isset($mergedParams[$part->name])) {
+                    if (! $isOptional) {
+                        throw new Exception\InvalidArgumentException(sprintf('Missing parameter "%s"', $part->name));
                     }
 
-                    $host .= $mergedParams[$part[1]];
+                    return '';
+                } elseif (
+                    ! $isOptional
+                    || ! isset($this->defaults[$part->name])
+                    || $this->defaults[$part->name] !== $mergedParams[$part->name]
+                ) {
+                    $skip = false;
+                }
 
-                    $this->assembledParams[] = $part[1];
-                    break;
+                $host .= (string) $mergedParams[$part->name];
 
-                case 'optional':
-                    $skippable    = true;
-                    $optionalPart = $this->buildHost($part[1], $mergedParams, true);
+                $this->assembledParams[] = $part->name;
+                continue;
+            }
 
-                    if ($optionalPart !== '') {
-                        $host .= $optionalPart;
-                        $skip  = false;
-                    }
-                    break;
+            if ($part instanceof RouteDefinitionOption) {
+                $skippable    = true;
+                $optionalPart = $this->buildHost($part->part, $mergedParams, true);
+
+                if ($optionalPart !== '') {
+                    $host .= $optionalPart;
+                    $skip  = false;
+                }
             }
         }
 
@@ -303,17 +246,15 @@ class Hostname implements HttpRouteInterface
         return $host;
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request)
+    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
             return null;
         }
 
-        /** @var UriInterface $uri */
+        /** @var Http $uri */
         $uri  = $request->getUri();
         $host = $uri->getHost() ?? '';
 
@@ -334,17 +275,15 @@ class Hostname implements HttpRouteInterface
         return new HttpRouteMatch(array_merge($this->defaults, $params));
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): string
     {
         $this->assembledParams = [];
 
-        if (isset($options['uri'])) {
+        if (isset($options['uri']) && $options['uri'] instanceof HttpUri) {
             $host = $this->buildHost(
-                $this->parts,
+                $this->parts->getParts(),
                 array_merge($this->defaults, $params),
                 false
             );
@@ -356,11 +295,9 @@ class Hostname implements HttpRouteInterface
         return '';
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
-    public function getAssembledParams()
+    public function getAssembledParams(): array
     {
         return $this->assembledParams;
     }

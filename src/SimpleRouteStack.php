@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Laminas\Router;
 
-use Laminas\ServiceManager\ServiceManager;
-use Laminas\Stdlib\ArrayUtils;
+use Laminas\Router\Exception\RuntimeException;
+use Laminas\Router\PriorityList;
+use Laminas\Router\RouteMatch;
 use Laminas\Stdlib\RequestInterface;
 use Override;
-use Traversable;
 
 use function array_merge;
+use function assert;
 use function is_array;
+use function is_int;
+use function is_string;
 use function sprintf;
 
 /**
@@ -25,29 +28,26 @@ class SimpleRouteStack implements RouteStackInterface
     /**
      * Stack containing all routes.
      *
-     * @var PriorityList<string, TRoute>
+     * @var PriorityList<non-empty-string|array-key, TRoute>
      */
-    protected $routes;
+    protected PriorityList $routes;
 
     /**
-     * Route plugin manager
-     *
-     * @var RoutePluginManager
+     * @param array<non-empty-string, array|TRoute> $routes
+     * @param array<non-empty-string, non-empty-string> $defaultParams
      */
-    protected $routePluginManager;
-
-    /**
-     * Default parameters.
-     *
-     * @var array
-     */
-    protected $defaultParams = [];
-
-    public function __construct(?RoutePluginManager $routePluginManager = null)
-    {
-        /** @var PriorityList<string, TRoute> $this->routes */
-        $this->routes             = new PriorityList();
-        $this->routePluginManager = $routePluginManager ?? new RoutePluginManager(new ServiceManager());
+    public function __construct(
+        private readonly RoutePluginManager $routePluginManager,
+        array $routes = [],
+        /**
+         * Default parameters.
+         */
+        protected array $defaultParams = []
+    ) {
+        /** @var PriorityList<non-empty-string|array-key, TRoute> $priorityList */
+        $priorityList = new PriorityList();
+        $this->routes = $priorityList;
+        $this->addRoutes($routes);
     }
 
     /**
@@ -55,90 +55,70 @@ class SimpleRouteStack implements RouteStackInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory($options = [])
+    public static function factory(array $options = []): static
     {
-        if ($options instanceof Traversable) {
-            $options = ArrayUtils::iteratorToArray($options);
-        } elseif (! is_array($options)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                '%s expects an array or Traversable set of options',
-                __METHOD__
-            ));
+        /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
+        $routes       = $options['routes'] ?? [];
+        $routePlugins = $options['route_plugins'] ?? null;
+        /** @psalm-var array<non-empty-string, non-empty-string> $defaultParams */
+        $defaultParams = $options['default_params'] ?? [];
+
+        if (! $routePlugins instanceof RoutePluginManager) {
+            throw new RuntimeException('Missing "route_plugins" in options array');
         }
 
-        $routePluginManager = null;
-        if (isset($options['route_plugins'])) {
-            $routePluginManager = $options['route_plugins'];
-        }
-
-        $instance = new static($routePluginManager);
-
-        if (isset($options['routes'])) {
-            $instance->addRoutes($options['routes']);
-        }
-
-        if (isset($options['default_params'])) {
-            $instance->setDefaultParams($options['default_params']);
-        }
-
-        return $instance;
+        return new static(
+            $routePlugins,
+            $routes,
+            $defaultParams
+        );
     }
 
     /** @inheritDoc */
     #[Override]
-    public function addRoutes($routes)
+    public function addRoutes(array $routes): void
     {
-        if (! is_array($routes) && ! $routes instanceof Traversable) {
-            throw new Exception\InvalidArgumentException('addRoutes expects an array or Traversable set of routes');
-        }
-
         foreach ($routes as $name => $route) {
             $this->addRoute($name, $route);
         }
-
-        return $this;
     }
 
     /** @inheritDoc */
     #[Override]
-    public function addRoute($name, $route, $priority = null)
+    public function addRoute(string|int $name, array|RouteInterface $route, ?int $priority = null): void
     {
-        if (! $route instanceof RouteInterface) {
+        if (is_array($route)) {
             $route = $this->routeFromArray($route);
         }
 
-        if ($priority === null && isset($route->priority)) {
+        if ($priority === null && isset($route->priority) && is_int($route->priority)) {
             $priority = $route->priority;
         }
 
-        $this->routes->insert($name, $route, $priority);
+        $priority ??= 0;
 
-        return $this;
+        $this->routes->insert($name, $route, $priority);
     }
 
     /** @inheritDoc */
     #[Override]
-    public function removeRoute($name)
+    public function removeRoute(string $name): void
     {
         $this->routes->remove($name);
-        return $this;
     }
 
     /** @inheritDoc */
     #[Override]
-    public function setRoutes($routes)
+    public function setRoutes(array $routes): void
     {
         $this->routes->clear();
         $this->addRoutes($routes);
-        return $this;
     }
 
     /**
      * Get the added routes
-     *
-     * @return Traversable list of all routes
      */
-    public function getRoutes()
+    public function getRoutes(): PriorityList
     {
         return $this->routes;
     }
@@ -146,10 +126,9 @@ class SimpleRouteStack implements RouteStackInterface
     /**
      * Check if a route with a specific name exists
      *
-     * @param  string $name
-     * @return bool true if route exists
+     * @param non-empty-string $name
      */
-    public function hasRoute($name)
+    public function hasRoute(string $name): bool
     {
         return $this->routes->get($name) !== null;
     }
@@ -157,64 +136,44 @@ class SimpleRouteStack implements RouteStackInterface
     /**
      * Get a route by name
      *
-     * @param string $name
+     * @param non-empty-string $name
      * @return TRoute|null the route
      */
-    public function getRoute($name)
+    public function getRoute(string $name): RouteInterface|null
     {
         return $this->routes->get($name);
     }
 
     /**
-     * Set a default parameters.
-     *
-     * @return SimpleRouteStack
-     */
-    public function setDefaultParams(array $params)
-    {
-        $this->defaultParams = $params;
-        return $this;
-    }
-
-    /**
      * Set a default parameter.
      *
-     * @param  string $name
-     * @param  mixed  $value
-     * @return SimpleRouteStack
+     * @param non-empty-string $name
+     * @param non-empty-string $value
      */
-    public function setDefaultParam($name, $value)
+    public function setDefaultParam(string $name, string $value): void
     {
         $this->defaultParams[$name] = $value;
-        return $this;
     }
 
     /**
      * Create a route from array specifications.
      *
-     * @param  iterable $specs
      * @return TRoute
      * @throws Exception\InvalidArgumentException
      */
-    protected function routeFromArray($specs)
+    protected function routeFromArray(array $specs): RouteInterface
     {
-        if ($specs instanceof Traversable) {
-            $specs = ArrayUtils::iteratorToArray($specs);
-        }
+        $type = $specs['type'] ?? null;
+        /** @var array<string, string> $option */
+        $option = $specs['options'] ?? [];
 
-        if (! is_array($specs)) {
-            throw new Exception\InvalidArgumentException('Route definition must be an array or Traversable object');
-        }
-
-        if (! isset($specs['type'])) {
+        if (! is_string($type) || $type === '') {
             throw new Exception\InvalidArgumentException('Missing "type" option');
         }
 
-        if (! isset($specs['options'])) {
-            $specs['options'] = [];
-        }
+        $route = $this->routePluginManager->build($type, $option);
 
-        $route = $this->routePluginManager->build($specs['type'], $specs['options']);
+        /** @psalm-var TRoute $route */
 
         if (isset($specs['priority'])) {
             $route->priority = $specs['priority'];
@@ -223,15 +182,16 @@ class SimpleRouteStack implements RouteStackInterface
         return $route;
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request)
+    public function match(RequestInterface $request): ?RouteMatch
     {
         foreach ($this->routes as $name => $route) {
-            if (($match = $route->match($request)) instanceof RouteMatch) {
-                $match->setMatchedRouteName($name);
+            assert($name !== "");
+            assert($route instanceof RouteInterface);
+            $match = $route->match($request);
+            if ($match instanceof RouteMatch) {
+                $match->setMatchedRouteName((string) $name);
 
                 foreach ($this->defaultParams as $paramName => $value) {
                     if ($match->getParam($paramName) === null) {
@@ -249,19 +209,20 @@ class SimpleRouteStack implements RouteStackInterface
     /**
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
-     * @throws Exception\RuntimeException
+     * @throws RuntimeException
      */
     #[Override]
-    public function assemble(array $params = [], array $options = [])
+    public function assemble(array $params = [], array $options = []): string
     {
-        if (! isset($options['name'])) {
+        $name = $options['name'] ?? null;
+        if (! is_string($name) || $name === '') {
             throw new Exception\InvalidArgumentException('Missing "name" option');
         }
 
-        $route = $this->routes->get($options['name']);
+        $route = $this->routes->get($name);
 
         if (! $route) {
-            throw new Exception\RuntimeException(sprintf('Route with name "%s" not found', $options['name']));
+            throw new RuntimeException(sprintf('Route with name "%s" not found', $name));
         }
 
         unset($options['name']);

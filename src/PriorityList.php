@@ -9,11 +9,13 @@ use Laminas\Stdlib\PriorityList as StdlibPriorityList;
 /**
  * @internal
  *
- * @template TKey of string
+ * @psalm-internal \Laminas\Router
+ * @psalm-internal \LaminasTest\Router
+ *
+ * @template TKey of non-empty-string|array-key
  * @template TValue of RouteInterface
  * @template-extends StdlibPriorityList<TKey, TValue>
- * @final
  */
-class PriorityList extends StdlibPriorityList
+final class PriorityList extends StdlibPriorityList
 {
 }
