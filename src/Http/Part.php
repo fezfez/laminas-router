@@ -6,6 +6,8 @@ namespace Laminas\Router\Http;
 
 use ArrayObject;
 use Laminas\Router\Exception;
+use Laminas\Router\PriorityList;
+use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\RequestInterface;
@@ -25,16 +27,23 @@ use function strlen;
 
 /**
  * @template TRoute of HttpRouteInterface
- * @template-extends TreeRouteStack<TRoute>
  */
-final class Part extends TreeRouteStack implements HttpRouteInterface
+final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
 {
+    /**
+     * @internal
+     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
+     */
+    public int|null $priority = null;
+
     /**
      * RouteInterface to match.
      *
      * @var TRoute
      */
     private readonly HttpRouteInterface $route;
+
+    private readonly TreeRouteStack $childStack;
 
     /**
      * Create a new part route.
@@ -55,15 +64,18 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
         private readonly bool $mayTerminate = false,
         private array $childRoutes = [],
     ) {
-        parent::__construct($routePluginManager, $prototypes);
+        $specificationFactory = new HttpRouteSpecificationFactory($routePluginManager, $prototypes);
+        $this->childStack     = new TreeRouteStack($routePluginManager, $prototypes, [], []);
 
         if (! is_object($routes)) {
-            $routes = $this->routeFromArray($routes);
+            $routes = $specificationFactory->createFromSpecification($routes);
         }
 
         if ($routes instanceof self) {
             throw new Exception\InvalidArgumentException('Base route may not be a part route');
         }
+
+        assert($routes instanceof HttpRouteInterface);
 
         $this->route = $routes;
     }
@@ -106,6 +118,65 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
 
     /** @inheritDoc */
     #[Override]
+    public function addRoutes(array $routes): void
+    {
+        $this->childStack->addRoutes($routes);
+    }
+
+    /** @inheritDoc */
+    #[Override]
+    public function addRoute(string|int $name, int|string|array|RouteInterface $route, ?int $priority = null): void
+    {
+        $this->childStack->addRoute($name, $route, $priority);
+    }
+
+    /** @inheritDoc */
+    #[Override]
+    public function removeRoute(string $name): void
+    {
+        $this->childStack->removeRoute($name);
+    }
+
+    /** @inheritDoc */
+    #[Override]
+    public function setRoutes(array $routes): void
+    {
+        $this->childStack->setRoutes($routes);
+    }
+
+    public function getRoutes(): PriorityList
+    {
+        return $this->childStack->getRoutes();
+    }
+
+    /**
+     * @param non-empty-string $name
+     */
+    public function hasRoute(string $name): bool
+    {
+        return $this->childStack->hasRoute($name);
+    }
+
+    /**
+     * @param non-empty-string $name
+     * @return TRoute|null the route
+     */
+    public function getRoute(string $name): RouteInterface|null
+    {
+        return $this->childStack->getRoute($name);
+    }
+
+    /**
+     * @param non-empty-string $name
+     * @param non-empty-string $value
+     */
+    public function setDefaultParam(string $name, string $value): void
+    {
+        $this->childStack->setDefaultParam($name, $value);
+    }
+
+    /** @inheritDoc */
+    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -118,7 +189,7 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
 
         if ($match !== null && method_exists($request, 'getUri')) {
             if (count($this->childRoutes) !== 0) {
-                $this->addRoutes($this->childRoutes);
+                $this->childStack->addRoutes($this->childRoutes);
                 $this->childRoutes = [];
             }
 
@@ -140,7 +211,7 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
                 }
             }
 
-            foreach ($this->routes as $name => $route) {
+            foreach ($this->childStack->getRoutes() as $name => $route) {
                 assert($name !== '');
                 assert($route instanceof HttpRouteInterface);
                 $subMatch = $route->match($request, $nextOffset, $options);
@@ -163,7 +234,7 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
     public function assemble(array $params = [], array $options = []): string
     {
         if (count($this->childRoutes) !== 0) {
-            $this->addRoutes($this->childRoutes);
+            $this->childStack->addRoutes($this->childRoutes);
             $this->childRoutes = [];
         }
 
@@ -186,7 +257,7 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
 
         unset($options['has_child']);
         $options['only_return_path'] = true;
-        return $path . parent::assemble($params, $options);
+        return $path . $this->childStack->assemble($params, $options);
     }
 
     /** @inheritDoc */

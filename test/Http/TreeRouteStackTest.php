@@ -20,7 +20,6 @@ use Laminas\Uri\Http as HttpUri;
 use LaminasTest\Router\FactoryTester;
 use LaminasTest\Router\TestAsset\DummyRoute;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 
 final class TreeRouteStackTest extends TestCase
 {
@@ -459,9 +458,7 @@ final class TreeRouteStackTest extends TestCase
             ],
         ]);
 
-        $reflectedClass    = new ReflectionClass($stack);
-        $reflectedProperty = $reflectedClass->getProperty('routes');
-        $routes            = $reflectedProperty->getValue($stack);
+        $routes = $stack->getRoutes();
 
         self::assertInstanceOf(PriorityList::class, $routes);
 

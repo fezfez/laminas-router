@@ -6,10 +6,11 @@ namespace Laminas\Router\Http;
 
 use ArrayObject;
 use Laminas\Router\Exception;
-use Laminas\Router\Http\HttpRouteMatch;
+use Laminas\Router\PriorityList;
+use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\RequestInterface;
-use Laminas\Uri\Http;
+use Laminas\Uri\Http as HttpUri;
 use Override;
 
 use function array_diff_key;
@@ -24,14 +25,21 @@ use function strlen;
 
 /**
  * @template TRoute of HttpRouteInterface
- * @template-extends TreeRouteStack<TRoute>
  */
-final class Chain extends TreeRouteStack implements HttpRouteInterface
+final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterface
 {
+    /**
+     * @internal
+     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
+     */
+    public int|null $priority = null;
+
+    private readonly TreeRouteStack $stack;
+
     /**
      * Chain routes.
      *
-     * @var array<array-key, array|TRoute>
+     * @var array<array-key, array|TRoute>|null
      */
     private array|null $chainRoutes;
 
@@ -43,8 +51,6 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
     private array $assembledParams = [];
 
     /**
-     * Create a new part route.
-     *
      * @param array<array-key, array|TRoute> $routes
      * @param ArrayObject<string, TRoute> $prototypes
      * @param array<non-empty-string, non-empty-string> $defaultParams
@@ -56,7 +62,7 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
         array $defaultParams = []
     ) {
         $this->chainRoutes = array_reverse($routes);
-        parent::__construct($routePluginManager, $prototypes, [], $defaultParams);
+        $this->stack       = new TreeRouteStack($routePluginManager, $prototypes, [], $defaultParams);
     }
 
     /**
@@ -93,8 +99,90 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
 
     /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
+    public function addRoutes(array $routes): void
     {
+        $this->stack->addRoutes($routes);
+    }
+
+    /** @inheritDoc */
+    #[Override]
+    public function addRoute(string|int $name, int|string|array|RouteInterface $route, ?int $priority = null): void
+    {
+        $this->stack->addRoute($name, $route, $priority);
+    }
+
+    /** @inheritDoc */
+    #[Override]
+    public function removeRoute(string $name): void
+    {
+        $this->stack->removeRoute($name);
+    }
+
+    /** @inheritDoc */
+    #[Override]
+    public function setRoutes(array $routes): void
+    {
+        $this->stack->setRoutes($routes);
+    }
+
+    public function getRoutes(): PriorityList
+    {
+        return $this->stack->getRoutes();
+    }
+
+    /**
+     * @param non-empty-string $name
+     */
+    public function hasRoute(string $name): bool
+    {
+        return $this->stack->hasRoute($name);
+    }
+
+    /**
+     * @param non-empty-string $name
+     * @return TRoute|null the route
+     */
+    public function getRoute(string $name): RouteInterface|null
+    {
+        return $this->stack->getRoute($name);
+    }
+
+    /**
+     * @param non-empty-string $name
+     * @param non-empty-string $value
+     */
+    public function setDefaultParam(string $name, string $value): void
+    {
+        $this->stack->setDefaultParam($name, $value);
+    }
+
+    public function setBaseUrl(string $baseUrl): void
+    {
+        $this->stack->setBaseUrl($baseUrl);
+    }
+
+    public function getBaseUrl(): ?string
+    {
+        return $this->stack->getBaseUrl();
+    }
+
+    public function setRequestUri(HttpUri $uri): void
+    {
+        $this->stack->setRequestUri($uri);
+    }
+
+    public function getRequestUri(): ?HttpUri
+    {
+        return $this->stack->getRequestUri();
+    }
+
+    /** @inheritDoc */
+    #[Override]
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?HttpRouteMatch {
         if (! method_exists($request, 'getUri')) {
             return null;
         }
@@ -103,16 +191,16 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
         $pathOffset  ??= 0;
 
         if ($this->chainRoutes !== null) {
-            $this->addRoutes($this->chainRoutes);
+            $this->stack->addRoutes($this->chainRoutes);
             $this->chainRoutes = null;
         }
 
         $match = new HttpRouteMatch([]);
-        /** @var Http $uri */
+        /** @var HttpUri $uri */
         $uri        = $request->getUri();
         $pathLength = strlen((string) $uri->getPath());
 
-        foreach ($this->routes as $route) {
+        foreach ($this->stack->getRoutes() as $route) {
             assert($route instanceof HttpRouteInterface);
             $subMatch = $route->match($request, $pathOffset, $options);
 
@@ -138,13 +226,13 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
     public function assemble(array $params = [], array $options = []): string
     {
         if ($this->chainRoutes !== null) {
-            $this->addRoutes($this->chainRoutes);
+            $this->stack->addRoutes($this->chainRoutes);
             $this->chainRoutes = null;
         }
 
         $this->assembledParams = [];
 
-        $routes       = [...$this->routes];
+        $routes       = [...$this->stack->getRoutes()];
         $lastRouteKey = array_key_last($routes);
         $path         = '';
 

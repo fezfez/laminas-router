@@ -7,6 +7,7 @@ namespace Laminas\Router\Http;
 use ArrayObject;
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\RuntimeException;
+use Laminas\Router\PriorityList;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
@@ -21,7 +22,6 @@ use function explode;
 use function is_array;
 use function is_string;
 use function method_exists;
-use function property_exists;
 use function rtrim;
 use function sprintf;
 use function strlen;
@@ -30,10 +30,10 @@ use function strlen;
  * Tree search implementation.
  *
  * @template TRoute of HttpRouteInterface
- * @template-extends SimpleRouteStack<TRoute>
+ * @template-implements HttpNestedRoutesCapableInterface
  * @psalm-consistent-constructor
  */
-class TreeRouteStack extends SimpleRouteStack
+final class TreeRouteStack implements HttpNestedRoutesCapableInterface
 {
     /**
      * Base URL.
@@ -50,6 +50,11 @@ class TreeRouteStack extends SimpleRouteStack
      * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
      */
     public int|null $priority = null;
+
+    private readonly HttpRouteSpecificationFactory $routeSpecificationFactory;
+
+    /** @var SimpleRouteStack<TRoute> */
+    private SimpleRouteStack $stack;
 
     /**
      * @param ArrayObject<string, TRoute> $prototypes
@@ -68,7 +73,12 @@ class TreeRouteStack extends SimpleRouteStack
         array $routes = [],
         array $defaultParams = []
     ) {
-        parent::__construct($this->routePluginManager, $routes, $defaultParams);
+        $this->stack                     = new SimpleRouteStack($this->routePluginManager, [], $defaultParams);
+        $this->routeSpecificationFactory = new HttpRouteSpecificationFactory(
+            $this->routePluginManager,
+            $this->prototypes
+        );
+        $this->addRoutes($routes);
     }
 
     /**
@@ -100,6 +110,15 @@ class TreeRouteStack extends SimpleRouteStack
 
     /** @inheritDoc */
     #[Override]
+    public function addRoutes(array $routes): void
+    {
+        foreach ($routes as $name => $route) {
+            $this->addRoute($name, $route);
+        }
+    }
+
+    /** @inheritDoc */
+    #[Override]
     public function addRoute(string|int $name, int|string|array|RouteInterface $route, ?int $priority = null): void
     {
         if (! $route instanceof HttpRouteInterface && $route instanceof RouteInterface) {
@@ -108,85 +127,57 @@ class TreeRouteStack extends SimpleRouteStack
             );
         }
         if (! $route instanceof HttpRouteInterface) {
-            $route = $this->routeFromArray($route);
+            $route = $this->routeSpecificationFactory->createFromSpecification($route);
         }
 
-        parent::addRoute($name, $route, $priority);
+        assert($route instanceof HttpRouteInterface);
+
+        $this->stack->addRoute($name, $route, $priority);
     }
 
-    /**
-     * @inheritDoc
-     * @param  string|array $specs
-     * @return TRoute
-     * @throws Exception\InvalidArgumentException When route definition is not an array nor traversable.
-     * @throws Exception\InvalidArgumentException When chain routes are not an array nor traversable.
-     * @throws Exception\RuntimeException         When a generated routes does not implement the HTTP route interface.
-     */
+    /** @inheritDoc */
     #[Override]
-    final protected function routeFromArray(string|array $specs): RouteInterface
+    public function removeRoute(string $name): void
     {
-        if (is_string($specs)) {
-            return $this->getPrototype($specs);
-        }
+        $this->stack->removeRoute($name);
+    }
 
-        if (isset($specs['chain_routes'])) {
-            if (! is_array($specs['chain_routes'])) {
-                throw new Exception\InvalidArgumentException('Chain routes must be an array');
-            }
+    /** @inheritDoc */
+    #[Override]
+    public function setRoutes(array $routes): void
+    {
+        $this->stack->setRoutes($routes);
+    }
 
-            $chainRoutes = array_merge([$specs], $specs['chain_routes']);
-            if (isset($chainRoutes[0]['chain_routes'])) {
-                unset($chainRoutes[0]['chain_routes']);
-            }
-
-            if (isset($specs['child_routes']) && isset($chainRoutes[0]['child_routes'])) {
-                unset($chainRoutes[0]['child_routes']);
-            }
-
-            $options = [
-                'routes'        => $chainRoutes,
-                'route_plugins' => $this->routePluginManager,
-                'prototypes'    => $this->prototypes,
-            ];
-
-            $route = $this->routePluginManager->build(Chain::class, $options);
-        } else {
-            $route = parent::routeFromArray($specs);
-        }
-
-        if (! $route instanceof HttpRouteInterface) {
-            throw new Exception\RuntimeException('Given route does not implement HTTP route interface');
-        }
-
-        if (isset($specs['child_routes'])) {
-            $options = [
-                'route'         => $route,
-                'may_terminate' => isset($specs['may_terminate']) && $specs['may_terminate'] === true,
-                'child_routes'  => $specs['child_routes'],
-                'route_plugins' => $this->routePluginManager,
-                'prototypes'    => $this->prototypes,
-            ];
-
-            $priority = $route->priority ?? null;
-
-            $route           = $this->routePluginManager->build(Part::class, $options);
-            $route->priority = $priority;
-        }
-
-        return $route;
+    public function getRoutes(): PriorityList
+    {
+        return $this->stack->getRoutes();
     }
 
     /**
-     * Get a prototype.
-     *
-     * @return TRoute
+     * @param non-empty-string $name
      */
-    private function getPrototype(string $name): RouteInterface
+    public function hasRoute(string $name): bool
     {
-        if (! property_exists($this->prototypes, $name)) {
-            throw new Exception\RuntimeException(sprintf('Could not find prototype with name %s', $name));
-        }
-        return $this->prototypes[$name];
+        return $this->stack->hasRoute($name);
+    }
+
+    /**
+     * @param non-empty-string $name
+     * @return TRoute|null the route
+     */
+    public function getRoute(string $name): RouteInterface|null
+    {
+        return $this->stack->getRoute($name);
+    }
+
+    /**
+     * @param non-empty-string $name
+     * @param non-empty-string $value
+     */
+    public function setDefaultParam(string $name, string $value): void
+    {
+        $this->stack->setDefaultParam($name, $value);
     }
 
     /**
@@ -224,13 +215,13 @@ class TreeRouteStack extends SimpleRouteStack
             $pathLength = strlen((string) $uri->getPath()) - $baseUrlLength;
         }
 
-        foreach ($this->routes as $name => $route) {
+        foreach ($this->stack->getRoutes() as $name => $route) {
             assert($route instanceof HttpRouteInterface);
             $match = $route->match($request, $baseUrlLength, $options);
             if ($match instanceof HttpRouteMatch && ($pathLength === null || $match->getLength() === $pathLength)) {
                 $match->setMatchedRouteName((string) $name);
 
-                foreach ($this->defaultParams as $paramName => $value) {
+                foreach ($this->stack->getDefaultParams() as $paramName => $value) {
                     if ($match->getParam($paramName) === null) {
                         $match->setParam($paramName, $value);
                     }
@@ -262,14 +253,14 @@ class TreeRouteStack extends SimpleRouteStack
             throw new Exception\RuntimeException('Invalid route name');
         }
 
-        $route = $this->routes->get($names[0]);
+        $route = $this->stack->getRoutes()->get($names[0]);
 
         if (! $route) {
             throw new Exception\RuntimeException(sprintf('Route with name "%s" not found', $names[0]));
         }
 
         if (isset($names[1])) {
-            if (! $route instanceof TreeRouteStack) {
+            if (! $route instanceof HttpNestedRoutesCapableInterface) {
                 throw new Exception\RuntimeException(sprintf(
                     'Route with name "%s" does not have child routes',
                     $names[0]
@@ -281,7 +272,8 @@ class TreeRouteStack extends SimpleRouteStack
         }
 
         if (isset($options['only_return_path']) && $options['only_return_path'] === true) {
-            return ($this->baseUrl ?? '') . $route->assemble(array_merge($this->defaultParams, $params), $options);
+            return ($this->baseUrl ?? '')
+                . $route->assemble(array_merge($this->stack->getDefaultParams(), $params), $options);
         }
 
         if (! isset($options['uri']) || ! $options['uri'] instanceof HttpUri) {
@@ -302,7 +294,8 @@ class TreeRouteStack extends SimpleRouteStack
             $uri = $options['uri'];
         }
 
-        $path = ($this->baseUrl ?? '') . $route->assemble(array_merge($this->defaultParams, $params), $options);
+        $path = ($this->baseUrl ?? '')
+            . $route->assemble(array_merge($this->stack->getDefaultParams(), $params), $options);
 
         if (isset($options['query']) && (is_string($options['query']) || is_array($options['query']))) {
             $uri->setQuery($options['query']);

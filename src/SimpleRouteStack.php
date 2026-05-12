@@ -23,7 +23,7 @@ use function sprintf;
  * @template TRoute of RouteInterface
  * @template-implements RouteStackInterface<TRoute>
  */
-class SimpleRouteStack implements RouteStackInterface
+final class SimpleRouteStack implements RouteStackInterface
 {
     /**
      * Stack containing all routes.
@@ -153,6 +153,14 @@ class SimpleRouteStack implements RouteStackInterface
     public function setDefaultParam(string $name, string $value): void
     {
         $this->defaultParams[$name] = $value;
+    }
+
+    /**
+     * @return array<non-empty-string, non-empty-string>
+     */
+    public function getDefaultParams(): array
+    {
+        return $this->defaultParams;
     }
 
     /**
