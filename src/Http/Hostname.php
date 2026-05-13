@@ -14,7 +14,6 @@ use Laminas\Router\Http\RouteDefinition\RouteDefinitionPartInterface;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http;
 use Laminas\Uri\Http as HttpUri;
-use Override;
 
 use function array_merge;
 use function is_string;
@@ -77,7 +76,6 @@ final class Hostname implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
-    #[Override]
     public static function factory(array $options = []): self
     {
         $route = $options['route'] ?? null;
@@ -247,7 +245,6 @@ final class Hostname implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
@@ -276,7 +273,6 @@ final class Hostname implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         $this->assembledParams = [];
@@ -296,7 +292,6 @@ final class Hostname implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function getAssembledParams(): array
     {
         return $this->assembledParams;

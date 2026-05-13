@@ -8,7 +8,6 @@ use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\PriorityList;
 use Laminas\Router\RouteMatch;
 use Laminas\Stdlib\RequestInterface;
-use Override;
 
 use function array_merge;
 use function assert;
@@ -30,7 +29,7 @@ final class SimpleRouteStack implements RouteStackInterface
      *
      * @var PriorityList<TRoute>
      */
-    protected PriorityList $routes;
+    private PriorityList $routes;
 
     /**
      * @param array<non-empty-string, array|TRoute> $routes
@@ -42,7 +41,7 @@ final class SimpleRouteStack implements RouteStackInterface
         /**
          * Default parameters.
          */
-        protected array $defaultParams = []
+        private array $defaultParams = []
     ) {
         /** @var PriorityList<TRoute> $priorityList */
         $priorityList = new PriorityList();
@@ -54,7 +53,6 @@ final class SimpleRouteStack implements RouteStackInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
-    #[Override]
     public static function factory(array $options = []): self
     {
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
@@ -75,7 +73,6 @@ final class SimpleRouteStack implements RouteStackInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function addRoutes(array $routes): void
     {
         foreach ($routes as $name => $route) {
@@ -86,7 +83,6 @@ final class SimpleRouteStack implements RouteStackInterface
     /**
      * @inheritDoc
      */
-    #[Override]
     public function addRoute(string|int $name, array|RouteInterface $route, ?int $priority = null): void
     {
         if (is_array($route)) {
@@ -106,14 +102,12 @@ final class SimpleRouteStack implements RouteStackInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function removeRoute(string $name): void
     {
         $this->routes->remove($name);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function setRoutes(array $routes): void
     {
         $this->routes->clear();
@@ -174,7 +168,7 @@ final class SimpleRouteStack implements RouteStackInterface
      * @return TRoute
      * @throws Exception\InvalidArgumentException
      */
-    protected function routeFromArray(array $specs): RouteInterface
+    private function routeFromArray(array $specs): RouteInterface
     {
         $type = $specs['type'] ?? null;
         /** @var array<string, string> $option */
@@ -198,7 +192,6 @@ final class SimpleRouteStack implements RouteStackInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function match(RequestInterface $request): ?RouteMatch
     {
         foreach ($this->routes as $name => $route) {
@@ -226,7 +219,6 @@ final class SimpleRouteStack implements RouteStackInterface
      * @throws Exception\InvalidArgumentException
      * @throws RuntimeException
      */
-    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         $name = $options['name'] ?? null;

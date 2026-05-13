@@ -8,7 +8,6 @@ use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http;
-use Override;
 
 use function assert;
 use function is_array;
@@ -49,7 +48,6 @@ final class Literal implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
-    #[Override]
     public static function factory(array $options = []): self
     {
         $route    = $options['route'] ?? null;
@@ -67,7 +65,6 @@ final class Literal implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
@@ -96,14 +93,12 @@ final class Literal implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         return $this->route;
     }
 
     /** @inheritDoc */
-    #[Override]
     public function getAssembledParams(): array
     {
         return [];

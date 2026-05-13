@@ -4,21 +4,18 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
-use ArrayObject;
 use Laminas\Router\Exception;
 use Laminas\Router\PriorityList;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteMatch;
-use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Translator\TranslatorInterface;
 use Laminas\Uri\Http as HttpUri;
-use Override;
 
 use function assert;
 
 /**
- * Translator aware tree route stack (composition around {@see TreeRouteStack}).
+ * Translator aware tree route stack
  *
  * @implements HttpNestedRoutesCapableInterface<HttpRouteInterface>
  */
@@ -45,77 +42,50 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
      */
     private string $translatorTextDomain = 'default';
 
-    private readonly TreeRouteStack $inner;
+    private readonly TreeRouteStack $treeRouteStack;
 
-    /**
-     * @param ArrayObject<string, HttpRouteInterface>|null $prototypes
-     * @param array<non-empty-string, array|HttpRouteInterface> $routes
-     * @param array<non-empty-string, non-empty-string> $defaultParams
-     */
     public function __construct(
-        RoutePluginManager|TreeRouteStack $routePluginManagerOrInner,
-        ArrayObject|null $prototypes = null,
-        array $routes = [],
-        array $defaultParams = []
+        TreeRouteStack $treeRouteStack,
     ) {
-        if ($routePluginManagerOrInner instanceof TreeRouteStack) {
-            $this->inner = $routePluginManagerOrInner;
-
-            return;
-        }
-
-        /** @var ArrayObject<string, HttpRouteInterface> $resolvedPrototypes */
-        $resolvedPrototypes = $prototypes ?? new ArrayObject();
-
-        $this->inner = new TreeRouteStack(
-            $routePluginManagerOrInner,
-            $resolvedPrototypes,
-            $routes,
-            $defaultParams
-        );
+        $this->treeRouteStack = $treeRouteStack;
     }
 
     /**
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
-    #[Override]
     public static function factory(array $options = []): self
     {
         return new self(TreeRouteStack::factory($options));
     }
 
     /** @inheritDoc */
-    #[Override]
     public function addRoutes(array $routes): void
     {
-        $this->inner->addRoutes($routes);
+        $this->treeRouteStack->addRoutes($routes);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function addRoute(string|int $name, int|string|array|RouteInterface $route, ?int $priority = null): void
     {
-        $this->inner->addRoute($name, $route, $priority);
+        $this->treeRouteStack->addRoute($name, $route, $priority);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function removeRoute(string $name): void
     {
-        $this->inner->removeRoute($name);
+        $this->treeRouteStack->removeRoute($name);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function setRoutes(array $routes): void
     {
-        $this->inner->setRoutes($routes);
+        $this->treeRouteStack->setRoutes($routes);
     }
 
     public function getRoutes(): PriorityList
     {
-        return $this->inner->getRoutes();
+        return $this->treeRouteStack->getRoutes();
     }
 
     /**
@@ -123,7 +93,7 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
      */
     public function hasRoute(string $name): bool
     {
-        return $this->inner->hasRoute($name);
+        return $this->treeRouteStack->hasRoute($name);
     }
 
     /**
@@ -132,7 +102,7 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
      */
     public function getRoute(string $name): HttpRouteInterface|null
     {
-        $route = $this->inner->getRoute($name);
+        $route = $this->treeRouteStack->getRoute($name);
         assert($route === null || $route instanceof HttpRouteInterface);
 
         return $route;
@@ -144,34 +114,33 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
      */
     public function setDefaultParam(string $name, string $value): void
     {
-        $this->inner->setDefaultParam($name, $value);
+        $this->treeRouteStack->setDefaultParam($name, $value);
     }
 
     public function setBaseUrl(string $baseUrl): void
     {
-        $this->inner->setBaseUrl($baseUrl);
+        $this->treeRouteStack->setBaseUrl($baseUrl);
     }
 
     public function getBaseUrl(): ?string
     {
-        return $this->inner->getBaseUrl();
+        return $this->treeRouteStack->getBaseUrl();
     }
 
     public function setRequestUri(HttpUri $uri): void
     {
-        $this->inner->setRequestUri($uri);
+        $this->treeRouteStack->setRequestUri($uri);
     }
 
     public function getRequestUri(): ?HttpUri
     {
-        return $this->inner->getRequestUri();
+        return $this->treeRouteStack->getRequestUri();
     }
 
     /**
      * @inheritDoc
      * @param int|null $pathOffset
      */
-    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -185,7 +154,7 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
             $options['text_domain'] = $this->getTranslatorTextDomain();
         }
 
-        return $this->inner->match($request, $pathOffset, $options);
+        return $this->treeRouteStack->match($request, $pathOffset, $options);
     }
 
     /**
@@ -193,7 +162,6 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */
-    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         if ($this->hasTranslator() && $this->isTranslatorEnabled() && ! isset($options['translator'])) {
@@ -204,7 +172,7 @@ final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInte
             $options['text_domain'] = $this->getTranslatorTextDomain();
         }
 
-        return $this->inner->assemble($params, $options);
+        return $this->treeRouteStack->assemble($params, $options);
     }
 
     public function setTranslator(?TranslatorInterface $translator = null, ?string $textDomain = null): self

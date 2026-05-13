@@ -12,7 +12,6 @@ use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http;
-use Override;
 
 use function array_diff_key;
 use function array_flip;
@@ -78,7 +77,6 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
-    #[Override]
     public static function factory(array $options = []): self
     {
         $route        = $options['route'] ?? null;
@@ -111,28 +109,24 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function addRoutes(array $routes): void
     {
         $this->childStack->addRoutes($routes);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function addRoute(string|int $name, int|string|array|RouteInterface $route, ?int $priority = null): void
     {
         $this->childStack->addRoute($name, $route, $priority);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function removeRoute(string $name): void
     {
         $this->childStack->removeRoute($name);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function setRoutes(array $routes): void
     {
         $this->childStack->setRoutes($routes);
@@ -173,7 +167,6 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -229,7 +222,6 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
      * @inheritDoc
      * @throws Exception\RuntimeException
      */
-    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         if (count($this->childRoutes) !== 0) {
@@ -260,7 +252,6 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function getAssembledParams(): array
     {
         // Part routes may not occur as base route of other part routes, so we

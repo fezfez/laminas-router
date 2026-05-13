@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Laminas\Router;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Override;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -21,7 +20,6 @@ final class RouterFactory implements FactoryInterface
      *
      * Delegates to the HttpRouter service.
      */
-    #[Override]
     public function __invoke(
         ContainerInterface $container,
         string $requestedName,

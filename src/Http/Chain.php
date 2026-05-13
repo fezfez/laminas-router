@@ -11,7 +11,6 @@ use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http as HttpUri;
-use Override;
 
 use function array_diff_key;
 use function array_flip;
@@ -69,7 +68,6 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
-    #[Override]
     public static function factory(array $options = []): self
     {
         $route = $options['routes'] ?? null;
@@ -98,28 +96,24 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
     }
 
     /** @inheritDoc */
-    #[Override]
     public function addRoutes(array $routes): void
     {
         $this->stack->addRoutes($routes);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function addRoute(string|int $name, int|string|array|RouteInterface $route, ?int $priority = null): void
     {
         $this->stack->addRoute($name, $route, $priority);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function removeRoute(string $name): void
     {
         $this->stack->removeRoute($name);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function setRoutes(array $routes): void
     {
         $this->stack->setRoutes($routes);
@@ -180,7 +174,6 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
     }
 
     /** @inheritDoc */
-    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -225,7 +218,6 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
     }
 
     /** @inheritDoc */
-    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         if ($this->chainRoutes !== null) {
@@ -259,7 +251,6 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
     }
 
     /** @inheritDoc */
-    #[Override]
     public function getAssembledParams(): array
     {
         return $this->assembledParams;

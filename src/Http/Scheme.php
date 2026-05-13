@@ -8,7 +8,6 @@ use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http;
-use Override;
 
 use function is_array;
 use function is_string;
@@ -45,7 +44,6 @@ final class Scheme implements HttpRouteInterface
     /**
      * @inheritDoc
      */
-    #[Override]
     public static function factory(array $options = []): self
     {
         $scheme = $options['scheme'] ?? null;
@@ -60,7 +58,6 @@ final class Scheme implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
@@ -79,7 +76,6 @@ final class Scheme implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         if (isset($options['uri']) && $options['uri'] instanceof Http) {
@@ -91,7 +87,6 @@ final class Scheme implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function getAssembledParams(): array
     {
         return [];

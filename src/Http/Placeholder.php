@@ -7,7 +7,6 @@ namespace Laminas\Router\Http;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\RequestInterface;
-use Override;
 
 /**
  * Placeholder route.
@@ -33,7 +32,6 @@ final class Placeholder implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
-    #[Override]
     public static function factory(array $options = []): self
     {
         /** @var array<string, string> $defaults */
@@ -43,7 +41,6 @@ final class Placeholder implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -53,14 +50,12 @@ final class Placeholder implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         return '';
     }
 
     /** @inheritDoc */
-    #[Override]
     public function getAssembledParams(): array
     {
         return [];

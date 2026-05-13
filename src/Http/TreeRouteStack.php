@@ -14,7 +14,6 @@ use Laminas\Router\RoutePluginManager;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http as HttpUri;
-use Override;
 
 use function array_merge;
 use function assert;
@@ -84,7 +83,6 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
-    #[Override]
     public static function factory(array $options = []): static
     {
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
@@ -108,7 +106,6 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function addRoutes(array $routes): void
     {
         foreach ($routes as $name => $route) {
@@ -117,7 +114,6 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function addRoute(string|int $name, int|string|array|RouteInterface $route, ?int $priority = null): void
     {
         if (! $route instanceof HttpRouteInterface && $route instanceof RouteInterface) {
@@ -138,14 +134,12 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function removeRoute(string $name): void
     {
         $this->stack->removeRoute($name);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function setRoutes(array $routes): void
     {
         /** @var array<non-empty-string, array|TRoute> $routes */
@@ -187,7 +181,6 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
      * @inheritDoc
      * @param int|null $pathOffset
      */
-    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -243,7 +236,6 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */
-    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         $name = $options['name'] ?? '';
