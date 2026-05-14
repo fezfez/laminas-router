@@ -7,6 +7,7 @@ namespace Laminas\Router\Http;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\RequestInterface;
+use Override;
 
 use function array_map;
 use function explode;
@@ -48,6 +49,7 @@ final class Method implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory(array $options = []): self
     {
         /** @var mixed $verb */
@@ -63,6 +65,7 @@ final class Method implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getMethod')) {
@@ -81,6 +84,7 @@ final class Method implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         // The request method does not contribute to the path, thus nothing is returned.
@@ -88,6 +92,7 @@ final class Method implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function getAssembledParams(): array
     {
         return [];

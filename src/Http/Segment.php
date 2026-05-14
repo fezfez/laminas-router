@@ -14,6 +14,7 @@ use Laminas\Router\Http\RouteDefinition\RouteDefinitionTranslatedLiteral;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Translator\TranslatorInterface as Translator;
 use Laminas\Uri\Http;
+use Override;
 
 use function array_key_exists;
 use function array_merge;
@@ -128,6 +129,7 @@ final class Segment implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory(array $options = []): self
     {
         $route = $options['route'] ?? null;
@@ -338,6 +340,7 @@ final class Segment implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\RuntimeException
      */
+    #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
@@ -388,6 +391,7 @@ final class Segment implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         $this->assembledParams = [];
@@ -402,6 +406,7 @@ final class Segment implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function getAssembledParams(): array
     {
         return $this->assembledParams;

@@ -8,8 +8,8 @@ use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http;
+use Override;
 
-use function is_array;
 use function is_string;
 use function method_exists;
 
@@ -42,13 +42,13 @@ final class Scheme implements HttpRouteInterface
     }
 
     /**
-     * @inheritDoc
+     * @param array{'scheme'?:string, 'defaults'?: array<string, string>} $options
      */
+    #[Override]
     public static function factory(array $options = []): self
     {
-        $scheme = $options['scheme'] ?? null;
-        /** @var array<string, string> $defaults */
-        $defaults = is_array($options['defaults'] ?? null) ? $options['defaults'] : [];
+        $scheme   = $options['scheme'] ?? null;
+        $defaults = $options['defaults'] ?? [];
 
         if (! is_string($scheme) || $scheme === '') {
             throw new Exception\InvalidArgumentException('Missing "scheme" in options array');
@@ -58,6 +58,7 @@ final class Scheme implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
@@ -76,6 +77,7 @@ final class Scheme implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         if (isset($options['uri']) && $options['uri'] instanceof Http) {
@@ -87,6 +89,7 @@ final class Scheme implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function getAssembledParams(): array
     {
         return [];

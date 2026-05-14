@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\RouteMatch;
+use Override;
 
 use function array_merge;
 
@@ -32,6 +33,7 @@ final class HttpRouteMatch extends RouteMatch
     }
 
     /** @inheritDoc */
+    #[Override]
     public function setMatchedRouteName(string $name): self
     {
         if ($this->matchedRouteName === null) {

@@ -10,6 +10,7 @@ use Laminas\Router\PriorityList;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
+use Laminas\Router\RouteStackInterface;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http;
 
@@ -25,16 +26,21 @@ use function method_exists;
 use function strlen;
 
 /**
- * @implements HttpNestedRoutesCapableInterface<HttpRouteInterface>
+ * @template TRoute of HttpRouteInterface
+ * @template-implement RouteStackInterface<TRoute>
  */
-final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
+final class Part implements HttpRouteInterface, RouteStackInterface
 {
     /**
      * @internal
      * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
      */
     public int|null $priority = null;
-
+    /**
+     * RouteInterface to match.
+     *
+     * @var TRoute
+     */
     private readonly HttpRouteInterface $route;
 
     private readonly TreeRouteStack $childStack;
@@ -42,8 +48,8 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
     /**
      * Create a new part route.
      *
-     * @param ArrayObject<string, HttpRouteInterface> $prototypes
-     * @param array<non-empty-string, array|HttpRouteInterface> $childRoutes
+     * @param ArrayObject<string, TRoute> $prototypes
+     * @param array<non-empty-string, array|TRoute> $childRoutes
      * @throws Exception\InvalidArgumentException
      */
     public function __construct(
@@ -68,8 +74,6 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
             throw new Exception\InvalidArgumentException('Base route may not be a part route');
         }
 
-        assert($routes instanceof HttpRouteInterface);
-
         $this->route = $routes;
     }
 
@@ -77,14 +81,15 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory(array $options = []): self
     {
         $route        = $options['route'] ?? null;
         $routePlugins = $options['route_plugins'] ?? null;
-        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        /** @var ArrayObject<string, TRoute> $prototypes */
         $prototypes   = $options['prototypes'] ?? new ArrayObject();
         $mayTerminate = $options['may_terminate'] ?? false;
-        /** @var array<non-empty-string, array|HttpRouteInterface> $childRoutes */
+        /** @var array<non-empty-string, TRoute> $childRoutes */
         $childRoutes = $options['child_routes'] ?? [];
 
         if (! $routePlugins instanceof RoutePluginManager) {
@@ -167,6 +172,7 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -207,9 +213,7 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
                 $subMatch = $route->match($request, $nextOffset, $options);
                 if ($subMatch instanceof HttpRouteMatch) {
                     if (($match->getLength() + $subMatch->getLength() + $pathOffset) === $pathLength) {
-                        assert(is_string($name));
-
-                        return $match->merge($subMatch)->setMatchedRouteName($name);
+                        return $match->merge($subMatch)->setMatchedRouteName((string) $name);
                     }
                 }
             }
@@ -222,6 +226,7 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
      * @inheritDoc
      * @throws Exception\RuntimeException
      */
+    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         if (count($this->childRoutes) !== 0) {
@@ -252,6 +257,7 @@ final class Part implements HttpRouteInterface, HttpNestedRoutesCapableInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function getAssembledParams(): array
     {
         // Part routes may not occur as base route of other part routes, so we

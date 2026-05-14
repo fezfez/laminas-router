@@ -8,6 +8,7 @@ use Laminas\Router\Exception;
 use Laminas\Router\PriorityList;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteMatch;
+use Laminas\Router\RouteStackInterface;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Translator\TranslatorInterface;
 use Laminas\Uri\Http as HttpUri;
@@ -15,11 +16,12 @@ use Laminas\Uri\Http as HttpUri;
 use function assert;
 
 /**
- * Translator aware tree route stack
+ * Translator aware tree route stack.
  *
- * @implements HttpNestedRoutesCapableInterface<HttpRouteInterface>
+ * @template TRoute of HttpRouteInterface
+ * @template-implement RouteStackInterface<TRoute>
  */
-final class TranslatorAwareTreeRouteStack implements HttpNestedRoutesCapableInterface
+final class TranslatorAwareTreeRouteStack implements RouteStackInterface
 {
     /**
      * @internal

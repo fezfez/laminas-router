@@ -11,6 +11,7 @@ use Laminas\Router\PriorityList;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
+use Laminas\Router\RouteStackInterface;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http as HttpUri;
@@ -29,9 +30,9 @@ use function strlen;
  * Tree search implementation.
  *
  * @template TRoute of HttpRouteInterface
- * @implements HttpNestedRoutesCapableInterface<TRoute>
+ * @template-implement RouteStackInterface<TRoute>
  */
-final class TreeRouteStack implements HttpNestedRoutesCapableInterface
+final class TreeRouteStack implements RouteStackInterface
 {
     /**
      * Base URL.
@@ -83,6 +84,7 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory(array $options = []): static
     {
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
@@ -114,6 +116,7 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function addRoute(string|int $name, int|string|array|RouteInterface $route, ?int $priority = null): void
     {
         if (! $route instanceof HttpRouteInterface && $route instanceof RouteInterface) {
@@ -181,6 +184,7 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
      * @inheritDoc
      * @param int|null $pathOffset
      */
+    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -215,8 +219,7 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
             assert($route instanceof HttpRouteInterface);
             $match = $route->match($request, $baseUrlLength, $options);
             if ($match instanceof HttpRouteMatch && ($pathLength === null || $match->getLength() === $pathLength)) {
-                assert(is_string($name) && $name !== '');
-                $match->setMatchedRouteName($name);
+                $match->setMatchedRouteName((string) $name);
 
                 foreach ($this->stack->getDefaultParams() as $paramName => $value) {
                     if ($match->getParam($paramName) === null) {
@@ -236,6 +239,7 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */
+    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         $name = $options['name'] ?? '';
@@ -256,7 +260,7 @@ final class TreeRouteStack implements HttpNestedRoutesCapableInterface
         }
 
         if (isset($names[1])) {
-            if (! $route instanceof HttpNestedRoutesCapableInterface) {
+            if (! $route instanceof TreeRouteStack) {
                 throw new Exception\RuntimeException(sprintf(
                     'Route with name "%s" does not have child routes',
                     $names[0]

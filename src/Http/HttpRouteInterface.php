@@ -10,8 +10,6 @@ use Laminas\Stdlib\RequestInterface;
 
 /**
  * Tree specific route interface.
- *
- * @property int|null $priority Priority used when registering a route in a stack (optional; not enforced by PHP).
  */
 interface HttpRouteInterface extends RouteInterface
 {

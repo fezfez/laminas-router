@@ -9,6 +9,7 @@ use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http;
+use Override;
 
 use function array_merge;
 use function assert;
@@ -71,6 +72,7 @@ final class Regex implements HttpRouteInterface
      * @inheritDoc
      * @throws InvalidArgumentException
      */
+    #[Override]
     public static function factory(array $options = []): self
     {
         $regex    = $options['regex'] ?? null;
@@ -91,6 +93,7 @@ final class Regex implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
@@ -125,6 +128,7 @@ final class Regex implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         $url                   = $this->spec;
@@ -145,6 +149,7 @@ final class Regex implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function getAssembledParams(): array
     {
         return $this->assembledParams;

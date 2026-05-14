@@ -9,8 +9,10 @@ use Laminas\Router\Exception;
 use Laminas\Router\PriorityList;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
+use Laminas\Router\RouteStackInterface;
 use Laminas\Stdlib\RequestInterface;
-use Laminas\Uri\Http as HttpUri;
+use Laminas\Uri\Http;
+use Override;
 
 use function array_diff_key;
 use function array_flip;
@@ -23,9 +25,10 @@ use function method_exists;
 use function strlen;
 
 /**
- * @implements HttpNestedRoutesCapableInterface<HttpRouteInterface>
+ * @template TRoute of HttpRouteInterface
+ * @template-implement RouteStackInterface<TRoute>
  */
-final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterface
+final class Chain implements HttpRouteInterface, RouteStackInterface
 {
     /**
      * @internal
@@ -38,7 +41,7 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
     /**
      * Chain routes.
      *
-     * @var array<array-key, array|HttpRouteInterface>|null
+     * @var array<array-key, array|TRoute>
      */
     private array|null $chainRoutes;
 
@@ -50,8 +53,10 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
     private array $assembledParams = [];
 
     /**
-     * @param array<array-key, array|HttpRouteInterface> $routes
-     * @param ArrayObject<string, HttpRouteInterface> $prototypes
+     * Create a new part route.
+     *
+     * @param array<array-key, array|TRoute> $routes
+     * @param ArrayObject<string, TRoute> $prototypes
      * @param array<non-empty-string, non-empty-string> $defaultParams
      */
     public function __construct(
@@ -68,10 +73,11 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
+    #[Override]
     public static function factory(array $options = []): self
     {
         $route = $options['routes'] ?? null;
-        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
+        /** @var ArrayObject<string, TRoute> $prototypes */
         $prototypes   = $options['prototypes'] ?? new ArrayObject();
         $routePlugins = $options['route_plugins'] ?? null;
 
@@ -86,7 +92,7 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
         assert(is_array($route));
 
         /** @psalm-var RoutePluginManager $routePlugins */
-        /** @psalm-var array<non-empty-string, array|HttpRouteInterface> $route */
+        /** @psalm-var array<non-empty-string, TRoute> $route */
 
         return new self(
             $routePlugins,
@@ -163,12 +169,12 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
         return $this->stack->getBaseUrl();
     }
 
-    public function setRequestUri(HttpUri $uri): void
+    public function setRequestUri(Http $uri): void
     {
         $this->stack->setRequestUri($uri);
     }
 
-    public function getRequestUri(): ?HttpUri
+    public function getRequestUri(): ?Http
     {
         return $this->stack->getRequestUri();
     }
@@ -192,7 +198,7 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
         }
 
         $match = new HttpRouteMatch([]);
-        /** @var HttpUri $uri */
+        /** @var Http $uri */
         $uri        = $request->getUri();
         $pathLength = strlen((string) $uri->getPath());
 
@@ -218,6 +224,7 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
     }
 
     /** @inheritDoc */
+    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         if ($this->chainRoutes !== null) {
@@ -251,6 +258,7 @@ final class Chain implements HttpRouteInterface, HttpNestedRoutesCapableInterfac
     }
 
     /** @inheritDoc */
+    #[Override]
     public function getAssembledParams(): array
     {
         return $this->assembledParams;

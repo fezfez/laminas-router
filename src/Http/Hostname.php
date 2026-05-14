@@ -245,6 +245,7 @@ final class Hostname implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
         if (! method_exists($request, 'getUri')) {
@@ -273,6 +274,7 @@ final class Hostname implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function assemble(array $params = [], array $options = []): string
     {
         $this->assembledParams = [];
@@ -292,6 +294,7 @@ final class Hostname implements HttpRouteInterface
     }
 
     /** @inheritDoc */
+    #[Override]
     public function getAssembledParams(): array
     {
         return $this->assembledParams;
