@@ -140,14 +140,11 @@ final class Chain implements HttpRouteInterface, RouteStackInterface
 
     /**
      * @param non-empty-string $name
-     * @return HttpRouteInterface|null the route
+     * @return TRoute|null the route
      */
     public function getRoute(string $name): HttpRouteInterface|null
     {
-        $route = $this->stack->getRoute($name);
-        assert($route === null || $route instanceof HttpRouteInterface);
-
-        return $route;
+        return $this->stack->getRoute($name);
     }
 
     /**

@@ -100,7 +100,7 @@ final class TranslatorAwareTreeRouteStack implements RouteStackInterface
 
     /**
      * @param non-empty-string $name
-     * @return HttpRouteInterface|null the route
+     * @return TRoute|null the route
      */
     public function getRoute(string $name): HttpRouteInterface|null
     {

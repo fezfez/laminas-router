@@ -12,7 +12,7 @@ use function array_keys;
 
 final class PriorityListTest extends TestCase
 {
-    /** @var PriorityList<RouteInterface> */
+    /** @var PriorityList<non-empty-string|array-key, RouteInterface> */
     private PriorityList $list;
 
     public function setUp(): void
@@ -98,7 +98,6 @@ final class PriorityListTest extends TestCase
 
     public function testPriorityWithNegativesAndNull(): void
     {
-        /** @psalm-suppress NullArgument */
         $this->list->insert('foo', new TestAsset\DummyRoute(), null);
         $this->list->insert('bar', new TestAsset\DummyRoute(), 1);
         $this->list->insert('baz', new TestAsset\DummyRoute(), -1);

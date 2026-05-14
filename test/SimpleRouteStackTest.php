@@ -361,7 +361,6 @@ final class SimpleRouteStackTest extends TestCase
 
         $route = $router->getRoute('name');
         self::assertNotNull($route);
-        /** @psalm-suppress NoInterfaceProperties */
         self::assertEquals($expectedPriority, $route->priority);
     }
 }
