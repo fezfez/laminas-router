@@ -19,7 +19,7 @@ use function assert;
  * Translator aware tree route stack.
  *
  * @template TRoute of HttpRouteInterface
- * @template-implement RouteStackInterface<TRoute>
+ * @template-implements RouteStackInterface<TRoute>
  */
 final class TranslatorAwareTreeRouteStack implements RouteStackInterface
 {

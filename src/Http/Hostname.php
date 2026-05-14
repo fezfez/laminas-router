@@ -14,6 +14,7 @@ use Laminas\Router\Http\RouteDefinition\RouteDefinitionPartInterface;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http;
 use Laminas\Uri\Http as HttpUri;
+use Override;
 
 use function array_merge;
 use function is_string;

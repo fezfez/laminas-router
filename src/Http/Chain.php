@@ -26,7 +26,7 @@ use function strlen;
 
 /**
  * @template TRoute of HttpRouteInterface
- * @template-implement RouteStackInterface<TRoute>
+ * @template-implements RouteStackInterface<TRoute>
  */
 final class Chain implements HttpRouteInterface, RouteStackInterface
 {

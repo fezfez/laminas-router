@@ -15,6 +15,7 @@ use Laminas\Router\RouteStackInterface;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http as HttpUri;
+use Override;
 
 use function array_merge;
 use function assert;
@@ -30,7 +31,7 @@ use function strlen;
  * Tree search implementation.
  *
  * @template TRoute of HttpRouteInterface
- * @template-implement RouteStackInterface<TRoute>
+ * @template-implements RouteStackInterface<TRoute>
  */
 final class TreeRouteStack implements RouteStackInterface
 {

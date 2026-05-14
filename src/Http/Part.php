@@ -13,6 +13,7 @@ use Laminas\Router\RoutePluginManager;
 use Laminas\Router\RouteStackInterface;
 use Laminas\Stdlib\RequestInterface;
 use Laminas\Uri\Http;
+use Override;
 
 use function array_diff_key;
 use function array_flip;
@@ -27,7 +28,7 @@ use function strlen;
 
 /**
  * @template TRoute of HttpRouteInterface
- * @template-implement RouteStackInterface<TRoute>
+ * @template-implements RouteStackInterface<TRoute>
  */
 final class Part implements HttpRouteInterface, RouteStackInterface
 {
@@ -68,6 +69,7 @@ final class Part implements HttpRouteInterface, RouteStackInterface
 
         if (! is_object($routes)) {
             $routes = $specificationFactory->createFromSpecification($routes);
+            /** @psalm-var TRoute $routes */
         }
 
         if ($routes instanceof self) {
