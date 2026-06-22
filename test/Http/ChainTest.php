@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http;
 
-use ArrayObject;
-use Laminas\Http\Request;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Uri;
 use Laminas\Router\Http\Chain;
-use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Segment;
 use Laminas\Router\RoutePluginManager;
@@ -24,12 +23,9 @@ final class ChainTest extends TestCase
     public static function getRoute(): Chain
     {
         $routePlugins = new RoutePluginManager(new ServiceManager());
-        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
-        $prototypes = new ArrayObject();
 
         return new Chain(
             $routePlugins,
-            $prototypes,
             [
                 [
                     'type'    => Segment::class,
@@ -49,19 +45,16 @@ final class ChainTest extends TestCase
                         ],
                     ],
                 ],
-            ],
+            ]
         );
     }
 
     public static function getRouteWithOptionalParam(): Chain
     {
         $routePlugins = new RoutePluginManager(new ServiceManager());
-        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
-        $prototypes = new ArrayObject();
 
         return new Chain(
             $routePlugins,
-            $prototypes,
             [
                 [
                     'type'    => Segment::class,
@@ -81,7 +74,7 @@ final class ChainTest extends TestCase
                         ],
                     ],
                 ],
-            ],
+            ]
         );
     }
 
@@ -151,8 +144,8 @@ final class ChainTest extends TestCase
     public function testMatching(Chain $route, string $path, int|null $offset, ?array $params = null): void
     {
         $request = new Request();
-        $request->setUri('http://example.com' . $path);
-        $match = $route->match($request, $offset);
+        $request = $request->withUri(new Uri('http://example.com' . $path));
+        $match   = $route->match($request, $offset);
 
         if ($params === null) {
             $this->assertNull($match);
@@ -183,10 +176,92 @@ final class ChainTest extends TestCase
         $result = $route->assemble($params);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result->toString(), $offset));
         } else {
-            $this->assertEquals($path, $result);
+            $this->assertEquals($path, $result->toString());
         }
+    }
+
+    public function testMatchRejectsTrailingPathWhenNoOffset(): void
+    {
+        $request = (new Request())->withUri(new Uri('http://example.com/foo/bar/extra'));
+
+        $this->assertNull(self::getRoute()->match($request));
+    }
+
+    public function testMatchWithZeroOffsetAllowsPartialPath(): void
+    {
+        $request = (new Request())->withUri(new Uri('http://example.com/foo/bar/extra'));
+
+        $this->assertInstanceOf(HttpRouteMatch::class, self::getRoute()->match($request, 0));
+    }
+
+    public function testAssemblingOmitsOptionalTrailingSegmentWithoutParam(): void
+    {
+        $this->assertSame(
+            '/foo',
+            self::getRouteWithOptionalParam()->assemble(['controller' => 'foo'])->toString()
+        );
+    }
+
+    public function testAssemblingPropagatesHasChildOptionToLastSegment(): void
+    {
+        $routePlugins = new RoutePluginManager(new ServiceManager());
+        $route        = new Chain(
+            $routePlugins,
+            [
+                [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route'    => '/:controller',
+                        'defaults' => ['controller' => 'foo'],
+                    ],
+                ],
+                [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route'    => '[/:bar]',
+                        'defaults' => ['bar' => 'bar'],
+                    ],
+                ],
+            ]
+        );
+
+        $this->assertSame('/foo/bar', $route->assemble([], ['has_child' => true])->toString());
+    }
+
+    public function testAssemblingStripsConsumedParamsBetweenSegments(): void
+    {
+        $routePlugins = new RoutePluginManager(new ServiceManager());
+        $route        = new Chain(
+            $routePlugins,
+            [
+                [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route'    => '/:id',
+                        'defaults' => ['id' => '1'],
+                    ],
+                ],
+                [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route'    => '/:id',
+                        'defaults' => ['id' => '2'],
+                    ],
+                ],
+            ]
+        );
+
+        $this->assertSame('/x/2', $route->assemble(['id' => 'x'])->toString());
+    }
+
+    public function testGetAssembledParams(): void
+    {
+        $route = self::getRoute();
+        $route->assemble(['controller' => 'foo', 'bar' => 'baz']);
+
+        $this->assertSame(['controller', 'bar'], $route->getAssembledParams());
     }
 
     public function testFactory(): void

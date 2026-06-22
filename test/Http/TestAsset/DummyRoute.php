@@ -4,40 +4,45 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http\TestAsset;
 
+use Laminas\Router\AssembledUrl;
 use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Router\RouteMatch;
-use Laminas\Stdlib\RequestInterface;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Dummy route.
  */
-class DummyRoute implements HttpRouteInterface
+final class DummyRoute implements HttpRouteInterface
 {
     /** @inheritDoc */
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
         array $options = []
-    ): RouteMatch {
+    ): HttpRouteMatch {
         return new HttpRouteMatch(['offset' => $pathOffset], -4);
     }
 
     /** @inheritDoc */
-    public function assemble(array $params = [], array $options = []): string
+    public function assemble(array $params = [], array $options = []): AssembledUrl
     {
-        return '';
+        return new AssembledUrl();
     }
 
     /** @inheritDoc */
     public static function factory(array $options = []): static
     {
-        return new static();
+        return new self();
     }
 
     /** @inheritDoc */
     public function getAssembledParams(): array
     {
         return [];
+    }
+
+    public function getPriority(): ?int
+    {
+        return null;
     }
 }

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\TestAsset;
 
+use Laminas\Router\AssembledUrl;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteStackInterface;
-use Laminas\Stdlib\RequestInterface;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * @template TRoute of RouteInterface
@@ -27,9 +28,9 @@ final class Router implements RouteStackInterface
     }
 
     /** @inheritDoc */
-    public function assemble(array $params = [], array $options = []): string
+    public function assemble(array $params = [], array $options = []): AssembledUrl
     {
-        return '';
+        return new AssembledUrl();
     }
 
     /** @inheritDoc */
@@ -50,5 +51,10 @@ final class Router implements RouteStackInterface
     /** @inheritDoc */
     public function setRoutes(array $routes): void
     {
+    }
+
+    public function getPriority(): ?int
+    {
+        return null;
     }
 }

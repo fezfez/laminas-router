@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router;
 
+use Laminas\Diactoros\Request;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\Chain;
@@ -20,7 +21,6 @@ use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\ServiceManager\ServiceManager;
-use Laminas\Stdlib\Request;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -128,8 +128,7 @@ final class SimpleRouteStackTest extends TestCase
         /** @var SimpleRouteStack<RouteInterface> $stack */
         $stack = new SimpleRouteStack($this->createRoutePluginManager());
 
-        $route           = new TestAsset\DummyRouteWithParam();
-        $route->priority = 2;
+        $route = new TestAsset\DummyRouteWithParam(2);
         $stack->addRoute('baz', $route);
 
         $stack->addRoute('foo', [
@@ -148,7 +147,7 @@ final class SimpleRouteStackTest extends TestCase
         /** @var SimpleRouteStack<RouteInterface> $stack */
         $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()));
         $stack->addRoute('foo', new TestAsset\DummyRoute());
-        $this->assertEquals('', $stack->assemble([], ['name' => 'foo']));
+        $this->assertEquals('', $stack->assemble([], ['name' => 'foo'])->toString());
     }
 
     public function testAssembleWithoutNameOption(): void
@@ -157,7 +156,7 @@ final class SimpleRouteStackTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing "name" option');
-        $stack->assemble();
+        $stack->assemble([], []);
     }
 
     public function testAssembleNonExistentRoute(): void
@@ -202,7 +201,7 @@ final class SimpleRouteStackTest extends TestCase
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
         $stack->setDefaultParam('foo', 'bar');
 
-        $this->assertEquals('bar', $stack->assemble([], ['name' => 'foo']));
+        $this->assertEquals('bar', $stack->assemble([], ['name' => 'foo'])->toString());
     }
 
     public function testDefaultParamDoesNotOverrideParamForAssembling(): void
@@ -212,7 +211,7 @@ final class SimpleRouteStackTest extends TestCase
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
         $stack->setDefaultParam('foo', 'baz');
 
-        $this->assertEquals('bar', $stack->assemble(['foo' => 'bar'], ['name' => 'foo']));
+        $this->assertEquals('bar', $stack->assemble(['foo' => 'bar'], ['name' => 'foo'])->toString());
     }
 
     public function testFactory(): void
@@ -361,6 +360,6 @@ final class SimpleRouteStackTest extends TestCase
 
         $route = $router->getRoute('name');
         self::assertNotNull($route);
-        self::assertEquals($expectedPriority, $route->priority);
+        self::assertEquals($expectedPriority, $route->getPriority());
     }
 }

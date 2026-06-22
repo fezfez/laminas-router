@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http;
 
-use Laminas\Http\Request;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Uri;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\Hostname;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\Request as BaseRequest;
-use Laminas\Uri\Http as HttpUri;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
+use Throwable;
 
 final class HostnameTest extends TestCase
 {
@@ -172,8 +172,8 @@ final class HostnameTest extends TestCase
     public function testMatching(Hostname $route, string $hostname, ?array $params = null): void
     {
         $request = new Request();
-        $request->setUri('http://' . $hostname . '/');
-        $match = $route->match($request);
+        $request = $request->withUri(new Uri('http://' . $hostname . '/'));
+        $match   = $route->match($request);
 
         if ($params === null) {
             $this->assertNull($match);
@@ -198,17 +198,17 @@ final class HostnameTest extends TestCase
             return;
         }
 
-        $uri  = new HttpUri();
-        $path = $route->assemble($params, ['uri' => $uri]);
+        $uri    = new Uri();
+        $result = $route->assemble($params, ['uri' => $uri]);
 
-        $this->assertEquals('', $path);
-        $this->assertEquals($hostname, $uri->getHost());
+        $this->assertEquals('', $result->toString());
+        $this->assertSame($hostname, $result->host);
     }
 
     public function testNoMatchWithoutUriMethod(): void
     {
         $route   = new Hostname('example.com');
-        $request = new BaseRequest();
+        $request = new Request();
 
         $this->assertNull($route->match($request));
     }
@@ -217,7 +217,7 @@ final class HostnameTest extends TestCase
     {
         $route   = new Hostname('example.com');
         $request = new Request();
-        $request->setUri('/relative/path');
+        $request = $request->withUri(new Uri('/relative/path'));
 
         self::assertNull($route->match($request));
     }
@@ -226,7 +226,7 @@ final class HostnameTest extends TestCase
     {
         $route   = new Hostname(':domain');
         $request = new Request();
-        $request->setUri('/relative/path');
+        $request = $request->withUri(new Uri('/relative/path'));
 
         self::assertNull($route->match($request));
     }
@@ -235,7 +235,7 @@ final class HostnameTest extends TestCase
     {
         $route   = new Hostname('[:domain]');
         $request = new Request();
-        $request->setUri('/relative/path');
+        $request = $request->withUri(new Uri('/relative/path'));
 
         $match = $route->match($request);
         self::assertInstanceOf(HttpRouteMatch::class, $match);
@@ -245,7 +245,7 @@ final class HostnameTest extends TestCase
     public function testAssemblingWithMissingParameter(): void
     {
         $route = new Hostname(':foo.example.com');
-        $uri   = new HttpUri();
+        $uri   = new Uri();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing parameter "foo"');
@@ -255,10 +255,151 @@ final class HostnameTest extends TestCase
     public function testGetAssembledParams(): void
     {
         $route = new Hostname(':foo.example.com');
-        $uri   = new HttpUri();
+        $uri   = new Uri();
         $route->assemble(['foo' => 'bar', 'baz' => 'bat'], ['uri' => $uri]);
 
         $this->assertEquals(['foo'], $route->getAssembledParams());
+    }
+
+    public function testMatchIncludesDefaultsNotCapturedInHostname(): void
+    {
+        $route   = new Hostname('www.example.com', [], ['env' => 'prod']);
+        $request = (new Request())->withUri(new Uri('http://www.example.com/'));
+        $match   = $route->match($request);
+
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
+        $this->assertSame('prod', $match->getParam('env'));
+    }
+
+    public function testAssembleUsesDefaultsWhenParameterMissing(): void
+    {
+        $route  = new Hostname(':foo.example.com', [], ['foo' => 'baz']);
+        $result = $route->assemble([]);
+
+        $this->assertSame('baz.example.com', $result->host);
+    }
+
+    public function testAssembleOmitsOptionalWhenParameterEqualsDefault(): void
+    {
+        $route = new Hostname('[:foo.]example.com', [], ['foo' => 'bar']);
+
+        $this->assertSame('example.com', $route->assemble([])->host);
+        $this->assertSame('example.com', $route->assemble(['foo' => 'bar'])->host);
+    }
+
+    public function testAssembleIncludesOptionalWhenParameterDiffersFromDefault(): void
+    {
+        $route = new Hostname('[:foo.]example.com', [], ['foo' => 'bar']);
+
+        $this->assertSame('baz.example.com', $route->assemble(['foo' => 'baz'])->host);
+    }
+
+    public function testAssembleOmitsNestedOptionalWhenAllParametersEqualDefaults(): void
+    {
+        $route = new Hostname(
+            '[[:foo.]:bar.]example.com',
+            [],
+            ['foo' => 'a', 'bar' => 'b'],
+        );
+
+        $this->assertSame('example.com', $route->assemble([])->host);
+    }
+
+    public function testAssembleIncludesNestedOptionalWhenInnerParameterDiffersFromDefault(): void
+    {
+        $route = new Hostname(
+            '[[:foo.]:bar.]example.com',
+            [],
+            ['foo' => 'a', 'bar' => 'b'],
+        );
+
+        $this->assertSame('x.b.example.com', $route->assemble(['foo' => 'x'])->host);
+    }
+
+    public function testMatchCapturesThreeParametersInOrder(): void
+    {
+        $route   = new Hostname(':one.:two.:three.example.com');
+        $request = (new Request())->withUri(new Uri('http://a.b.c.example.com/'));
+        $match   = $route->match($request);
+
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
+        $this->assertSame('a', $match->getParam('one'));
+        $this->assertSame('b', $match->getParam('two'));
+        $this->assertSame('c', $match->getParam('three'));
+
+        $route->assemble(['one' => 'a', 'two' => 'b', 'three' => 'c']);
+        $this->assertSame(['one', 'two', 'three'], $route->getAssembledParams());
+    }
+
+    public function testConstructWithEmptyRoute(): void
+    {
+        $route   = new Hostname('');
+        $request = (new Request())->withUri((new Uri())->withHost(''));
+        $match   = $route->match($request);
+
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
+        $this->assertSame('', $route->assemble([])->host ?? '');
+    }
+
+    /**
+     * @psalm-return array<string, array{0: string, 1: class-string<Throwable>, 2: string}>
+     */
+    public static function parseExceptionsProvider(): array
+    {
+        return [
+            'unbalanced-brackets'     => [
+                '[',
+                RuntimeException::class,
+                'Found unbalanced brackets',
+            ],
+            'closing-without-opening' => [
+                ']',
+                RuntimeException::class,
+                'Found closing bracket without matching opening bracket',
+            ],
+            'empty-parameter-name'    => [
+                ':',
+                RuntimeException::class,
+                'Found empty parameter name',
+            ],
+        ];
+    }
+
+    /**
+     * @param class-string<Throwable> $exception
+     */
+    #[DataProvider('parseExceptionsProvider')]
+    public function testParseRouteDefinitionExceptions(string $route, string $exception, string $message): void
+    {
+        $this->expectException($exception);
+        $this->expectExceptionMessage($message);
+        new Hostname($route);
+    }
+
+    public function testFactoryAppliesConstraintsDefaultsAndPriority(): void
+    {
+        $route = Hostname::factory([
+            'route'       => ':foo.example.com',
+            'constraints' => ['foo' => '\d+'],
+            'defaults'    => ['foo' => '999'],
+            'priority'    => 5,
+        ]);
+
+        $this->assertSame(5, $route->getPriority());
+        $this->assertSame(
+            '999.example.com',
+            $route->assemble([])->host
+        );
+
+        $match = $route->match(
+            (new Request())->withUri(new Uri('http://123.example.com/'))
+        );
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
+        $this->assertSame('123', $match->getParam('foo'));
+
+        $this->assertNull(
+            $route->match((new Request())->withUri(new Uri('http://abc.example.com/')))
+        );
     }
 
     public function testFactory(): void

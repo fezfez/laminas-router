@@ -4,30 +4,23 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
+use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\RequestInterface;
-use Laminas\Uri\Http;
 use Override;
+use Psr\Http\Message\RequestInterface;
 
 use function assert;
 use function is_array;
 use function is_string;
-use function method_exists;
 use function strlen;
 use function strpos;
 
 /**
  * Literal route.
  */
-final class Literal implements HttpRouteInterface
+final readonly class Literal implements HttpRouteInterface
 {
-    /**
-     * @internal
-     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     */
-    public int|null $priority = null;
-
     /**
      * Create a new literal route.
      *
@@ -37,11 +30,12 @@ final class Literal implements HttpRouteInterface
         /**
          * RouteInterface to match.
          */
-        private readonly string $route,
+        private string $route,
         /**
          * Default values.
          */
-        private readonly array $defaults = []
+        private array $defaults = [],
+        private int|null $priority = null
     ) {
     }
 
@@ -54,6 +48,8 @@ final class Literal implements HttpRouteInterface
     {
         $route    = $options['route'] ?? null;
         $defaults = $options['defaults'] ?? [];
+        /** @psalm-var int|null $priority */
+        $priority = $options['priority'] ?? null;
 
         if (! is_string($route)) {
             throw new Exception\InvalidArgumentException('Missing "route" in options array');
@@ -63,20 +59,14 @@ final class Literal implements HttpRouteInterface
 
         /** @psalm-var array<string, string> $defaults */
 
-        return new self($route, $defaults);
+        return new self($route, $defaults, $priority);
     }
 
     /** @inheritDoc */
     #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
-        if (! method_exists($request, 'getUri')) {
-            return null;
-        }
-
-        /** @var Http $uri */
-        $uri  = $request->getUri();
-        $path = (string) $uri->getPath();
+        $path = $request->getUri()->getPath();
 
         if ($pathOffset !== null) {
             if ($pathOffset >= 0 && strlen($path) >= $pathOffset && ! empty($this->route)) {
@@ -92,14 +82,18 @@ final class Literal implements HttpRouteInterface
             return new HttpRouteMatch($this->defaults, strlen($this->route));
         }
 
+        if ($this->route === '/' && ($path === '' || $path === '/')) {
+            return new HttpRouteMatch($this->defaults, strlen($this->route));
+        }
+
         return null;
     }
 
     /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = []): string
+    public function assemble(array $params = [], array $options = []): AssembledUrl
     {
-        return $this->route;
+        return new AssembledUrl(path:$this->route);
     }
 
     /** @inheritDoc */
@@ -107,5 +101,11 @@ final class Literal implements HttpRouteInterface
     public function getAssembledParams(): array
     {
         return [];
+    }
+
+    #[Override]
+    public function getPriority(): ?int
+    {
+        return $this->priority;
     }
 }

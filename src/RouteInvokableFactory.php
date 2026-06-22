@@ -23,7 +23,7 @@ use function sprintf;
  * @psalm-internal \Laminas\Router
  * @psalm-internal \LaminasTest\Router
  */
-final class RouteInvokableFactory implements AbstractFactoryInterface
+final readonly class RouteInvokableFactory implements AbstractFactoryInterface
 {
     /**
      * Can we create a route instance with the given name? (v3)

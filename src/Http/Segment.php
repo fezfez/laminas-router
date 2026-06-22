@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Laminas\Router\Http;
 
+use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\RouteDefinition\RouteDefinition;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionLiteral;
@@ -11,15 +12,13 @@ use Laminas\Router\Http\RouteDefinition\RouteDefinitionOption;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionParameter;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionPartInterface;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionTranslatedLiteral;
-use Laminas\Stdlib\RequestInterface;
 use Laminas\Translator\TranslatorInterface as Translator;
-use Laminas\Uri\Http;
 use Override;
+use Psr\Http\Message\RequestInterface;
 
 use function array_key_exists;
 use function array_merge;
 use function is_string;
-use function method_exists;
 use function preg_match;
 use function preg_quote;
 use function rawurldecode;
@@ -105,12 +104,6 @@ final class Segment implements HttpRouteInterface
     private array $translationKeys = [];
 
     /**
-     * @internal
-     * @deprecated Since 3.9.0 This property will be removed or made private in version 4.0
-     */
-    public int|null $priority = null;
-
-    /**
      * Create a new regex route.
      *
      * @param array<string, string> $constraints
@@ -119,7 +112,8 @@ final class Segment implements HttpRouteInterface
     public function __construct(
         string $route,
         array $constraints = [],
-        private array $defaults = []
+        private array $defaults = [],
+        private readonly int|null $priority = null,
     ) {
         $this->parts = $this->parseRouteDefinition($route);
         $this->regex = $this->buildRegex($this->parts->getParts(), $constraints);
@@ -137,12 +131,14 @@ final class Segment implements HttpRouteInterface
         $constraints = $options['constraints'] ?? [];
         /** @psalm-var array<non-empty-string, string> $defaults */
         $defaults = $options['defaults'] ?? [];
+        /** @psalm-var int|null $priority */
+        $priority = $options['priority'] ?? null;
 
         if (! is_string($route)) {
             throw new Exception\InvalidArgumentException('Missing "route" in options array');
         }
 
-        return new self($route, $constraints, $defaults);
+        return new self($route, $constraints, $defaults, $priority);
     }
 
     /**
@@ -343,13 +339,7 @@ final class Segment implements HttpRouteInterface
     #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
     {
-        if (! method_exists($request, 'getUri')) {
-            return null;
-        }
-
-        /** @var Http $uri */
-        $uri   = $request->getUri();
-        $path  = $uri->getPath();
+        $path  = $request->getUri()->getPath();
         $regex = $this->regex;
 
         if ($this->translationKeys) {
@@ -369,9 +359,9 @@ final class Segment implements HttpRouteInterface
         }
 
         if ($pathOffset !== null) {
-            $result = preg_match('(\G' . $regex . ')', (string) $path, $matches, 0, $pathOffset);
+            $result = preg_match('(\G' . $regex . ')', $path, $matches, 0, $pathOffset);
         } else {
-            $result = preg_match('(^' . $regex . '$)', (string) $path, $matches);
+            $result = preg_match('(^' . $regex . '$)', $path, $matches);
         }
 
         if (! $result) {
@@ -392,17 +382,17 @@ final class Segment implements HttpRouteInterface
 
     /** @inheritDoc */
     #[Override]
-    public function assemble(array $params = [], array $options = []): string
+    public function assemble(array $params = [], array $options = []): AssembledUrl
     {
         $this->assembledParams = [];
 
-        return $this->buildPath(
+        return new AssembledUrl(path :$this->buildPath(
             $this->parts->getParts(),
             array_merge($this->defaults, $params),
             false,
             array_key_exists('has_child', $options) && $options['has_child'] === true,
             $options
-        );
+        ));
     }
 
     /** @inheritDoc */
@@ -410,6 +400,12 @@ final class Segment implements HttpRouteInterface
     public function getAssembledParams(): array
     {
         return $this->assembledParams;
+    }
+
+    #[Override]
+    public function getPriority(): ?int
+    {
+        return $this->priority;
     }
 
     /**

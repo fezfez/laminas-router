@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http;
 
-use ArrayObject;
-use Laminas\Http\Request;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Uri;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
-use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Part;
@@ -17,12 +16,13 @@ use Laminas\Router\RouteInvokableFactory;
 use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
-use Laminas\Stdlib\Parameters;
-use Laminas\Stdlib\Request as BaseRequest;
+use Laminas\Translator\TranslatorInterface;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 use function strlen;
 use function strpos;
@@ -50,12 +50,8 @@ final class PartTest extends TestCase
 
     public static function getRoute(): Part
     {
-        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
-        $prototypes = new ArrayObject();
-
         return new Part(
             self::getRoutePlugins(),
-            $prototypes,
             [
                 'type'    => Literal::class,
                 'options' => [
@@ -66,6 +62,7 @@ final class PartTest extends TestCase
                 ],
             ],
             [],
+            null,
             true,
             [
                 'bar' => [
@@ -116,7 +113,7 @@ final class PartTest extends TestCase
                         ],
                     ],
                 ],
-            ],
+            ]
         );
     }
 
@@ -217,8 +214,8 @@ final class PartTest extends TestCase
         ?array $params = null
     ): void {
         $request = new Request();
-        $request->setUri('http://example.com' . $path);
-        $match = $route->match($request, $offset);
+        $request = $request->withUri(new Uri('http://example.com' . $path));
+        $match   = $route->match($request, $offset);
 
         if ($params === null) {
             $this->assertNull($match);
@@ -257,9 +254,9 @@ final class PartTest extends TestCase
         $result = $route->assemble($params, ['name' => $routeName]);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result->toString(), $offset));
         } else {
-            $this->assertEquals($path, $result);
+            $this->assertEquals($path, $result->toString());
         }
     }
 
@@ -275,23 +272,19 @@ final class PartTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Base route may not be a part route');
 
-        /** @var ArrayObject<string, HttpRouteInterface> $prototypes */
-        $prototypes = new ArrayObject();
-
         new Part(
             new RoutePluginManager(new ServiceManager()),
-            $prototypes,
             self::getRoute(),
             [],
-            true,
-            [],
+            null,
+            true
         );
     }
 
     public function testNoMatchWithoutUriMethod(): void
     {
         $route   = self::getRoute();
-        $request = new BaseRequest();
+        $request = new Request();
 
         $this->assertNull($route->match($request));
     }
@@ -351,13 +344,160 @@ final class PartTest extends TestCase
 
         $route   = Part::factory($options);
         $request = new Request();
-        $request->setUri('http://example.com/resource?foo=bar');
-        $query = new Parameters(['foo' => 'bar']);
-        $request->setQuery($query);
-        $request->getQuery();
+        $uri     = new Uri('http://example.com/resource?foo=bar');
+        $uri     = $uri->withQuery('foo');
+        $request = $request->withUri($uri);
 
         $match = $route->match($request);
         $this->assertInstanceOf(RouteMatch::class, $match);
         $this->assertEquals('resource', $match->getParam('action'));
+    }
+
+    private function getLocalePartRoute(): Part
+    {
+        return new Part(
+            self::getRoutePlugins(),
+            [
+                'type'    => Segment::class,
+                'options' => [
+                    'route' => '/:locale',
+                ],
+            ],
+            [],
+            null,
+            true,
+            [
+                'index' => [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route' => '/{homepage}',
+                    ],
+                ],
+            ],
+        );
+    }
+
+    private function getTranslator(int $expectedCallCount): TranslatorInterface&MockObject
+    {
+        $translator = $this->createMock(TranslatorInterface::class);
+        $translator->expects($this->exactly($expectedCallCount))
+            ->method('translate')
+            ->willReturnCallback(function (
+                string $message,
+                string $textDomain = 'default',
+                ?string $locale = null
+            ): string {
+                if ($message === 'homepage' && $textDomain === 'route' && $locale === 'de') {
+                    return 'hauptseite';
+                }
+
+                if ($message === 'homepage' && $textDomain === 'route' && $locale === 'en') {
+                    return 'homepage';
+                }
+
+                throw new UnexpectedValueException('Translation not found');
+            });
+
+        return $translator;
+    }
+
+    public function testMatchPropagatesLocaleFromParentParam(): void
+    {
+        $route   = $this->getLocalePartRoute();
+        $request = (new Request())->withUri(new Uri('http://example.com/de/hauptseite'));
+
+        $match = $route->match($request, null, ['translator' => $this->getTranslator(1), 'text_domain' => 'route']);
+
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
+        $this->assertSame('index', $match->getMatchedRouteName());
+    }
+
+    public function testAssemblePropagatesLocaleFromParamsWhenLocaleOptionIsNotSet(): void
+    {
+        $route = $this->getLocalePartRoute();
+
+        $this->assertSame(
+            '/de/hauptseite',
+            $route->assemble(
+                ['locale' => 'de'],
+                ['name' => 'index', 'translator' => $this->getTranslator(1), 'text_domain' => 'route']
+            )->toString()
+        );
+    }
+
+    public function testAssembleDoesNotPropagateLocaleWhenLocaleOptionIsSet(): void
+    {
+        $route = $this->getLocalePartRoute();
+
+        $this->assertSame(
+            '/de/homepage',
+            $route->assemble(
+                ['locale' => 'de'],
+                [
+                    'name'        => 'index',
+                    'locale'      => 'en',
+                    'translator'  => $this->getTranslator(1),
+                    'text_domain' => 'route',
+                ]
+            )->toString()
+        );
+    }
+
+    public function testMatchDoesNotPropagateLocaleWhenLocaleOptionIsSet(): void
+    {
+        $route   = $this->getLocalePartRoute();
+        $request = (new Request())->withUri(new Uri('http://example.com/de/hauptseite'));
+
+        $match = $route->match($request, null, [
+            'translator'  => $this->getTranslator(1),
+            'text_domain' => 'route',
+            'locale'      => 'en',
+        ]);
+
+        $this->assertNull($match);
+    }
+
+    public function testAssembleStripsParentAssembledParams(): void
+    {
+        $route = new Part(
+            self::getRoutePlugins(),
+            [
+                'type'    => Segment::class,
+                'options' => [
+                    'route' => '/:foo',
+                ],
+            ],
+            [],
+            null,
+            true,
+            [
+                'bar' => [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route'    => '/:foo/baz',
+                        'defaults' => ['foo' => '2'],
+                    ],
+                ],
+            ],
+        );
+
+        $this->assertSame('/1/2/baz', $route->assemble(['foo' => '1'], ['name' => 'bar'])->toString());
+    }
+
+    public function testAssembleChildReturnsPathOnly(): void
+    {
+        $route = self::getRoute();
+
+        $this->assertSame(
+            '/foo/bar',
+            $route->assemble(
+                ['controller' => 'bar'],
+                [
+                    'name'            => 'bar',
+                    'uri'             => new Uri('https://example.com'),
+                    'force_canonical' => true,
+                ]
+            )->toString()
+        );
     }
 }

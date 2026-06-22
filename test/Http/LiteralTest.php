@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http;
 
-use Laminas\Http\Request;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Uri;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
-use Laminas\Stdlib\Request as BaseRequest;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -66,8 +66,8 @@ final class LiteralTest extends TestCase
     public function testMatching(Literal $route, string $path, int|null $offset, bool $shouldMatch): void
     {
         $request = new Request();
-        $request->setUri('http://example.com' . $path);
-        $match = $route->match($request, $offset);
+        $request = $request->withUri(new Uri('http://example.com' . $path));
+        $match   = $route->match($request, $offset);
 
         if (! $shouldMatch) {
             $this->assertNull($match);
@@ -92,16 +92,16 @@ final class LiteralTest extends TestCase
         $result = $route->assemble();
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result->toString(), $offset));
         } else {
-            $this->assertEquals($path, $result);
+            $this->assertEquals($path, $result->toString());
         }
     }
 
     public function testNoMatchWithoutUriMethod(): void
     {
         $route   = new Literal('/foo');
-        $request = new BaseRequest();
+        $request = new Request();
 
         $this->assertNull($route->match($request));
     }
@@ -134,5 +134,51 @@ final class LiteralTest extends TestCase
         $request = new Request();
         $route   = new Literal('');
         $this->assertNull($route->match($request, 0));
+    }
+
+    public function testMatchWithOffsetBeyondPathLengthReturnsNull(): void
+    {
+        $request = (new Request())->withUri(new Uri('http://example.com/foo'));
+
+        $this->assertNull((new Literal('/foo'))->match($request, 10));
+    }
+
+    public function testMatchWithNegativeOffsetReturnsNull(): void
+    {
+        $request = (new Request())->withUri(new Uri('http://example.com/foo'));
+
+        $this->assertNull((new Literal('/foo'))->match($request, -1));
+    }
+
+    public function testMatchWithOffsetMisalignedReturnsNull(): void
+    {
+        $request = (new Request())->withUri(new Uri('http://example.com/x/foo'));
+
+        $this->assertNull((new Literal('foo'))->match($request, 1));
+    }
+
+    public function testMatchWithOffsetReturnsSegmentLength(): void
+    {
+        $request = (new Request())->withUri(new Uri('http://example.com/foo'));
+        $match   = (new Literal('foo'))->match($request, 1);
+
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
+        $this->assertSame(3, $match->getLength());
+    }
+
+    public function testMatchWithOffsetAtPathLengthReturnsNull(): void
+    {
+        $request = (new Request())->withUri(new Uri('http://example.com/foo'));
+
+        $this->assertNull((new Literal('/foo'))->match($request, 4));
+    }
+
+    public function testMatchWithOffsetEnablesMatchAtLastCharacter(): void
+    {
+        $request = (new Request())->withUri(new Uri('http://example.com/foo'));
+        $match   = (new Literal('o'))->match($request, 3);
+
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
+        $this->assertSame(1, $match->getLength());
     }
 }

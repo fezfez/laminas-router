@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http;
 
-use Laminas\Http\Request;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Uri;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Segment;
-use Laminas\Stdlib\Request as BaseRequest;
 use Laminas\Translator\TranslatorInterface;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -318,8 +318,8 @@ final class SegmentTest extends TestCase
         array $options = []
     ): void {
         $request = new Request();
-        $request->setUri('http://example.com' . $path);
-        $match = $route->match($request, $offset, $options);
+        $request = $request->withUri(new Uri('http://example.com' . $path));
+        $match   = $route->match($request, $offset, $options);
 
         if ($params === null) {
             $this->assertNull($match);
@@ -327,7 +327,7 @@ final class SegmentTest extends TestCase
             $this->assertInstanceOf(HttpRouteMatch::class, $match);
 
             if ($offset === null) {
-                $this->assertEquals(strlen($path), $match->getLength());
+                $this->assertEquals(strlen($request->getUri()->getPath()), $match->getLength());
             }
 
             foreach ($params as $key => $value) {
@@ -356,9 +356,9 @@ final class SegmentTest extends TestCase
         $result = $route->assemble($params, $options);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result->toString(), $offset));
         } else {
-            $this->assertEquals($path, $result);
+            $this->assertEquals($path, $result->toString());
         }
     }
 
@@ -373,8 +373,8 @@ final class SegmentTest extends TestCase
         array $options = []
     ): void {
         $request = new Request();
-        $request->setUri('http://example.com' . $path);
-        $match = $route->match($request, $offset, $options);
+        $request = $request->withUri(new Uri('http://example.com' . $path));
+        $match   = $route->match($request, $offset, $options);
 
         if ($params === null) {
             $this->assertNull($match);
@@ -409,9 +409,9 @@ final class SegmentTest extends TestCase
         $result = $route->assemble($params, $options);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result->toString(), $offset));
         } else {
-            $this->assertEquals($path, $result);
+            $this->assertEquals($path, $result->toString());
         }
     }
 
@@ -456,7 +456,7 @@ final class SegmentTest extends TestCase
     public function testNoMatchWithoutUriMethod(): void
     {
         $route   = new Segment('/foo');
-        $request = new BaseRequest();
+        $request = new Request();
 
         $this->assertNull($route->match($request));
     }
@@ -466,7 +466,7 @@ final class SegmentTest extends TestCase
         $route = new Segment('/[:foo]', [], ['foo' => 'bar']);
         $path  = $route->assemble([], ['has_child' => true]);
 
-        $this->assertEquals('/bar', $path);
+        $this->assertEquals('/bar', $path->toString());
     }
 
     public function testFactory(): void
@@ -490,9 +490,9 @@ final class SegmentTest extends TestCase
         // this includes every character other than #, %, / and ?
         $raw     = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`-=[]\\;\',.~!@$^&*()_+{}|:"<>';
         $request = new Request();
-        $request->setUri('http://example.com/' . $raw);
-        $route = new Segment('/:foo');
-        $match = $route->match($request);
+        $request = $request->withUri(new Uri('http://example.com/' . $raw));
+        $route   = new Segment('/:foo');
+        $match   = $route->match($request);
 
         self::assertNotNull($match);
         $this->assertSame($raw, $match->getParam('foo'));
@@ -507,9 +507,9 @@ final class SegmentTest extends TestCase
         // @codingStandardsIgnoreEnd
 
         $request = new Request();
-        $request->setUri('http://example.com/' . $in);
-        $route = new Segment('/:foo');
-        $match = $route->match($request);
+        $request = $request->withUri(new Uri('http://example.com/' . $in));
+        $route   = new Segment('/:foo');
+        $match   = $route->match($request);
 
         self::assertNotNull($match);
         $this->assertSame($out, $match->getParam('foo'));
@@ -525,12 +525,53 @@ final class SegmentTest extends TestCase
         $route   = new Segment('example.com/:p1/:p2');
         $request = new Request();
 
-        $request->setUri($uri1);
+        $request = $request->withUri(new Uri($uri1));
         $route->match($request);
-        $this->assertSame($uri1, $route->assemble($params1));
+        $this->assertSame($uri1, $route->assemble($params1)->toString());
 
-        $request->setUri($uri2);
+        $request = $request->withUri(new Uri($uri2));
         $route->match($request);
-        $this->assertSame($uri2, $route->assemble($params2));
+        $this->assertSame($uri2, $route->assemble($params2)->toString());
+    }
+
+    public function testConstructWithEmptyRoute(): void
+    {
+        $route = new Segment('');
+
+        $this->assertSame('', $route->assemble([])->toString());
+    }
+
+    public function testMatchCapturesThreeParametersInOrder(): void
+    {
+        $route   = new Segment('/:one/:two/:three');
+        $request = (new Request())->withUri(new Uri('http://example.com/a/b/c'));
+        $match   = $route->match($request);
+
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
+        $this->assertSame('a', $match->getParam('one'));
+        $this->assertSame('b', $match->getParam('two'));
+        $this->assertSame('c', $match->getParam('three'));
+
+        $route->assemble(['one' => 'a', 'two' => 'b', 'three' => 'c']);
+        $this->assertSame(['one', 'two', 'three'], $route->getAssembledParams());
+    }
+
+    public function testMatchLiteralWithRegexMetacharacters(): void
+    {
+        $route   = new Segment('/foo.bar/:id');
+        $request = (new Request())->withUri(new Uri('http://example.com/foo.bar/1'));
+
+        $this->assertSame('1', $route->match($request)?->getParam('id'));
+
+        $request = (new Request())->withUri(new Uri('http://example.com/fooXbar/1'));
+        $this->assertNull($route->match($request));
+    }
+
+    public function testAssembleOmitsNestedOptionalWhenDefaults(): void
+    {
+        $route = new Segment('[:bar[/:baz]]', [], ['bar' => 'b', 'baz' => 'c']);
+
+        $this->assertSame('', $route->assemble([])->toString());
+        $this->assertSame('x', $route->assemble(['bar' => 'x'])->toString());
     }
 }

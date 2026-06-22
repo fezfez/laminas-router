@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router\Http\TestAsset;
 
+use Laminas\Router\AssembledUrl;
+use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\HttpRouteMatch;
-use Laminas\Stdlib\RequestInterface;
+use Psr\Http\Message\RequestInterface;
 
 use function array_key_exists;
 
 /**
  * Dummy route.
  */
-final class DummyRouteWithParam extends DummyRoute
+final class DummyRouteWithParam implements HttpRouteInterface
 {
     /** @inheritDoc */
     public function match(
@@ -24,14 +26,25 @@ final class DummyRouteWithParam extends DummyRoute
     }
 
     /** @inheritDoc */
-    public function assemble(array $params = [], array $options = []): string
+    public function assemble(array $params = [], array $options = []): AssembledUrl
     {
-        return array_key_exists('foo', $params) ? (string) $params['foo'] : '';
+        return new AssembledUrl(array_key_exists('foo', $params) ? (string) $params['foo'] : '');
     }
 
     /** @inheritDoc */
     public static function factory(array $options = []): static
     {
         return new self();
+    }
+
+    /** @inheritDoc */
+    public function getAssembledParams(): array
+    {
+        return [];
+    }
+
+    public function getPriority(): ?int
+    {
+        return null;
     }
 }

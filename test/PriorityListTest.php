@@ -12,7 +12,7 @@ use function array_keys;
 
 final class PriorityListTest extends TestCase
 {
-    /** @var PriorityList<non-empty-string|array-key, RouteInterface> */
+    /** @var PriorityList<non-empty-string, RouteInterface> */
     private PriorityList $list;
 
     public function setUp(): void
