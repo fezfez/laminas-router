@@ -41,7 +41,7 @@ final class SchemeTest extends TestCase
         $route  = new Scheme('https');
         $result = $route->assemble([], ['uri' => $uri]);
 
-        $this->assertEquals('', (string) $result);
+        $this->assertEquals('', $result->toString());
         $this->assertSame('https', $result->scheme);
     }
 

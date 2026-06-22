@@ -356,9 +356,9 @@ final class SegmentTest extends TestCase
         $result = $route->assemble($params, $options);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, (string) $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result->toString(), $offset));
         } else {
-            $this->assertEquals($path, (string) $result);
+            $this->assertEquals($path, $result->toString());
         }
     }
 
@@ -409,9 +409,9 @@ final class SegmentTest extends TestCase
         $result = $route->assemble($params, $options);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, (string) $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result->toString(), $offset));
         } else {
-            $this->assertEquals($path, $result);
+            $this->assertEquals($path, $result->toString());
         }
     }
 
@@ -466,7 +466,7 @@ final class SegmentTest extends TestCase
         $route = new Segment('/[:foo]', [], ['foo' => 'bar']);
         $path  = $route->assemble([], ['has_child' => true]);
 
-        $this->assertEquals('/bar', $path);
+        $this->assertEquals('/bar', $path->toString());
     }
 
     public function testFactory(): void
@@ -527,10 +527,10 @@ final class SegmentTest extends TestCase
 
         $request = $request->withUri(new Uri($uri1));
         $route->match($request);
-        $this->assertSame($uri1, (string) $route->assemble($params1));
+        $this->assertSame($uri1, $route->assemble($params1)->toString());
 
         $request = $request->withUri(new Uri($uri2));
         $route->match($request);
-        $this->assertSame($uri2, (string) $route->assemble($params2));
+        $this->assertSame($uri2, $route->assemble($params2)->toString());
     }
 }

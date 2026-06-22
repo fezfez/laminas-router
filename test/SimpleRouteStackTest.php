@@ -147,7 +147,7 @@ final class SimpleRouteStackTest extends TestCase
         /** @var SimpleRouteStack<RouteInterface> $stack */
         $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()));
         $stack->addRoute('foo', new TestAsset\DummyRoute());
-        $this->assertEquals('', $stack->assemble([], ['name' => 'foo']));
+        $this->assertEquals('', $stack->assemble([], ['name' => 'foo'])->toString());
     }
 
     public function testAssembleWithoutNameOption(): void
@@ -201,7 +201,7 @@ final class SimpleRouteStackTest extends TestCase
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
         $stack->setDefaultParam('foo', 'bar');
 
-        $this->assertEquals('bar', (string) $stack->assemble([], ['name' => 'foo']));
+        $this->assertEquals('bar', $stack->assemble([], ['name' => 'foo'])->toString());
     }
 
     public function testDefaultParamDoesNotOverrideParamForAssembling(): void
@@ -211,7 +211,7 @@ final class SimpleRouteStackTest extends TestCase
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
         $stack->setDefaultParam('foo', 'baz');
 
-        $this->assertEquals('bar', (string) $stack->assemble(['foo' => 'bar'], ['name' => 'foo']));
+        $this->assertEquals('bar', $stack->assemble(['foo' => 'bar'], ['name' => 'foo'])->toString());
     }
 
     public function testFactory(): void

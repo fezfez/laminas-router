@@ -83,7 +83,7 @@ class TreeRouteStack extends SimpleRouteStack
     {
         if ($route instanceof RouteInterface && ! $route instanceof HttpRouteInterface) {
             throw new Exception\InvalidArgumentException(
-                'Only HttpRouteInterface instances or array/string specifications are allowed.'
+                'Only HttpRouteInterface instances or array specifications are allowed.'
             );
         }
         if (is_array($route)) {
@@ -271,6 +271,7 @@ class TreeRouteStack extends SimpleRouteStack
         $fragment = $assembledUrl->fragment;
 
         if (array_key_exists('query', $options) && is_array($options['query'])) {
+            /** @var array<string, scalar> $query */
             $query = $options['query'];
         }
 

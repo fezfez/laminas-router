@@ -200,7 +200,7 @@ final class HostnameTest extends TestCase
         $uri    = new Uri();
         $result = $route->assemble($params, ['uri' => $uri]);
 
-        $this->assertEquals('', (string) $result);
+        $this->assertEquals('', $result->toString());
         $this->assertSame($hostname, $result->host);
     }
 

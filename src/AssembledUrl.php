@@ -4,26 +4,23 @@ declare(strict_types=1);
 
 namespace Laminas\Router;
 
-use Stringable;
-
 use function array_merge;
 use function http_build_query;
 use function sprintf;
 use function str_starts_with;
 use function strtolower;
 
-readonly final class AssembledUrl implements Stringable
+readonly final class AssembledUrl
 {
+    /**
+     * @param array<string, scalar> $query
+     * @param non-empty-string|null $host
+     * @param non-empty-string|null $scheme
+     */
     public function __construct(
         public string $path = '',
         public array $query = [],
-        /**
-         * @var non-empty-string|null
-         */
         public ?string $host = null,
-        /**
-         * @var non-empty-string|null
-         */
         public ?string $scheme = null,
         public ?string $fragment = null,
         public bool $forceCanonical = false,
@@ -44,7 +41,7 @@ readonly final class AssembledUrl implements Stringable
         );
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         $uri = $this->path;
 

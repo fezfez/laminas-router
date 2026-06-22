@@ -36,7 +36,7 @@ final class TreeRouteStackTest extends TestCase
         $stack = new TreeRouteStack(new RoutePluginManager(new ServiceManager()));
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Only HttpRouteInterface instances or array/string specifications are allowed.');
+        $this->expectExceptionMessage('Only HttpRouteInterface instances or array specifications are allowed.');
         /** @psalm-suppress InvalidArgument we're explicitly testing runtime type validation here */
         $stack->addRoute('foo', new DummyRoute());
     }
@@ -83,7 +83,7 @@ final class TreeRouteStackTest extends TestCase
         /** @var TreeRouteStack<HttpRouteInterface> $stack */
         $stack = new TreeRouteStack($this->createRoutePluginManager());
         $stack->addRoute('foo', new TestAsset\DummyRoute());
-        $this->assertEquals('', $stack->assemble([], ['name' => 'foo']));
+        $this->assertEquals('', $stack->assemble([], ['name' => 'foo'])->toString());
     }
 
     public function testAssembleCanonicalUriWithoutRequestUri(): void
@@ -107,7 +107,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->addRoute('foo', new TestAsset\DummyRoute());
         $this->assertEquals(
             'http://example.com:8080/',
-            (string) $stack->assemble([], ['name' => 'foo', 'force_canonical' => true])
+            $stack->assemble([], ['name' => 'foo', 'force_canonical' => true])->toString()
         );
     }
 
@@ -120,7 +120,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->addRoute('foo', new TestAsset\DummyRoute());
         $this->assertEquals(
             'http://example.com:8080/',
-            (string) $stack->assemble([], ['name' => 'foo', 'uri' => $uri, 'force_canonical' => true])
+            $stack->assemble([], ['name' => 'foo', 'uri' => $uri, 'force_canonical' => true])->toString()
         );
     }
 
@@ -132,7 +132,10 @@ final class TreeRouteStackTest extends TestCase
         $uri = new Uri();
         $uri = $uri->withScheme('http');
 
-        $this->assertEquals('http://example.com/', (string) $stack->assemble([], ['name' => 'foo', 'uri' => $uri]));
+        $this->assertEquals(
+            'http://example.com/',
+            $stack->assemble([], ['name' => 'foo', 'uri' => $uri])->toString()
+        );
     }
 
     public function testAssembleCanonicalUriWithHostnameRouteWithoutScheme(): void
@@ -156,7 +159,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->setRequestUri($uri);
         $stack->addRoute('foo', new Hostname('example.com'));
 
-        $this->assertEquals('http://example.com/', (string) $stack->assemble([], ['name' => 'foo']));
+        $this->assertEquals('http://example.com/', $stack->assemble([], ['name' => 'foo'])->toString());
     }
 
     public function testAssembleWithQueryParams(): void
@@ -174,7 +177,7 @@ final class TreeRouteStackTest extends TestCase
 
         $this->assertEquals(
             '/?foo=bar',
-            (string) $stack->assemble([], ['name' => 'index', 'query' => ['foo' => 'bar']])
+            $stack->assemble([], ['name' => 'index', 'query' => ['foo' => 'bar']])->toString()
         );
     }
 
@@ -191,7 +194,7 @@ final class TreeRouteStackTest extends TestCase
             ]
         );
 
-        $this->assertEquals('/this%2Fthat', (string) $stack->assemble([], ['name' => 'index']));
+        $this->assertEquals('/this%2Fthat', $stack->assemble([], ['name' => 'index'])->toString());
     }
 
     public function testAssembleWithEncodedPathAndQueryParams(): void
@@ -209,7 +212,10 @@ final class TreeRouteStackTest extends TestCase
 
         $this->assertEquals(
             '/this%2Fthat?foo=bar',
-            (string) $stack->assemble([], ['name' => 'index', 'query' => ['foo' => 'bar'], 'normalize_path' => false])
+            $stack->assemble(
+                [],
+                ['name' => 'index', 'query' => ['foo' => 'bar'], 'normalize_path' => false]
+            )->toString()
         );
     }
 
@@ -237,7 +243,7 @@ final class TreeRouteStackTest extends TestCase
                 ],
             ]
         );
-        $this->assertEquals('https://example.com/', $stack->assemble([], ['name' => 'secure/index']));
+        $this->assertEquals('https://example.com/', $stack->assemble([], ['name' => 'secure/index'])->toString());
     }
 
     public function testAssembleWithFragment(): void
@@ -253,7 +259,7 @@ final class TreeRouteStackTest extends TestCase
             ]
         );
 
-        $this->assertEquals('/#foobar', $stack->assemble([], ['name' => 'index', 'fragment' => 'foobar']));
+        $this->assertEquals('/#foobar', $stack->assemble([], ['name' => 'index', 'fragment' => 'foobar'])->toString());
     }
 
     public function testAssembleWithoutNameOption(): void
@@ -299,7 +305,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
         $stack->setDefaultParam('foo', 'bar');
 
-        $this->assertEquals('bar', (string) $stack->assemble([], ['name' => 'foo']));
+        $this->assertEquals('bar', $stack->assemble([], ['name' => 'foo'])->toString());
     }
 
     public function testDefaultParamDoesNotOverrideParamForAssembling(): void
@@ -309,7 +315,7 @@ final class TreeRouteStackTest extends TestCase
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
         $stack->setDefaultParam('foo', 'baz');
 
-        $this->assertEquals('bar', (string) $stack->assemble(['foo' => 'bar'], ['name' => 'foo']));
+        $this->assertEquals('bar', $stack->assemble(['foo' => 'bar'], ['name' => 'foo'])->toString());
     }
 
     public function testSetRequestUri(): void
@@ -393,7 +399,7 @@ final class TreeRouteStackTest extends TestCase
             ]
         );
 
-        $this->assertEquals('https://localhost/foo/baz', (string) $stack->assemble([], ['name' => 'foo/baz']));
+        $this->assertEquals('https://localhost/foo/baz', $stack->assemble([], ['name' => 'foo/baz'])->toString());
     }
 
     public function testFactory(): void

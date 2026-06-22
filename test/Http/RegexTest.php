@@ -119,9 +119,9 @@ final class RegexTest extends TestCase
         $result = $route->assemble($params);
 
         if ($offset !== null) {
-            $this->assertEquals($offset, strpos($path, (string) $result, $offset));
+            $this->assertEquals($offset, strpos($path, $result->toString(), $offset));
         } else {
-            $this->assertEquals($path, (string) $result);
+            $this->assertEquals($path, $result->toString());
         }
     }
 
