@@ -52,12 +52,6 @@ final readonly class ConfigProvider
     public function getDependencyConfig(): array
     {
         return [
-            'aliases'   => [
-                'HttpRouter'         => TreeRouteStack::class,
-                'router'             => RouteStackInterface::class,
-                'Router'             => RouteStackInterface::class,
-                'RoutePluginManager' => RoutePluginManager::class,
-            ],
             'factories' => [
                 TreeRouteStack::class      => Http\HttpRouterFactory::class,
                 RoutePluginManager::class  => RoutePluginManagerFactory::class,
