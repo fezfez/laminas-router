@@ -33,7 +33,7 @@ final readonly class DummyRouteWithParam implements RouteInterface
     }
 
     /** @inheritDoc */
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;

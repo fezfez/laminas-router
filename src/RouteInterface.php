@@ -15,7 +15,7 @@ interface RouteInterface
     /**
      * Create a new route with given options.
      */
-    public static function factory(array $options = []): static;
+    public static function factory(array $options = []): self;
 
     /**
      * Match a given request.

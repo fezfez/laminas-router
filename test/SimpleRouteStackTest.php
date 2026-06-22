@@ -171,9 +171,8 @@ final class SimpleRouteStackTest extends TestCase
     public function testDefaultParamIsAddedToMatch(): void
     {
         /** @var SimpleRouteStack<RouteInterface> $stack */
-        $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()));
+        $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()), defaultParams: ['foo' => 'bar']);
         $stack->addRoute('foo', new TestAsset\DummyRoute());
-        $stack->setDefaultParam('foo', 'bar');
 
         $match = $stack->match(new Request());
         self::assertNotNull($match);
@@ -184,9 +183,8 @@ final class SimpleRouteStackTest extends TestCase
     public function testDefaultParamDoesNotOverrideParam(): void
     {
         /** @var SimpleRouteStack<RouteInterface> $stack */
-        $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()));
+        $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()), defaultParams: ['foo' => 'bar']);
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
-        $stack->setDefaultParam('foo', 'baz');
 
         $match = $stack->match(new Request());
 
@@ -197,9 +195,8 @@ final class SimpleRouteStackTest extends TestCase
     public function testDefaultParamIsUsedForAssembling(): void
     {
         /** @var SimpleRouteStack<RouteInterface> $stack */
-        $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()));
+        $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()), defaultParams: ['foo' => 'bar']);
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
-        $stack->setDefaultParam('foo', 'bar');
 
         $this->assertEquals('bar', $stack->assemble([], ['name' => 'foo'])->toString());
     }
@@ -207,9 +204,8 @@ final class SimpleRouteStackTest extends TestCase
     public function testDefaultParamDoesNotOverrideParamForAssembling(): void
     {
         /** @var SimpleRouteStack<RouteInterface> $stack */
-        $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()));
+        $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()), defaultParams: ['foo' => 'bar']);
         $stack->addRoute('foo', new TestAsset\DummyRouteWithParam());
-        $stack->setDefaultParam('foo', 'baz');
 
         $this->assertEquals('bar', $stack->assemble(['foo' => 'bar'], ['name' => 'foo'])->toString());
     }

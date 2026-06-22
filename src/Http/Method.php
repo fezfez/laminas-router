@@ -45,7 +45,7 @@ final readonly class Method implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         /** @var mixed $verb */
         $verb = $options['verb'] ?? null;

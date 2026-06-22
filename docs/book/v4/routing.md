@@ -18,7 +18,7 @@ use Laminas\Stdlib\RequestInterface;
 
 interface RouteInterface
 {
-    public static function factory(array $options = []): static;
+    public static function factory(array $options = []): self;
     public function match(RequestInterface $request): RouteMatch|null;
     public function assemble(array $params = [], array $options = []): string;
 }
