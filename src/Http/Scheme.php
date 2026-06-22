@@ -72,13 +72,6 @@ final readonly class Scheme implements HttpRouteInterface
         return new AssembledUrl(scheme:$this->scheme);
     }
 
-    /** @inheritDoc */
-    #[Override]
-    public function getAssembledParams(): array
-    {
-        return [];
-    }
-
     #[Override]
     public function getPriority(): ?int
     {

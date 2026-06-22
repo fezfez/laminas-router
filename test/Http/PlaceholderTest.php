@@ -68,7 +68,7 @@ final class PlaceholderTest extends TestCase
     public function testGetAssembledParams(): void
     {
         $route = new Placeholder([]);
-        $this->assertEquals([], $route->getAssembledParams());
+        $this->assertEquals([], $route->assemble([])->assembledParams);
     }
 
     public function testFactory(): void

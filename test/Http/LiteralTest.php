@@ -109,9 +109,7 @@ final class LiteralTest extends TestCase
     public function testGetAssembledParams(): void
     {
         $route = new Literal('/foo');
-        $route->assemble(['foo' => 'bar']);
-
-        $this->assertEquals([], $route->getAssembledParams());
+        $this->assertEquals([], $route->assemble(['foo' => 'bar'])->assembledParams);
     }
 
     public function testFactory(): void

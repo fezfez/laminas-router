@@ -259,9 +259,10 @@ final class ChainTest extends TestCase
     public function testGetAssembledParams(): void
     {
         $route = self::getRoute();
-        $route->assemble(['controller' => 'foo', 'bar' => 'baz']);
-
-        $this->assertSame(['controller', 'bar'], $route->getAssembledParams());
+        $this->assertSame(
+            ['controller', 'bar'],
+            $route->assemble(['controller' => 'foo', 'bar' => 'baz'])->assembledParams,
+        );
     }
 
     public function testFactory(): void

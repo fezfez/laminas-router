@@ -34,13 +34,6 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
     private array|null $chainRoutes;
 
     /**
-     * List of assembled parameters.
-     *
-     * @var list<non-empty-string>
-     */
-    private array $assembledParams = [];
-
-    /**
      * Create a new part route.
      *
      * @param array<array-key, array|TRoute> $routes
@@ -135,8 +128,6 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
             $this->chainRoutes = null;
         }
 
-        $this->assembledParams = [];
-
         $routes       = [...$this->routes];
         $lastRouteKey = array_key_last($routes);
 
@@ -150,21 +141,9 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
             $assembledUrl = $route->assemble($params, $chainOptions);
             $finalResult  = $finalResult->merge($assembledUrl);
 
-            $params = array_diff_key($params, array_flip($route->getAssembledParams()));
-
-            $this->assembledParams = [
-                ...$this->assembledParams,
-                ...$route->getAssembledParams(),
-            ];
+            $params = array_diff_key($params, array_flip($assembledUrl->assembledParams));
         }
 
         return $finalResult;
-    }
-
-    /** @inheritDoc */
-    #[Override]
-    public function getAssembledParams(): array
-    {
-        return $this->assembledParams;
     }
 }

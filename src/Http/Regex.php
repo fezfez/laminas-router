@@ -25,15 +25,8 @@ use function strlen;
 /**
  * Regex route.
  */
-final class Regex implements HttpRouteInterface
+final readonly class Regex implements HttpRouteInterface
 {
-    /**
-     * List of assembled parameters.
-     *
-     * @var list<non-empty-string>
-     */
-    private array $assembledParams = [];
-
     /**
      * Create a new regex route.
      *
@@ -45,20 +38,20 @@ final class Regex implements HttpRouteInterface
         /**
          * Regex to match.
          */
-        private readonly string $regex,
+        private string $regex,
         /**
          * Specification for URL assembly.
          *
          * Parameters accepting substitutions should be denoted as "%key%"
          */
-        private readonly string $spec,
+        private string $spec,
         /**
          * Default values.
          *
          * @var array<non-empty-string, string|int>
          */
-        private readonly array $defaults = [],
-        private readonly int|null $priority = null
+        private array $defaults = [],
+        private int|null $priority = null,
     ) {
     }
 
@@ -121,9 +114,9 @@ final class Regex implements HttpRouteInterface
     #[Override]
     public function assemble(array $params = [], array $options = []): AssembledUrl
     {
-        $url                   = $this->spec;
-        $mergedParams          = array_merge($this->defaults, $params);
-        $this->assembledParams = [];
+        $url             = $this->spec;
+        $mergedParams    = array_merge($this->defaults, $params);
+        $assembledParams = [];
 
         foreach ($mergedParams as $key => $value) {
             $spec = '%' . $key . '%';
@@ -131,18 +124,11 @@ final class Regex implements HttpRouteInterface
             if (str_contains($url, $spec)) {
                 $url = str_replace($spec, rawurlencode((string) $value), $url);
 
-                $this->assembledParams[] = $key;
+                $assembledParams[] = $key;
             }
         }
 
-        return new AssembledUrl(path:$url);
-    }
-
-    /** @inheritDoc */
-    #[Override]
-    public function getAssembledParams(): array
-    {
-        return $this->assembledParams;
+        return new AssembledUrl(path: $url, assembledParams: $assembledParams);
     }
 
     #[Override]

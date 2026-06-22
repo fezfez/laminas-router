@@ -172,7 +172,7 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
         }
 
         $uri    = $this->route->assemble($params, $options);
-        $params = array_diff_key($params, array_flip($this->route->getAssembledParams()));
+        $params = array_diff_key($params, array_flip($uri->assembledParams));
 
         if (! isset($options['name'])) {
             if (! $this->mayTerminate) {
@@ -186,14 +186,5 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
         $options['only_return_path'] = true;
 
         return $uri->merge(parent::assemble($params, $options));
-    }
-
-    /** @inheritDoc */
-    #[Override]
-    public function getAssembledParams(): array
-    {
-        // Part routes may not occur as base route of other part routes, so we
-        // don't have to return anything here.
-        return [];
     }
 }
