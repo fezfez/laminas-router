@@ -7,6 +7,7 @@ namespace LaminasTest\Router\Http;
 use Laminas\Diactoros\Request;
 use Laminas\Diactoros\Uri;
 use Laminas\Router\AssembledUrl;
+use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\TranslatorAwareTreeRouteStack;
 use Laminas\Router\RoutePluginManager;
@@ -176,5 +177,46 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
         $match = $stack->match($request);
         $this->assertNotNull($match);
         $this->assertEquals('foo/index', $match->getMatchedRouteName());
+    }
+
+    public function testMatchDoesNotTranslateWhenTranslatorDisabled(): void
+    {
+        $translator = $this->createMock(TranslatorInterface::class);
+        $translator->expects($this->never())->method('translate');
+
+        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
+        $stack->setTranslator($translator);
+        $stack->setTranslatorEnabled(false);
+        $stack->addRoute('foo', $this->fooRoute);
+
+        $request = (new Request())->withUri(new Uri('http://example.com/de/hauptseite'));
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('No translator provided');
+        $stack->match($request);
+    }
+
+    public function testAssembleDoesNotTranslateWhenTranslatorDisabled(): void
+    {
+        $translator = $this->createMock(TranslatorInterface::class);
+        $translator->expects($this->never())->method('translate');
+
+        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
+        $stack->setTranslator($translator);
+        $stack->setTranslatorEnabled(false);
+        $stack->addRoute('foo', $this->fooRoute);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('No translator provided');
+        $stack->assemble(['locale' => 'de'], ['name' => 'foo/index']);
+    }
+
+    public function testSetTranslatorEnabledDefaultsToTrue(): void
+    {
+        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
+        $stack->setTranslator($this->createStub(TranslatorInterface::class));
+        $stack->setTranslatorEnabled();
+
+        $this->assertTrue($stack->isTranslatorEnabled());
     }
 }

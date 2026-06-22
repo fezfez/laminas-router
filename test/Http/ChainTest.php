@@ -182,6 +182,88 @@ final class ChainTest extends TestCase
         }
     }
 
+    public function testMatchRejectsTrailingPathWhenNoOffset(): void
+    {
+        $request = (new Request())->withUri(new Uri('http://example.com/foo/bar/extra'));
+
+        $this->assertNull(self::getRoute()->match($request));
+    }
+
+    public function testMatchWithZeroOffsetAllowsPartialPath(): void
+    {
+        $request = (new Request())->withUri(new Uri('http://example.com/foo/bar/extra'));
+
+        $this->assertInstanceOf(HttpRouteMatch::class, self::getRoute()->match($request, 0));
+    }
+
+    public function testAssemblingOmitsOptionalTrailingSegmentWithoutParam(): void
+    {
+        $this->assertSame(
+            '/foo',
+            self::getRouteWithOptionalParam()->assemble(['controller' => 'foo'])->toString()
+        );
+    }
+
+    public function testAssemblingPropagatesHasChildOptionToLastSegment(): void
+    {
+        $routePlugins = new RoutePluginManager(new ServiceManager());
+        $route        = new Chain(
+            $routePlugins,
+            [
+                [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route'    => '/:controller',
+                        'defaults' => ['controller' => 'foo'],
+                    ],
+                ],
+                [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route'    => '[/:bar]',
+                        'defaults' => ['bar' => 'bar'],
+                    ],
+                ],
+            ]
+        );
+
+        $this->assertSame('/foo/bar', $route->assemble([], ['has_child' => true])->toString());
+    }
+
+    public function testAssemblingStripsConsumedParamsBetweenSegments(): void
+    {
+        $routePlugins = new RoutePluginManager(new ServiceManager());
+        $route        = new Chain(
+            $routePlugins,
+            [
+                [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route'    => '/:id',
+                        'defaults' => ['id' => '1'],
+                    ],
+                ],
+                [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route'    => '/:id',
+                        'defaults' => ['id' => '2'],
+                    ],
+                ],
+            ]
+        );
+
+        $this->assertSame('/x/2', $route->assemble(['id' => 'x'])->toString());
+    }
+
+    public function testGetAssembledParams(): void
+    {
+        $route = self::getRoute();
+        $route->assemble(['controller' => 'foo', 'bar' => 'baz']);
+
+        $this->assertSame(['controller', 'bar'], $route->getAssembledParams());
+    }
+
     public function testFactory(): void
     {
         $tester = new FactoryTester();

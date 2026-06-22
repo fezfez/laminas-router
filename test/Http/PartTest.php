@@ -16,10 +16,13 @@ use Laminas\Router\RouteInvokableFactory;
 use Laminas\Router\RouteMatch;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
+use Laminas\Translator\TranslatorInterface;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 use function strlen;
 use function strpos;
@@ -348,5 +351,153 @@ final class PartTest extends TestCase
         $match = $route->match($request);
         $this->assertInstanceOf(RouteMatch::class, $match);
         $this->assertEquals('resource', $match->getParam('action'));
+    }
+
+    private function getLocalePartRoute(): Part
+    {
+        return new Part(
+            self::getRoutePlugins(),
+            [
+                'type'    => Segment::class,
+                'options' => [
+                    'route' => '/:locale',
+                ],
+            ],
+            [],
+            null,
+            true,
+            [
+                'index' => [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route' => '/{homepage}',
+                    ],
+                ],
+            ],
+        );
+    }
+
+    private function getTranslator(int $expectedCallCount): TranslatorInterface&MockObject
+    {
+        $translator = $this->createMock(TranslatorInterface::class);
+        $translator->expects($this->exactly($expectedCallCount))
+            ->method('translate')
+            ->willReturnCallback(function (
+                string $message,
+                string $textDomain = 'default',
+                ?string $locale = null
+            ): string {
+                if ($message === 'homepage' && $textDomain === 'route' && $locale === 'de') {
+                    return 'hauptseite';
+                }
+
+                if ($message === 'homepage' && $textDomain === 'route' && $locale === 'en') {
+                    return 'homepage';
+                }
+
+                throw new UnexpectedValueException('Translation not found');
+            });
+
+        return $translator;
+    }
+
+    public function testMatchPropagatesLocaleFromParentParam(): void
+    {
+        $route   = $this->getLocalePartRoute();
+        $request = (new Request())->withUri(new Uri('http://example.com/de/hauptseite'));
+
+        $match = $route->match($request, null, ['translator' => $this->getTranslator(1), 'text_domain' => 'route']);
+
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
+        $this->assertSame('index', $match->getMatchedRouteName());
+    }
+
+    public function testAssemblePropagatesLocaleFromParamsWhenLocaleOptionIsNotSet(): void
+    {
+        $route = $this->getLocalePartRoute();
+
+        $this->assertSame(
+            '/de/hauptseite',
+            $route->assemble(
+                ['locale' => 'de'],
+                ['name' => 'index', 'translator' => $this->getTranslator(1), 'text_domain' => 'route']
+            )->toString()
+        );
+    }
+
+    public function testAssembleDoesNotPropagateLocaleWhenLocaleOptionIsSet(): void
+    {
+        $route = $this->getLocalePartRoute();
+
+        $this->assertSame(
+            '/de/homepage',
+            $route->assemble(
+                ['locale' => 'de'],
+                [
+                    'name'        => 'index',
+                    'locale'      => 'en',
+                    'translator'  => $this->getTranslator(1),
+                    'text_domain' => 'route',
+                ]
+            )->toString()
+        );
+    }
+
+    public function testMatchDoesNotPropagateLocaleWhenLocaleOptionIsSet(): void
+    {
+        $route   = $this->getLocalePartRoute();
+        $request = (new Request())->withUri(new Uri('http://example.com/de/hauptseite'));
+
+        $match = $route->match($request, null, [
+            'translator'  => $this->getTranslator(1),
+            'text_domain' => 'route',
+            'locale'      => 'en',
+        ]);
+
+        $this->assertNull($match);
+    }
+
+    public function testAssembleStripsParentAssembledParams(): void
+    {
+        $route = new Part(
+            self::getRoutePlugins(),
+            [
+                'type'    => Segment::class,
+                'options' => [
+                    'route' => '/:foo',
+                ],
+            ],
+            [],
+            null,
+            true,
+            [
+                'bar' => [
+                    'type'    => Segment::class,
+                    'options' => [
+                        'route'    => '/:foo/baz',
+                        'defaults' => ['foo' => '2'],
+                    ],
+                ],
+            ],
+        );
+
+        $this->assertSame('/1/2/baz', $route->assemble(['foo' => '1'], ['name' => 'bar'])->toString());
+    }
+
+    public function testAssembleChildReturnsPathOnly(): void
+    {
+        $route = self::getRoute();
+
+        $this->assertSame(
+            '/foo/bar',
+            $route->assemble(
+                ['controller' => 'bar'],
+                [
+                    'name'            => 'bar',
+                    'uri'             => new Uri('https://example.com'),
+                    'force_canonical' => true,
+                ]
+            )->toString()
+        );
     }
 }

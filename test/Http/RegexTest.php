@@ -141,6 +141,20 @@ final class RegexTest extends TestCase
         $this->assertEquals(['foo'], $route->getAssembledParams());
     }
 
+    public function testAssemblingUsesDefaultsForMissingParams(): void
+    {
+        $route = new Regex('/foo', '/foo-%bar%', ['bar' => 'baz']);
+
+        $this->assertSame('/foo-baz', $route->assemble([])->toString());
+    }
+
+    public function testAssemblingParamsOverrideDefaults(): void
+    {
+        $route = new Regex('/foo', '/foo-%bar%', ['bar' => 'baz']);
+
+        $this->assertSame('/foo-qux', $route->assemble(['bar' => 'qux'])->toString());
+    }
+
     public function testFactory(): void
     {
         $tester = new FactoryTester();
