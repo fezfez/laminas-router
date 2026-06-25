@@ -133,7 +133,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
     public function testMatchRouteWithParameterLocale(): void
     {
         $translator = $this->getTranslator(1);
-        $stack = new TranslatorAwareTreeRouteStack(
+        $stack      = new TranslatorAwareTreeRouteStack(
             new RoutePluginManager(new ServiceManager()),
             translator: $translator,
             translatorTextDomain: 'route'
