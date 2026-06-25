@@ -31,22 +31,17 @@ use function strlen;
  * @template-extends SimpleRouteStack<TRoute>
  * @psalm-consistent-constructor
  */
-class TreeRouteStack extends SimpleRouteStack
+readonly class TreeRouteStack extends SimpleRouteStack
 {
     /**
-     * Request URI.
-     */
-    private UriInterface|null $requestUri = null;
-
-    /**
-     * @param array<non-empty-string, array|TRoute> $routes
+     * @param array<non-empty-string|array-key, array|TRoute> $routes
      * @param array<non-empty-string, non-empty-string> $defaultParams
      */
     public function __construct(
-        private readonly RoutePluginManager $routePluginManager,
+        private RoutePluginManager $routePluginManager,
         array $routes = [],
         array $defaultParams = [],
-        protected readonly int|null $priority = null,
+        protected int|null $priority = null,
     ) {
         parent::__construct($this->routePluginManager, $routes, $defaultParams);
     }
@@ -56,7 +51,7 @@ class TreeRouteStack extends SimpleRouteStack
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
         $routes       = $options['routes'] ?? [];
@@ -68,7 +63,7 @@ class TreeRouteStack extends SimpleRouteStack
             throw new RuntimeException('Missing "route_plugins" in options array');
         }
 
-        return new static(
+        return new self(
             $routePlugins,
             $routes,
             $defaultParams,
@@ -123,6 +118,7 @@ class TreeRouteStack extends SimpleRouteStack
             $options = [
                 'routes'        => $chainRoutes,
                 'route_plugins' => $this->routePluginManager,
+                'priority'      => $specs['priority'] ?? null,
             ];
 
             $route = $this->routePluginManager->build(Chain::class, $options);
@@ -165,12 +161,8 @@ class TreeRouteStack extends SimpleRouteStack
         array $options = []
     ): ?RouteMatch {
         $baseUrlLength = $pathOffset;
+        $pathLength    = null;
 
-        if ($this->requestUri === null) {
-            $this->setRequestUri($request->getUri());
-        }
-
-        $pathLength = null;
         if ($baseUrlLength !== null) {
             $pathLength = strlen($request->getUri()->getPath()) - $baseUrlLength;
         }
@@ -180,11 +172,11 @@ class TreeRouteStack extends SimpleRouteStack
             assert($route instanceof HttpRouteInterface);
             $match = $route->match($request, $baseUrlLength, $options);
             if ($match instanceof HttpRouteMatch && ($pathLength === null || $match->getLength() === $pathLength)) {
-                $match->setMatchedRouteName($name);
+                $match = $match->setMatchedRouteName($name);
 
                 foreach ($this->defaultParams as $paramName => $value) {
                     if ($match->getParam($paramName) === null) {
-                        $match->setParam($paramName, $value);
+                        $match = $match->setParam($paramName, $value);
                     }
                 }
 
@@ -251,8 +243,7 @@ class TreeRouteStack extends SimpleRouteStack
         }
 
         $forceCanonical = isset($options['force_canonical']) && $options['force_canonical'] === true;
-        $contextUri     = isset($options['uri']) && $options['uri'] instanceof UriInterface ? $options['uri'] : null;
-        $fallbackUri    = $contextUri ?? $this->requestUri;
+        $fallbackUri    = isset($options['uri']) && $options['uri'] instanceof UriInterface ? $options['uri'] : null;
 
         if ($forceCanonical && $fallbackUri === null) {
             throw new RuntimeException('Request URI has not been set');
@@ -295,21 +286,5 @@ class TreeRouteStack extends SimpleRouteStack
     public function getPriority(): ?int
     {
         return $this->priority;
-    }
-
-    /**
-     * Set the request URI.
-     */
-    public function setRequestUri(UriInterface $uri): void
-    {
-        $this->requestUri = $uri;
-    }
-
-    /**
-     * Get the request URI.
-     */
-    public function getRequestUri(): ?UriInterface
-    {
-        return $this->requestUri;
     }
 }

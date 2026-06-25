@@ -32,7 +32,7 @@ final class DummyRouteWithParam implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         return new self();
     }

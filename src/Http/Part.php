@@ -14,7 +14,6 @@ use Psr\Http\Message\RequestInterface;
 use function array_diff_key;
 use function array_flip;
 use function assert;
-use function count;
 use function is_array;
 use function is_bool;
 use function is_int;
@@ -25,14 +24,14 @@ use function strlen;
  * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
  */
-final class Part extends TreeRouteStack implements HttpRouteInterface
+final readonly class Part extends TreeRouteStack implements HttpRouteInterface
 {
     /**
      * RouteInterface to match.
      *
      * @var TRoute
      */
-    private readonly HttpRouteInterface $route;
+    private HttpRouteInterface $route;
 
     /**
      * Create a new part route.
@@ -49,8 +48,8 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
         /**
          * Whether the route may terminate.
          */
-        private readonly bool $mayTerminate = false,
-        private array $childRoutes = [],
+        private bool $mayTerminate = false,
+        array $childRoutes = [],
     ) {
         parent::__construct($routePluginManager, priority: $priority);
 
@@ -63,6 +62,10 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
         }
 
         $this->route = $routes;
+
+        if ($childRoutes !== []) {
+            $this->addRoutes($childRoutes);
+        }
     }
 
     /**
@@ -70,7 +73,7 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         $routes       = $options['route'] ?? null;
         $routePlugins = $options['route_plugins'] ?? null;
@@ -117,11 +120,6 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
         assert($match instanceof HttpRouteMatch || $match === null);
 
         if ($match !== null) {
-            if (count($this->childRoutes) !== 0) {
-                $this->addRoutes($this->childRoutes);
-                $this->childRoutes = [];
-            }
-
             $nextOffset = $pathOffset + $match->getLength();
 
             $pathLength = strlen($request->getUri()->getPath());
@@ -160,11 +158,6 @@ final class Part extends TreeRouteStack implements HttpRouteInterface
     #[Override]
     public function assemble(array $params = [], array $options = []): AssembledUrl
     {
-        if (count($this->childRoutes) !== 0) {
-            $this->addRoutes($this->childRoutes);
-            $this->childRoutes = [];
-        }
-
         $options['has_child'] = isset($options['name']);
 
         if (isset($options['translator']) && ! isset($options['locale']) && isset($params['locale'])) {

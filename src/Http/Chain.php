@@ -24,15 +24,8 @@ use function strlen;
  * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
  */
-final class Chain extends TreeRouteStack implements HttpRouteInterface
+final readonly class Chain extends TreeRouteStack implements HttpRouteInterface
 {
-    /**
-     * Chain routes.
-     *
-     * @var array<array-key, array|TRoute>
-     */
-    private array|null $chainRoutes;
-
     /**
      * Create a new part route.
      *
@@ -45,8 +38,7 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
         array $defaultParams = [],
         ?int $priority = null,
     ) {
-        $this->chainRoutes = array_reverse($routes);
-        parent::__construct($routePluginManager, [], $defaultParams, $priority);
+        parent::__construct($routePluginManager, array_reverse($routes), $defaultParams, $priority);
     }
 
     /**
@@ -54,7 +46,7 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         $routePlugins = $options['route_plugins'] ?? null;
 
@@ -87,14 +79,8 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
     {
         $mustTerminate = $pathOffset === null;
         $pathOffset  ??= 0;
-
-        if ($this->chainRoutes !== null) {
-            $this->addRoutes($this->chainRoutes);
-            $this->chainRoutes = null;
-        }
-
-        $match      = new HttpRouteMatch([]);
-        $pathLength = strlen($request->getUri()->getPath());
+        $match         = new HttpRouteMatch([]);
+        $pathLength    = strlen($request->getUri()->getPath());
 
         foreach ($this->routes as $route) {
             assert($route instanceof HttpRouteInterface);
@@ -106,7 +92,7 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
 
             assert($subMatch instanceof HttpRouteMatch);
 
-            $match->merge($subMatch);
+            $match       = $match->merge($subMatch);
             $pathOffset += $subMatch->getLength();
         }
 
@@ -121,13 +107,7 @@ final class Chain extends TreeRouteStack implements HttpRouteInterface
     #[Override]
     public function assemble(array $params = [], array $options = []): AssembledUrl
     {
-        $finalResult = new AssembledUrl();
-
-        if ($this->chainRoutes !== null) {
-            $this->addRoutes($this->chainRoutes);
-            $this->chainRoutes = null;
-        }
-
+        $finalResult  = new AssembledUrl();
         $routes       = [...$this->routes];
         $lastRouteKey = array_key_last($routes);
 

@@ -16,7 +16,7 @@ use Psr\Container\ContainerInterface;
  * @psalm-internal LaminasTest\Router
  * @psalm-import-type RouterConfigShape from ConfigProvider
  */
-final class HttpRouterFactory implements FactoryInterface
+final readonly class HttpRouterFactory implements FactoryInterface
 {
     /**
      * Create and return the HTTP router

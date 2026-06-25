@@ -38,7 +38,7 @@ final readonly class Scheme implements HttpRouteInterface
     }
 
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         /** @psalm-var string|null $scheme */
         $scheme = $options['scheme'] ?? null;

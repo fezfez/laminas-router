@@ -61,7 +61,7 @@ final readonly class Segment implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         $route = $options['route'] ?? null;
         /** @psalm-var array<non-empty-string, string> $constraints */

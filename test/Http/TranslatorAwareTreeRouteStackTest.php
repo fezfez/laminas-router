@@ -66,42 +66,6 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
         return $translator;
     }
 
-    public function testTranslatorAwareInterfaceImplementation(): void
-    {
-        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
-
-        // Defaults
-        $this->assertNull($stack->getTranslator());
-        $this->assertFalse($stack->hasTranslator());
-        $this->assertEquals('default', $stack->getTranslatorTextDomain());
-        $this->assertTrue($stack->isTranslatorEnabled());
-
-        // Inject translator without text domain
-        $translator = $this->createStub(TranslatorInterface::class);
-        $stack->setTranslator($translator);
-        $this->assertSame($translator, $stack->getTranslator());
-        $this->assertEquals('default', $stack->getTranslatorTextDomain());
-        $this->assertTrue($stack->hasTranslator());
-
-        // Reset translator
-        $stack->setTranslator(null);
-        $this->assertNull($stack->getTranslator());
-        $this->assertFalse($stack->hasTranslator());
-
-        // Inject translator with text domain
-        $stack->setTranslator($translator, 'alternative');
-        $this->assertSame($translator, $stack->getTranslator());
-        $this->assertEquals('alternative', $stack->getTranslatorTextDomain());
-
-        // Set text domain
-        $stack->setTranslatorTextDomain('default');
-        $this->assertEquals('default', $stack->getTranslatorTextDomain());
-
-        // Disable translator
-        $stack->setTranslatorEnabled(false);
-        $this->assertFalse($stack->isTranslatorEnabled());
-    }
-
     public function testTranslatorIsPassedThroughMatchMethod(): void
     {
         $translator = $this->createStub(TranslatorInterface::class);
@@ -145,8 +109,12 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
     public function testAssembleRouteWithParameterLocale(): void
     {
-        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
-        $stack->setTranslator($this->getTranslator(2), 'route');
+        $translator = $this->getTranslator(2);
+        $stack      = new TranslatorAwareTreeRouteStack(
+            new RoutePluginManager(new ServiceManager()),
+            translator: $translator,
+            translatorTextDomain: 'route'
+        );
         $stack->addRoute(
             'foo',
             $this->fooRoute
@@ -164,8 +132,12 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
     public function testMatchRouteWithParameterLocale(): void
     {
-        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
-        $stack->setTranslator($this->getTranslator(1), 'route');
+        $translator = $this->getTranslator(1);
+        $stack = new TranslatorAwareTreeRouteStack(
+            new RoutePluginManager(new ServiceManager()),
+            translator: $translator,
+            translatorTextDomain: 'route'
+        );
         $stack->addRoute(
             'foo',
             $this->fooRoute
@@ -176,47 +148,24 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
         $match = $stack->match($request);
         $this->assertNotNull($match);
+        $this->assertSame($translator, $stack->getTranslator());
+        $this->assertSame('route', $stack->getTranslatorTextDomain());
         $this->assertEquals('foo/index', $match->getMatchedRouteName());
+        $this->assertTrue($stack->isTranslatorEnabled());
     }
 
     public function testMatchDoesNotTranslateWhenTranslatorDisabled(): void
     {
-        $translator = $this->createMock(TranslatorInterface::class);
-        $translator->expects($this->never())->method('translate');
-
         $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
-        $stack->setTranslator($translator);
-        $stack->setTranslatorEnabled(false);
         $stack->addRoute('foo', $this->fooRoute);
 
         $request = (new Request())->withUri(new Uri('http://example.com/de/hauptseite'));
 
+        $this->assertFalse($stack->isTranslatorEnabled());
+        $this->assertNull($stack->getTranslator());
+        $this->assertSame('default', $stack->getTranslatorTextDomain());
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No translator provided');
         $stack->match($request);
-    }
-
-    public function testAssembleDoesNotTranslateWhenTranslatorDisabled(): void
-    {
-        $translator = $this->createMock(TranslatorInterface::class);
-        $translator->expects($this->never())->method('translate');
-
-        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
-        $stack->setTranslator($translator);
-        $stack->setTranslatorEnabled(false);
-        $stack->addRoute('foo', $this->fooRoute);
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('No translator provided');
-        $stack->assemble(['locale' => 'de'], ['name' => 'foo/index']);
-    }
-
-    public function testSetTranslatorEnabledDefaultsToTrue(): void
-    {
-        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
-        $stack->setTranslator($this->createStub(TranslatorInterface::class));
-        $stack->setTranslatorEnabled();
-
-        $this->assertTrue($stack->isTranslatorEnabled());
     }
 }
