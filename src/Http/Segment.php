@@ -21,6 +21,7 @@ use Psr\Http\Message\RequestInterface;
 
 use function array_key_exists;
 use function array_merge;
+use function count;
 use function is_string;
 use function preg_match;
 use function preg_quote;
@@ -205,7 +206,7 @@ final readonly class Segment implements HttpRouteInterface
         $textDomain = null;
         $locale     = null;
 
-        if ($this->routeRegexBuildResult->translationKeys) {
+        if (count($this->routeRegexBuildResult->translationKeys) > 0) {
             /** @var mixed $translator */
             $translator = $options['translator'] ?? null;
             /** @psalm-var string $textDomain */
@@ -293,7 +294,7 @@ final readonly class Segment implements HttpRouteInterface
         $path  = $request->getUri()->getPath();
         $regex = $this->routeRegexBuildResult->regex;
 
-        if ($this->routeRegexBuildResult->translationKeys) {
+        if (count($this->routeRegexBuildResult->translationKeys) > 0) {
             $translator = $options['translator'] ?? null;
             /** @psalm-var string $textDomain */
             $textDomain = $options['text_domain'] ?? 'default';
