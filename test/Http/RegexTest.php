@@ -136,9 +136,7 @@ final class RegexTest extends TestCase
     public function testGetAssembledParams(): void
     {
         $route = new Regex('/(?<foo>.+)', '/%foo%');
-        $route->assemble(['foo' => 'bar', 'baz' => 'bat']);
-
-        $this->assertEquals(['foo'], $route->getAssembledParams());
+        $this->assertEquals(['foo'], $route->assemble(['foo' => 'bar', 'baz' => 'bat'])->assembledParams);
     }
 
     public function testAssemblingUsesDefaultsForMissingParams(): void

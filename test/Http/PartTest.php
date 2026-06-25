@@ -292,9 +292,10 @@ final class PartTest extends TestCase
     public function testGetAssembledParams(): void
     {
         $route = self::getRoute();
-        $route->assemble(['controller' => 'foo'], ['name' => 'baz/bat']);
-
-        $this->assertEquals([], $route->getAssembledParams());
+        $this->assertEquals(
+            ['controller'],
+            $route->assemble(['controller' => 'foo'], ['name' => 'baz/bat'])->assembledParams,
+        );
     }
 
     public function testFactory(): void

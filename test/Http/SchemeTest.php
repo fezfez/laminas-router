@@ -56,9 +56,7 @@ final class SchemeTest extends TestCase
     public function testGetAssembledParams(): void
     {
         $route = new Scheme('https');
-        $route->assemble(['foo' => 'bar']);
-
-        $this->assertEquals([], $route->getAssembledParams());
+        $this->assertEquals([], $route->assemble(['foo' => 'bar'])->assembledParams);
     }
 
     public function testFactory(): void

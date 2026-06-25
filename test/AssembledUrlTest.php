@@ -10,6 +10,14 @@ use PHPUnit\Framework\TestCase;
 
 final class AssembledUrlTest extends TestCase
 {
+    public function testMergeConcatenatesAssembledParams(): void
+    {
+        $base  = new AssembledUrl(assembledParams: ['foo']);
+        $other = new AssembledUrl(assembledParams: ['bar']);
+
+        $this->assertSame(['foo', 'bar'], $base->merge($other)->assembledParams);
+    }
+
     public function testMergeCombinesPathQueryAndScalarProperties(): void
     {
         $base  = new AssembledUrl(

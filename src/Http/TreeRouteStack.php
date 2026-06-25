@@ -282,6 +282,7 @@ class TreeRouteStack extends SimpleRouteStack
         return new AssembledUrl(
             $assembledUrl->path,
             $query,
+            $assembledUrl->assembledParams,
             $resolvedHost,
             $resolvedScheme,
             $fragment,

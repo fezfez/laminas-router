@@ -256,9 +256,10 @@ final class HostnameTest extends TestCase
     {
         $route = new Hostname(':foo.example.com');
         $uri   = new Uri();
-        $route->assemble(['foo' => 'bar', 'baz' => 'bat'], ['uri' => $uri]);
-
-        $this->assertEquals(['foo'], $route->getAssembledParams());
+        $this->assertEquals(
+            ['foo'],
+            $route->assemble(['foo' => 'bar', 'baz' => 'bat'], ['uri' => $uri])->assembledParams,
+        );
     }
 
     public function testMatchIncludesDefaultsNotCapturedInHostname(): void
@@ -316,6 +317,16 @@ final class HostnameTest extends TestCase
         $this->assertSame('x.b.example.com', $route->assemble(['foo' => 'x'])->host);
     }
 
+    public function testAssembleNestedOptionalCollectsAssembledParamsFromBothLevels(): void
+    {
+        $route = new Hostname('[[:foo.]:bar.]example.com');
+
+        $this->assertSame(
+            ['foo', 'bar'],
+            $route->assemble(['foo' => 'baz', 'bar' => 'bat'])->assembledParams,
+        );
+    }
+
     public function testMatchCapturesThreeParametersInOrder(): void
     {
         $route   = new Hostname(':one.:two.:three.example.com');
@@ -327,8 +338,10 @@ final class HostnameTest extends TestCase
         $this->assertSame('b', $match->getParam('two'));
         $this->assertSame('c', $match->getParam('three'));
 
-        $route->assemble(['one' => 'a', 'two' => 'b', 'three' => 'c']);
-        $this->assertSame(['one', 'two', 'three'], $route->getAssembledParams());
+        $this->assertSame(
+            ['one', 'two', 'three'],
+            $route->assemble(['one' => 'a', 'two' => 'b', 'three' => 'c'])->assembledParams,
+        );
     }
 
     public function testConstructWithEmptyRoute(): void

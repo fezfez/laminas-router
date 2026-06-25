@@ -14,12 +14,14 @@ readonly final class AssembledUrl
 {
     /**
      * @param array<string, scalar> $query
+     * @param list<non-empty-string> $assembledParams
      * @param non-empty-string|null $host
      * @param non-empty-string|null $scheme
      */
     public function __construct(
         public string $path = '',
         public array $query = [],
+        public array $assembledParams = [],
         public ?string $host = null,
         public ?string $scheme = null,
         public ?string $fragment = null,
@@ -33,6 +35,7 @@ readonly final class AssembledUrl
         return new self(
             path: $this->path . $other->path,
             query: array_merge($this->query, $other->query),
+            assembledParams: [...$this->assembledParams, ...$other->assembledParams],
             host: $other->host ?? $this->host,
             scheme: $other->scheme ?? $this->scheme,
             fragment: $other->fragment ?? $this->fragment,

@@ -35,12 +35,6 @@ final class DummyRoute implements HttpRouteInterface
         return new self();
     }
 
-    /** @inheritDoc */
-    public function getAssembledParams(): array
-    {
-        return [];
-    }
-
     public function getPriority(): ?int
     {
         return null;

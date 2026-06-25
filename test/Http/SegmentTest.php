@@ -552,8 +552,10 @@ final class SegmentTest extends TestCase
         $this->assertSame('b', $match->getParam('two'));
         $this->assertSame('c', $match->getParam('three'));
 
-        $route->assemble(['one' => 'a', 'two' => 'b', 'three' => 'c']);
-        $this->assertSame(['one', 'two', 'three'], $route->getAssembledParams());
+        $this->assertSame(
+            ['one', 'two', 'three'],
+            $route->assemble(['one' => 'a', 'two' => 'b', 'three' => 'c'])->assembledParams,
+        );
     }
 
     public function testMatchLiteralWithRegexMetacharacters(): void
@@ -573,5 +575,35 @@ final class SegmentTest extends TestCase
 
         $this->assertSame('', $route->assemble([])->toString());
         $this->assertSame('x', $route->assemble(['bar' => 'x'])->toString());
+    }
+
+    public function testAssembleNestedOptionalCollectsAssembledParamsFromBothLevels(): void
+    {
+        $route = new Segment('[:bar[/:baz]]', [], ['bar' => 'b', 'baz' => 'c']);
+
+        $this->assertSame(
+            ['bar', 'baz'],
+            $route->assemble(['bar' => 'x', 'baz' => 'y'])->assembledParams,
+        );
+    }
+
+    public function testMatchNestedOptionalWithTranslatedLiteralsAtBothLevels(): void
+    {
+        $translator = $this->createMock(TranslatorInterface::class);
+        $translator->method('translate')->willReturnCallback(
+            static fn (string $message): string => match ($message) {
+                'outer' => 'OUT',
+                'inner' => 'IN',
+                default => $message,
+            },
+        );
+
+        $route   = new Segment('[/{outer}[/{inner}/:bar]]');
+        $request = (new Request())->withUri(new Uri('http://example.com/OUT/IN/x'));
+
+        $match = $route->match($request, null, ['translator' => $translator]);
+
+        $this->assertInstanceOf(HttpRouteMatch::class, $match);
+        $this->assertSame('x', $match->getParam('bar'));
     }
 }

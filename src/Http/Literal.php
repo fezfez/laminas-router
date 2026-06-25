@@ -96,13 +96,6 @@ final readonly class Literal implements HttpRouteInterface
         return new AssembledUrl(path:$this->route);
     }
 
-    /** @inheritDoc */
-    #[Override]
-    public function getAssembledParams(): array
-    {
-        return [];
-    }
-
     #[Override]
     public function getPriority(): ?int
     {

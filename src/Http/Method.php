@@ -84,13 +84,6 @@ final readonly class Method implements HttpRouteInterface
         return new AssembledUrl();
     }
 
-    /** @inheritDoc */
-    #[Override]
-    public function getAssembledParams(): array
-    {
-        return [];
-    }
-
     #[Override]
     public function getPriority(): ?int
     {
