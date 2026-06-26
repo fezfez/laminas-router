@@ -893,8 +893,6 @@
   </file>
   <file src="test/Http/SchemeTest.php">
     <DeprecatedMethod>
-      <code><![CDATA[assemble]]></code>
-      <code><![CDATA[assemble]]></code>
       <code><![CDATA[getAssembledParams]]></code>
     </DeprecatedMethod>
     <MixedAssignment>

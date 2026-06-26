@@ -99,8 +99,6 @@ class Scheme implements HttpRouteInterface
     }
 
     /**
-     * @deprecated Return type will be AssembledUrl in v4.0; cast to string for now
-     *
      * @inheritDoc
      */
     #[Override]
