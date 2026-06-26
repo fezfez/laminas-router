@@ -13,10 +13,11 @@ use Laminas\Router\Http\Placeholder;
 use Laminas\Router\Http\TreeRouteStack;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
-use Laminas\Stdlib\ArrayUtils;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+
+use function array_replace_recursive;
 
 final class PlaceholderTest extends TestCase
 {
@@ -80,7 +81,7 @@ final class PlaceholderTest extends TestCase
     #[DataProvider('placeholderProvider')]
     public function testPlaceholderDefault(array $additionalConfig, string $uri, string $expectedRouteName): void
     {
-        $routeConfig = ArrayUtils::merge(self::$routeConfig, $additionalConfig);
+        $routeConfig = array_replace_recursive(self::$routeConfig, $additionalConfig);
         $router      = TreeRouteStack::factory([
             'routes'        => $routeConfig,
             'route_plugins' => new RoutePluginManager(new ServiceManager()),

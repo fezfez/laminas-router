@@ -167,9 +167,7 @@ readonly class TreeRouteStack extends SimpleRouteStack
             $pathLength = strlen($request->getUri()->getPath()) - $baseUrlLength;
         }
 
-        foreach ($this->routes as $name => $route) {
-            assert(is_string($name));
-            assert($route instanceof HttpRouteInterface);
+        foreach ($this->routes->getAsArray() as $name => $route) {
             $match = $route->match($request, $baseUrlLength, $options);
             if ($match instanceof HttpRouteMatch && ($pathLength === null || $match->getLength() === $pathLength)) {
                 $match = $match->setMatchedRouteName($name);

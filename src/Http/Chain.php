@@ -82,8 +82,7 @@ final readonly class Chain extends TreeRouteStack implements HttpRouteInterface
         $match         = new HttpRouteMatch([]);
         $pathLength    = strlen($request->getUri()->getPath());
 
-        foreach ($this->routes as $route) {
-            assert($route instanceof HttpRouteInterface);
+        foreach ($this->routes->getAsArray() as $route) {
             $subMatch = $route->match($request, $pathOffset, $options);
 
             if ($subMatch === null) {
@@ -108,11 +107,10 @@ final readonly class Chain extends TreeRouteStack implements HttpRouteInterface
     public function assemble(array $params = [], array $options = []): AssembledUrl
     {
         $finalResult  = new AssembledUrl();
-        $routes       = [...$this->routes];
+        $routes       = [...$this->routes->getAsArray()];
         $lastRouteKey = array_key_last($routes);
 
         foreach ($routes as $key => $route) {
-            assert($route instanceof HttpRouteInterface);
             $chainOptions = $options;
             $hasChild     = isset($options['has_child']) && is_bool($options['has_child']) && $options['has_child'];
 

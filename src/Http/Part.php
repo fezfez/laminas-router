@@ -136,9 +136,7 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
                 }
             }
 
-            foreach ($this->routes as $name => $route) {
-                assert(is_string($name));
-                assert($route instanceof HttpRouteInterface);
+            foreach ($this->routes->getAsArray() as $name => $route) {
                 $subMatch = $route->match($request, $nextOffset, $options);
                 if ($subMatch instanceof HttpRouteMatch) {
                     if (($match->getLength() + $subMatch->getLength() + $pathOffset) === $pathLength) {

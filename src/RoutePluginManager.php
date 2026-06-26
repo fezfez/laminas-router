@@ -37,6 +37,7 @@ use function sprintf;
  *
  * @psalm-type InstanceType = RouteInterface
  * @extends AbstractPluginManager<InstanceType>
+ * @psalm-import-type FactoriesConfiguration from ServiceManager
  * @psalm-import-type ServiceManagerConfiguration from ServiceManager
  */
 final class RoutePluginManager extends AbstractPluginManager
@@ -144,9 +145,13 @@ final class RoutePluginManager extends AbstractPluginManager
                     : $aliases;
             }
 
-            $config['factories'] = isset($config['factories'])
-                ? array_merge($config['factories'], $factories)
-                : $factories;
+            if (isset($config['factories'])) {
+                /** @psalm-var FactoriesConfiguration $existingFactories */
+                $existingFactories   = $config['factories'];
+                $config['factories'] = array_merge($existingFactories, $factories);
+            } else {
+                $config['factories'] = $factories;
+            }
 
             unset($config['invokables']);
         }

@@ -10,6 +10,8 @@ use Laminas\Router\RouteStackInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
 
+use function assert;
+
 /**
  * @internal
  *
@@ -41,6 +43,10 @@ final readonly class HttpRouterFactory implements FactoryInterface
         $class                   = $config['router']['router_class'];
         $config['route_plugins'] = $config['router']['route_plugins'];
 
-        return $class::factory($config);
+        $router = $class::factory($config);
+
+        assert($router instanceof RouteStackInterface);
+
+        return $router;
     }
 }
