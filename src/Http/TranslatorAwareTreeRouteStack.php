@@ -80,6 +80,8 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
     /**
      * setTranslator(): defined by TranslatorAwareInterface.
      *
+     * @deprecated Configure translator via constructor/factory options; removed in v4.0
+     *
      * @see    TranslatorAwareInterface::setTranslator()
      *
      * @param  string     $textDomain
@@ -113,6 +115,8 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
     /**
      * hasTranslator(): defined by TranslatorAwareInterface.
      *
+     * @deprecated Configure translator via constructor/factory options; removed in v4.0
+     *
      * @see    TranslatorAwareInterface::hasTranslator()
      *
      * @return bool
@@ -125,6 +129,8 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
 
     /**
      * setTranslatorEnabled(): defined by TranslatorAwareInterface.
+     *
+     * @deprecated Configure translator via constructor/factory options; removed in v4.0
      *
      * @see    TranslatorAwareInterface::setTranslatorEnabled()
      *
@@ -153,6 +159,8 @@ class TranslatorAwareTreeRouteStack extends TreeRouteStack implements Translator
 
     /**
      * setTranslatorTextDomain(): defined by TranslatorAwareInterface.
+     *
+     * @deprecated Configure translator via constructor/factory options; removed in v4.0
      *
      * @see    TranslatorAwareInterface::setTranslatorTextDomain()
      *

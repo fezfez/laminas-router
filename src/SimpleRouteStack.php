@@ -100,6 +100,8 @@ class SimpleRouteStack implements RouteStackInterface
     }
 
     /**
+     * @deprecated Pass configuration via constructor/factory options; removed in v4.0
+     *
      * @param RoutePluginManager<TRoute> $routePlugins
      * @return $this
      */
@@ -203,6 +205,8 @@ class SimpleRouteStack implements RouteStackInterface
     /**
      * Set a default parameters.
      *
+     * @deprecated Pass configuration via constructor/factory options; removed in v4.0
+     *
      * @return SimpleRouteStack
      */
     public function setDefaultParams(array $params)
@@ -213,6 +217,8 @@ class SimpleRouteStack implements RouteStackInterface
 
     /**
      * Set a default parameter.
+     *
+     * @deprecated Pass configuration via constructor/factory options; removed in v4.0
      *
      * @param  string $name
      * @param  mixed  $value

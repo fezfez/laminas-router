@@ -234,6 +234,8 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Add multiple prototypes at once.
      *
+     * @deprecated Prototype routes removed in v4.0
+     *
      * @param iterable<string|iterable|TRoute> $routes
      * @return $this
      * @throws Exception\InvalidArgumentException
@@ -254,6 +256,8 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Add a prototype.
      *
+     * @deprecated Prototype routes removed in v4.0
+     *
      * @param string                 $name
      * @param string|iterable|TRoute $route
      * @return $this
@@ -271,6 +275,8 @@ class TreeRouteStack extends SimpleRouteStack
 
     /**
      * Get a prototype.
+     *
+     * @deprecated Prototype routes removed in v4.0
      *
      * @param  string $name
      * @return TRoute|null
@@ -436,6 +442,9 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Set the base URL.
      *
+     * @deprecated Since 3.19.0. This method will be removed in 4.0 and you will be expected to pass
+     * the base url via parameters to the {@link assemble()} method.
+     *
      * @param  string $baseUrl
      * @return self
      */
@@ -448,6 +457,8 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Get the base URL.
      *
+     * @deprecated Since 3.19.0. This method will be removed in 4.0 without replacement
+     *
      * @return string
      */
     public function getBaseUrl()
@@ -457,6 +468,9 @@ class TreeRouteStack extends SimpleRouteStack
 
     /**
      * Set the request URI.
+     *
+     * @deprecated Since 3.19.0. This method will be removed in 4.0 and you will be expected to pass
+     * parameters to the {@link assemble()} method.
      *
      * @return TreeRouteStack
      */
@@ -468,6 +482,8 @@ class TreeRouteStack extends SimpleRouteStack
 
     /**
      * Get the request URI.
+     *
+     * @deprecated Since 3.19.0. This method will be removed in 4.0 without replacement
      *
      * @return HttpUri
      */
