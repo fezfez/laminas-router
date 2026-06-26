@@ -14,6 +14,7 @@ interface RouteStackInterface extends RouteInterface
      *
      * @param non-empty-string $name
      * @param array|TRoute $route
+     * @throws Exception\InvalidArgumentException
      */
     public function addRoute(string $name, array|RouteInterface $route, ?int $priority = null): void;
 

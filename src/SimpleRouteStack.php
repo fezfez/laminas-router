@@ -30,7 +30,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
     /**
      * Stack containing all routes.
      *
-     * @var PriorityList<non-empty-string, TRoute>
+     * @var PriorityList<TRoute>
      */
     protected PriorityList $routes;
 
@@ -46,7 +46,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
          */
         protected array $defaultParams = []
     ) {
-        /** @var PriorityList<non-empty-string, TRoute> $priorityList */
+        /** @var PriorityList<TRoute> $priorityList */
         $priorityList = new PriorityList();
         $this->routes = $priorityList;
         $this->addRoutes($routes);
@@ -86,7 +86,10 @@ readonly class SimpleRouteStack implements RouteStackInterface
         }
     }
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     * @throws Exception\InvalidArgumentException
+     */
     #[Override]
     public function addRoute(string $name, array|RouteInterface $route, ?int $priority = null): void
     {
@@ -94,13 +97,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
             $route = $this->routeFromArray($route);
         }
 
-        $routePriority = $route->getPriority();
-
-        if ($priority === null && $routePriority !== null) {
-            $priority = $routePriority;
-        }
-
-        $this->routes->insert($name, $route, $priority ?? 0);
+        $this->routes->insert($name, $route, $priority);
     }
 
     /** @inheritDoc */
@@ -173,9 +170,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
     #[Override]
     public function match(RequestInterface $request): ?RouteMatch
     {
-        foreach ($this->routes as $name => $route) {
-            assert(is_string($name));
-            assert($route instanceof RouteInterface);
+        foreach ($this->routes->getAsArray() as $name => $route) {
             $match = $route->match($request);
             if ($match instanceof RouteMatch) {
                 $match = $match->setMatchedRouteName($name);

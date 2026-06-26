@@ -8,6 +8,8 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Override;
 use Psr\Container\ContainerInterface;
 
+use function assert;
+
 /**
  * @internal
  *
@@ -27,6 +29,10 @@ final readonly class RouterFactory implements FactoryInterface
         string $requestedName,
         ?array $options = null
     ): RouteStackInterface {
-        return $container->get(Http\TreeRouteStack::class);
+        $router = $container->get(Http\TreeRouteStack::class);
+
+        assert($router instanceof RouteStackInterface);
+
+        return $router;
     }
 }

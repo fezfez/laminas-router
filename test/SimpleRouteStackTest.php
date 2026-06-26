@@ -104,6 +104,18 @@ final class SimpleRouteStackTest extends TestCase
         $stack->addRoute('foo', []);
     }
 
+    public function testAddDuplicateRouteThrowsException(): void
+    {
+        /** @var SimpleRouteStack<RouteInterface> $stack */
+        $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()));
+
+        $stack->addRoute('foo', new TestAsset\DummyRoute());
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Route with name "foo" already exists');
+        $stack->addRoute('foo', new TestAsset\DummyRoute());
+    }
+
     public function testAddRouteAsArrayWithPriority(): void
     {
         $stack = new SimpleRouteStack($this->createRoutePluginManager());
