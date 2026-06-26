@@ -107,7 +107,7 @@ final readonly class Chain extends TreeRouteStack implements HttpRouteInterface
     public function assemble(array $params = [], array $options = []): AssembledUrl
     {
         $finalResult  = new AssembledUrl();
-        $routes       = [...$this->routes->getAsArray()];
+        $routes       = $this->routes->getAsArray();
         $lastRouteKey = array_key_last($routes);
 
         foreach ($routes as $key => $route) {
