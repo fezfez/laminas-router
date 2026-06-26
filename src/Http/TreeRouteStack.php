@@ -442,7 +442,7 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Set the base URL.
      *
-     * @deprecated Pass via assemble() options; removed in v4.0
+     * @deprecated Since 3.19.0. This method will be removed in 4.0 and you will be expected to pass the base url via parameters to the {@link assemble()} method.
      *
      * @param  string $baseUrl
      * @return self
