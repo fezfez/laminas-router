@@ -26,7 +26,7 @@ final class RouteMatchTest extends TestCase
     public function testLengthIsMerged(): void
     {
         $match = new HttpRouteMatch([], 10);
-        $match->merge(new HttpRouteMatch([], 5));
+        $match = $match->merge(new HttpRouteMatch([], 5));
 
         $this->assertEquals(15, $match->getLength());
     }
@@ -34,7 +34,7 @@ final class RouteMatchTest extends TestCase
     public function testMatchedRouteNameIsSet(): void
     {
         $match = new HttpRouteMatch([]);
-        $match->setMatchedRouteName('foo');
+        $match = $match->setMatchedRouteName('foo');
 
         $this->assertEquals('foo', $match->getMatchedRouteName());
     }
@@ -42,8 +42,8 @@ final class RouteMatchTest extends TestCase
     public function testMatchedRouteNameIsPrependedWhenAlreadySet(): void
     {
         $match = new HttpRouteMatch([]);
-        $match->setMatchedRouteName('foo');
-        $match->setMatchedRouteName('bar');
+        $match = $match->setMatchedRouteName('foo');
+        $match = $match->setMatchedRouteName('bar');
 
         $this->assertEquals('bar/foo', $match->getMatchedRouteName());
     }
@@ -51,12 +51,12 @@ final class RouteMatchTest extends TestCase
     public function testMatchedRouteNameIsOverriddenOnMerge(): void
     {
         $match = new HttpRouteMatch([]);
-        $match->setMatchedRouteName('foo');
+        $match = $match->setMatchedRouteName('foo');
 
         $subMatch = new HttpRouteMatch([]);
-        $subMatch->setMatchedRouteName('bar');
+        $subMatch = $subMatch->setMatchedRouteName('bar');
 
-        $match->merge($subMatch);
+        $match = $match->merge($subMatch);
 
         $this->assertEquals('bar', $match->getMatchedRouteName());
     }

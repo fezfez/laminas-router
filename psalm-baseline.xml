@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="6.16.1@f1f5de594dc76faf8784e02d3dc4716c91c6f6ac">
-  <file src="src/Http/TreeRouteStack.php">
-    <UnsafeGenericInstantiation>
-      <code><![CDATA[new static(
-            $routePlugins,
-            $routes,
-            $defaultParams,
-        )]]></code>
-    </UnsafeGenericInstantiation>
+  <file src="src/Http/HttpRouterFactory.php">
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$class::factory($config)]]></code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[RouteStackInterface]]></code>
+    </MoreSpecificReturnType>
   </file>
   <file src="src/RoutePluginManager.php">
     <MethodSignatureMismatch>
@@ -16,14 +15,5 @@
     <MixedArgument>
       <code><![CDATA[$config['factories']]]></code>
     </MixedArgument>
-  </file>
-  <file src="src/SimpleRouteStack.php">
-    <UnsafeGenericInstantiation>
-      <code><![CDATA[new static(
-            $routePlugins,
-            $routes,
-            $defaultParams
-        )]]></code>
-    </UnsafeGenericInstantiation>
   </file>
 </files>

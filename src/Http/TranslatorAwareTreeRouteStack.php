@@ -6,10 +6,14 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
+use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\RouteMatch;
+use Laminas\Router\RoutePluginManager;
 use Laminas\Translator\TranslatorInterface;
 use Override;
 use Psr\Http\Message\RequestInterface;
+
+use function is_string;
 
 /**
  * Translator aware tree route stack.
@@ -17,22 +21,56 @@ use Psr\Http\Message\RequestInterface;
  * @template TRoute of HttpRouteInterface
  * @template-extends TreeRouteStack<TRoute>
  */
-final class TranslatorAwareTreeRouteStack extends TreeRouteStack
+final readonly class TranslatorAwareTreeRouteStack extends TreeRouteStack
 {
     /**
-     * Translator used for translatable segments.
+     * @param array<non-empty-string|array-key, array|TRoute> $routes
+     * @param array<non-empty-string, non-empty-string> $defaultParams
      */
-    private ?TranslatorInterface $translator = null;
+    public function __construct(
+        RoutePluginManager $routePluginManager,
+        array $routes = [],
+        array $defaultParams = [],
+        int|null $priority = null,
+        private ?TranslatorInterface $translator = null,
+        private string $translatorTextDomain = 'default'
+    ) {
+        parent::__construct($routePluginManager, $routes, $defaultParams, $priority);
+    }
 
     /**
-     * Whether the translator is enabled.
+     * @inheritDoc
+     * @throws Exception\InvalidArgumentException
      */
-    private bool $translatorEnabled = true;
+    #[Override]
+    public static function factory(array $options = []): self
+    {
+        /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
+        $routes       = $options['routes'] ?? [];
+        $routePlugins = $options['route_plugins'] ?? null;
+        /** @psalm-var array<non-empty-string, non-empty-string> $defaultParams */
+        $defaultParams        = $options['default_params'] ?? [];
+        $translator           = $options['translator'] ?? null;
+        $translatorTextDomain = $options['translator_text_domain'] ?? TranslatorInterface::DEFAULT_TEXT_DOMAIN;
 
-    /**
-     * Translator text domain to use.
-     */
-    private string $translatorTextDomain = 'default';
+        if (! $routePlugins instanceof RoutePluginManager) {
+            throw new RuntimeException('Missing "route_plugins" in options array');
+        }
+        if (! is_string($translatorTextDomain)) {
+            throw new RuntimeException('Invalid "translator_text_domain" option');
+        }
+        if ($translator !== null && ! $translator instanceof TranslatorInterface) {
+            throw new RuntimeException('Invalid "translator" option');
+        }
+
+        return new self(
+            $routePlugins,
+            $routes,
+            $defaultParams,
+            translator: $translator,
+            translatorTextDomain: $translatorTextDomain
+        );
+    }
 
     /**
      * @inheritDoc
@@ -41,7 +79,7 @@ final class TranslatorAwareTreeRouteStack extends TreeRouteStack
     #[Override]
     public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?RouteMatch
     {
-        if ($this->hasTranslator() && $this->isTranslatorEnabled() && ! isset($options['translator'])) {
+        if ($this->isTranslatorEnabled() && ! isset($options['translator'])) {
             $options['translator'] = $this->getTranslator();
         }
 
@@ -60,7 +98,7 @@ final class TranslatorAwareTreeRouteStack extends TreeRouteStack
     #[Override]
     public function assemble(array $params = [], array $options = []): AssembledUrl
     {
-        if ($this->hasTranslator() && $this->isTranslatorEnabled() && ! isset($options['translator'])) {
+        if ($this->isTranslatorEnabled() && ! isset($options['translator'])) {
             $options['translator'] = $this->getTranslator();
         }
 
@@ -71,43 +109,14 @@ final class TranslatorAwareTreeRouteStack extends TreeRouteStack
         return parent::assemble($params, $options);
     }
 
-    public function setTranslator(?TranslatorInterface $translator = null, ?string $textDomain = null): self
-    {
-        $this->translator = $translator;
-
-        if ($textDomain !== null) {
-            $this->setTranslatorTextDomain($textDomain);
-        }
-
-        return $this;
-    }
-
     public function getTranslator(): ?TranslatorInterface
     {
         return $this->translator;
     }
 
-    public function hasTranslator(): bool
-    {
-        return $this->translator !== null;
-    }
-
-    public function setTranslatorEnabled(bool $enabled = true): self
-    {
-        $this->translatorEnabled = $enabled;
-        return $this;
-    }
-
     public function isTranslatorEnabled(): bool
     {
-        return $this->translatorEnabled;
-    }
-
-    public function setTranslatorTextDomain(string $textDomain = 'default'): self
-    {
-        $this->translatorTextDomain = $textDomain;
-
-        return $this;
+        return $this->translator !== null;
     }
 
     public function getTranslatorTextDomain(): string

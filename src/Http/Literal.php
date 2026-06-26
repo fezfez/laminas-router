@@ -44,7 +44,7 @@ final readonly class Literal implements HttpRouteInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         $route    = $options['route'] ?? null;
         $defaults = $options['defaults'] ?? [];

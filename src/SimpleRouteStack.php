@@ -25,7 +25,7 @@ use function sprintf;
  * @template-implements RouteStackInterface<TRoute>
  * @psalm-consistent-constructor
  */
-class SimpleRouteStack implements RouteStackInterface
+readonly class SimpleRouteStack implements RouteStackInterface
 {
     /**
      * Stack containing all routes.
@@ -35,11 +35,11 @@ class SimpleRouteStack implements RouteStackInterface
     protected PriorityList $routes;
 
     /**
-     * @param array<non-empty-string, array|TRoute> $routes
+     * @param array<non-empty-string|array-key, array|TRoute> $routes
      * @param array<non-empty-string, non-empty-string> $defaultParams
      */
     public function __construct(
-        private readonly RoutePluginManager $routePluginManager,
+        private RoutePluginManager $routePluginManager,
         array $routes = [],
         /**
          * Default parameters.
@@ -57,7 +57,7 @@ class SimpleRouteStack implements RouteStackInterface
      * @throws Exception\InvalidArgumentException
      */
     #[Override]
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
         $routes       = $options['routes'] ?? [];
@@ -68,7 +68,7 @@ class SimpleRouteStack implements RouteStackInterface
         if (! $routePlugins instanceof RoutePluginManager) {
             throw new RuntimeException('Missing "route_plugins" in options array');
         }
-        return new static(
+        return new self(
             $routePlugins,
             $routes,
             $defaultParams
@@ -148,17 +148,6 @@ class SimpleRouteStack implements RouteStackInterface
     }
 
     /**
-     * Set a default parameter.
-     *
-     * @param non-empty-string $name
-     * @param non-empty-string $value
-     */
-    public function setDefaultParam(string $name, string $value): void
-    {
-        $this->defaultParams[$name] = $value;
-    }
-
-    /**
      * Create a route from array specifications.
      *
      * @return TRoute
@@ -189,11 +178,11 @@ class SimpleRouteStack implements RouteStackInterface
             assert($route instanceof RouteInterface);
             $match = $route->match($request);
             if ($match instanceof RouteMatch) {
-                $match->setMatchedRouteName($name);
+                $match = $match->setMatchedRouteName($name);
 
                 foreach ($this->defaultParams as $paramName => $value) {
                     if ($match->getParam($paramName) === null) {
-                        $match->setParam($paramName, $value);
+                        $match = $match->setParam($paramName, $value);
                     }
                 }
 

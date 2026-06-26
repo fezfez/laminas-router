@@ -31,12 +31,12 @@ final readonly class DummyRoute implements RouteInterface
     }
 
     /** @inheritDoc */
-    public static function factory(array $options = []): static
+    public static function factory(array $options = []): self
     {
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;
 
-        return new static($priority);
+        return new self($priority);
     }
 
     public function getPriority(): ?int
