@@ -234,6 +234,8 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Add multiple prototypes at once.
      *
+     * @deprecated Prototype routes removed in v4.0
+     *
      * @param iterable<string|iterable|TRoute> $routes
      * @return $this
      * @throws Exception\InvalidArgumentException
@@ -254,6 +256,8 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Add a prototype.
      *
+     * @deprecated Prototype routes removed in v4.0
+     *
      * @param string                 $name
      * @param string|iterable|TRoute $route
      * @return $this
@@ -271,6 +275,8 @@ class TreeRouteStack extends SimpleRouteStack
 
     /**
      * Get a prototype.
+     *
+     * @deprecated Prototype routes removed in v4.0
      *
      * @param  string $name
      * @return TRoute|null
@@ -436,6 +442,8 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Set the base URL.
      *
+     * @deprecated Pass via assemble() options; removed in v4.0
+     *
      * @param  string $baseUrl
      * @return self
      */
@@ -448,6 +456,8 @@ class TreeRouteStack extends SimpleRouteStack
     /**
      * Get the base URL.
      *
+     * @deprecated Pass via assemble() options; removed in v4.0
+     *
      * @return string
      */
     public function getBaseUrl()
@@ -457,6 +467,8 @@ class TreeRouteStack extends SimpleRouteStack
 
     /**
      * Set the request URI.
+     *
+     * @deprecated Pass via assemble() options; removed in v4.0
      *
      * @return TreeRouteStack
      */
@@ -468,6 +480,8 @@ class TreeRouteStack extends SimpleRouteStack
 
     /**
      * Get the request URI.
+     *
+     * @deprecated Pass via assemble() options; removed in v4.0
      *
      * @return HttpUri
      */

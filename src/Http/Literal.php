@@ -121,6 +121,8 @@ class Literal implements HttpRouteInterface
     }
 
     /**
+     * @deprecated Use the assembledParams from the AssembledUrl returned by assemble(); removed in v4.0
+     *
      * @inheritDoc
      */
     #[Override]

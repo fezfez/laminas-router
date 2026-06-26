@@ -89,6 +89,8 @@ class RoutePluginManager extends AbstractPluginManager
     /**
      * Validate a route plugin. (v2)
      *
+     * @deprecated This component is no longer compatible with Service Manager v2; removed in v4.0
+     *
      * @param InstanceType $plugin
      * @throws Exception\RuntimeException
      * @psalm-assert InstanceType $instance
