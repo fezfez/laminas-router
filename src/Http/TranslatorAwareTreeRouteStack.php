@@ -51,7 +51,7 @@ final readonly class TranslatorAwareTreeRouteStack extends TreeRouteStack
         /** @psalm-var array<non-empty-string, non-empty-string> $defaultParams */
         $defaultParams        = $options['default_params'] ?? [];
         $translator           = $options['translator'] ?? null;
-        $translatorTextDomain = $options['translator_text_domain'] ?? 'default';
+        $translatorTextDomain = $options['translator_text_domain'] ?? TranslatorInterface::DEFAULT_TEXT_DOMAIN;
 
         if (! $routePlugins instanceof RoutePluginManager) {
             throw new RuntimeException('Missing "route_plugins" in options array');
