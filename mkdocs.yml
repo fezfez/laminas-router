@@ -2,11 +2,27 @@ docs_dir: docs/book
 site_dir: docs/html
 nav:
     - Home: index.md
-    - Routing: routing.md
-    - Migration:
-        - "V2 to V3": migration/v2-to-v3.md
+    - v4:
+        - Routing: v4/routing.md
+        - Migration:
+            - "From v3 to v4": v4/migration/v3-to-v4.md
+    - v3:
+        - Routing: v3/routing.md
+        - Migration:
+            - "From v2 to v3": v3/migration/v2-to-v3.md
 site_name: laminas-router
 site_description: 'laminas-router: Flexible routing system for HTTP applications'
 repo_url: 'https://github.com/laminas/laminas-router'
 extra:
     project: Components
+    installation:
+        config_provider_class: 'Laminas\Router\ConfigProvider'
+    current_version: v4
+    versions:
+        - v4
+        - v3
+plugins:
+    - redirects:
+        redirect_maps:
+            routing.md: v4/routing.md
+            migration/v2-to-v3.md: v3/migration/v2-to-v3.md

@@ -1,5 +1,7 @@
 # Routing
 
+> Upgrading from version 3? See the [migration guide from v3 to v4](migration/v3-to-v4.md).
+
 Routing is the act of matching a request to a given controller.
 
 Typically, routing will examine the request URI, and attempt to match the URI
@@ -35,7 +37,7 @@ class RouteMatch
     public function __construct(array $params);
     public function setMatchedRouteName(string $name): static;
     public function getMatchedRouteName(): string|null;
-    public function setParam(string $name, mixed $value): static;
+    public function setParam(string $name, string $value): static;
     public function getParams(): array;
     public function getParam(string $name, string $default = null): int|string|null;
 }
@@ -119,9 +121,8 @@ routes that will match most often should be registered last, and least common
 routes first. Additionally, you will need to ensure that routes that potentially
 overlap are registered such that the most specific match will match first (i.e.,
 register later). Alternatively, you can set priorities by giving the priority as
-third parameter to the `addRoute()` method, specifying the priority in the route
-specifications or setting the priority property within a route instance before
-adding it to the route stack.
+third parameter to the `addRoute()` method, or specifying the priority in the
+route specifications.
 
 ### TreeRouteStack
 
@@ -375,10 +376,10 @@ The module can provide configuration such as the following:
 ```php
 return [
     'auth' => [
-        'type' => \Laminas\Mvc\Router\Http\Placeholder::class,
+        'type' => \Laminas\Router\Http\Placeholder::class,
         'child_routes' => [
             'login' => [
-                'type' => \Laminas\Mvc\Router\Http\Literal::class,
+                'type' => \Laminas\Router\Http\Literal::class,
                 'options' => [
                     'route' => '/login',
                     'defaults' => [
@@ -388,7 +389,7 @@ return [
                 ],
             ],
             'register' => [
-                'type' => \Laminas\Mvc\Router\Http\Literal::class,
+                'type' => \Laminas\Router\Http\Literal::class,
                 'options' => [
                     'route' => '/register',
                     'defaults' => [
@@ -410,7 +411,7 @@ resource location, they can provide an alternative route type to replace the
 ```php
 return [
     'auth' => [
-        'type' => \Laminas\Mvc\Router\Http\Literal::class,
+        'type' => \Laminas\Router\Http\Literal::class,
         'options' => [
             'route' => '/auth',
         ],
