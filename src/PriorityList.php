@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Laminas\Router;
 
+use Laminas\Router\Exception\InvalidArgumentException;
+
+use function sprintf;
 use function uasort;
 
 /**
@@ -27,9 +30,14 @@ final class PriorityList
     /**
      * @param non-empty-string $name
      * @param TValue $value
+     * @throws InvalidArgumentException
      */
     public function insert(string $name, RouteInterface $value, int|null $priority): void
     {
+        if (isset($this->items[$name])) {
+            throw new InvalidArgumentException(sprintf('Route with name "%s" already exists', $name));
+        }
+
         $this->sorted = false;
 
         $routePriority = $value->getPriority();

@@ -86,7 +86,10 @@ readonly class SimpleRouteStack implements RouteStackInterface
         }
     }
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     * @throws Exception\InvalidArgumentException
+     */
     #[Override]
     public function addRoute(string $name, array|RouteInterface $route, ?int $priority = null): void
     {

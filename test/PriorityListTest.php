@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router;
 
+use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\PriorityList;
 use PHPUnit\Framework\TestCase;
 
@@ -24,6 +25,26 @@ final class PriorityListTest extends TestCase
 
         $this->assertCount(1, $this->list->getAsArray());
         $this->assertSame(['foo'], array_keys([...$this->list->getAsArray()]));
+    }
+
+    public function testInsertDuplicateRouteThrowsException(): void
+    {
+        $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Route with name "foo" already exists');
+        $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
+    }
+
+    public function testInsertAfterRemoveSucceeds(): void
+    {
+        $route = new TestAsset\DummyRoute();
+
+        $this->list->insert('foo', $route, 0);
+        $this->list->remove('foo');
+        $this->list->insert('foo', $route, 0);
+
+        $this->assertEquals($route, $this->list->get('foo'));
     }
 
     public function testRemove(): void
