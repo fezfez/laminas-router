@@ -55,16 +55,6 @@ The `Wildcard` route type has been removed. It was deprecated since version 2.3.
 **Migration:** Replace `Wildcard` routes with `Segment` routes (or another
 supported route type).
 
-### `Laminas\Router\Module`
-
-The MVC `Module` class has been removed. Use the shipped `ConfigProvider` to
-ensure the library is correctly configured for use with the application service
-manager.
-
-**Migration:** Remove `Laminas\Router\Module` from your laminas-mvc `modules`
-configuration. Merge configuration from `Laminas\Router\ConfigProvider` via
-laminas-component-installer or your config aggregation pipeline.
-
 ### `Laminas\Router\Http\RouteInterface`
 
 This deprecated alias extending `HttpRouteInterface` has been removed.
