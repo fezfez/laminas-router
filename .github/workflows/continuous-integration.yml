@@ -15,14 +15,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: shivammathur/setup-php@2.32.0
+      - uses: actions/checkout@v7.0.0
+      - uses: shivammathur/setup-php@2.37.1
 
         with:
           php-version: ${{ env.default_php }}
           ini-values: memory_limit=-1
           extensions: ${{ env.php_extensions }}
-      - uses: ramsey/composer-install@3.0.0
+      - uses: ramsey/composer-install@4.0.0
       - run: make install-tools
       - run: make composer-require-checker
 
@@ -30,12 +30,12 @@ jobs:
     name: "Mutation Tests"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: shivammathur/setup-php@2.32.0
+      - uses: actions/checkout@v7.0.0
+      - uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ env.default_php }}
           coverage: xdebug
-      - uses: ramsey/composer-install@3.0.0
+      - uses: ramsey/composer-install@4.0.0
       - run: make install-tools
       - run: make mutants
 
@@ -43,12 +43,12 @@ jobs:
     name: Check for Unused Dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: shivammathur/setup-php@2.34.1
+      - uses: actions/checkout@v7.0.0
+      - uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ env.default_php }}
           tools: composer
-      - uses: ramsey/composer-install@3.1.1
+      - uses: ramsey/composer-install@4.0.0
       - run: make install-tools
       - run: make unused-ci
 
@@ -56,11 +56,11 @@ jobs:
     name: "Psalm Security Report"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: shivammathur/setup-php@2.32.0
+      - uses: actions/checkout@v7.0.0
+      - uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ env.default_php }}
-      - uses: ramsey/composer-install@3.0.0
+      - uses: ramsey/composer-install@4.0.0
       - name: "Psalm"
         run: vendor/bin/psalm --report=results.sarif
       - name: "Upload Security Analysis results to GitHub"
@@ -72,11 +72,11 @@ jobs:
     name: Rector on Default PHP
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: shivammathur/setup-php@2.34.1
+      - uses: actions/checkout@v7.0.0
+      - uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ env.default_php }}
           tools: composer
-      - uses: ramsey/composer-install@3.1.1
+      - uses: ramsey/composer-install@4.0.0
       - run: make install-tools
       - run: make rector-ci
