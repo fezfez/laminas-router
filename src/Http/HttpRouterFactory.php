@@ -40,8 +40,12 @@ final readonly class HttpRouterFactory implements FactoryInterface
             ],
         ];
 
-        $class                   = $config['router']['router_class'];
-        $config['route_plugins'] = $config['router']['route_plugins'];
+        $class              = $config['router']['router_class'];
+        $routePluginManager = $container->get($config['router']['route_plugins']);
+
+        assert($routePluginManager instanceof RoutePluginManager);
+
+        $config['route_plugins'] = $routePluginManager;
 
         $router = $class::factory($config);
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LaminasTest\Router;
 
+use Laminas\Router\ConfigProvider;
 use Laminas\Router\Http\HttpRouterFactory;
 use Laminas\Router\Http\TreeRouteStack;
 use Laminas\Router\RoutePluginManager;
@@ -77,5 +78,13 @@ class RouterFactoryTest extends TestCase
 
         $router = $this->factory->__invoke($services, 'router');
         $this->assertInstanceOf(TestAsset\Router::class, $router);
+    }
+
+    public function testDefaultConfig(): void
+    {
+        $services = new ServiceManager((new ConfigProvider())->getDependencyConfig());
+
+        $router = $this->factory->__invoke($services, 'router');
+        $this->assertInstanceOf(TreeRouteStack::class, $router);
     }
 }
