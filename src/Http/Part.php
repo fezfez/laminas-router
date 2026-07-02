@@ -122,7 +122,6 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
 
         if ($match !== null) {
             $nextOffset = $pathOffset + $match->getLength();
-
             $pathLength = strlen($request->getUri()->getPath());
 
             if ($this->mayTerminate && $nextOffset === $pathLength) {

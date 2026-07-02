@@ -103,7 +103,7 @@ final readonly class Segment implements HttpRouteInterface
                     ! preg_match(
                         '(\G(?P<name>[^:/{\[\]]+)(?:{(?P<delimiters>[^}]+)})?:?)',
                         $def,
-                        $matches,
+                        $nameAndDelimitersMatch,
                         0,
                         $currentPos
                     )
@@ -111,21 +111,21 @@ final readonly class Segment implements HttpRouteInterface
                     throw new Exception\RuntimeException('Found empty parameter name');
                 }
 
-                /** @psalm-var non-empty-string $matches['name'] */
+                /** @psalm-var non-empty-string $nameAndDelimitersMatch['name'] */
                 $routeDefinition->addPart(new RouteDefinitionParameter(
-                    $matches['name'],
-                    $matches['delimiters'] ?? null
+                    $nameAndDelimitersMatch['name'],
+                    $nameAndDelimitersMatch['delimiters'] ?? null
                 ));
 
-                $currentPos += strlen($matches[0]);
+                $currentPos += strlen($nameAndDelimitersMatch[0]);
             } elseif ($matches['token'] === '{') {
-                if (! preg_match('(\G(?P<literal>[^}]+)\})', $def, $matches, 0, $currentPos)) {
+                if (! preg_match('(\G(?P<literal>[^}]+)\})', $def, $literalMatch, 0, $currentPos)) {
                     throw new Exception\RuntimeException('Translated literal missing closing bracket');
                 }
 
-                $currentPos += strlen($matches[0]);
+                $currentPos += strlen($literalMatch[0]);
 
-                $routeDefinition->addPart(new RouteDefinitionTranslatedLiteral($matches['literal']));
+                $routeDefinition->addPart(new RouteDefinitionTranslatedLiteral($literalMatch['literal']));
             } elseif ($matches['token'] === '[') {
                 $routeDefinition->assertStartOptional();
             } elseif ($matches['token'] === ']') {
