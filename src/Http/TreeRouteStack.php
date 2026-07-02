@@ -29,7 +29,6 @@ use function strlen;
  *
  * @template TRoute of HttpRouteInterface
  * @template-extends SimpleRouteStack<TRoute>
- * @psalm-consistent-constructor
  */
 readonly class TreeRouteStack extends SimpleRouteStack
 {

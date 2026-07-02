@@ -38,6 +38,7 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
      *
      * @param TRoute|array           $routes
      * @param array<non-empty-string, array|TRoute> $childRoutes
+     * @param array<non-empty-string, non-empty-string> $defaultParams
      * @throws Exception\InvalidArgumentException
      */
     public function __construct(
@@ -51,7 +52,7 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
         private bool $mayTerminate = false,
         array $childRoutes = [],
     ) {
-        parent::__construct($routePluginManager, priority: $priority);
+        parent::__construct($routePluginManager, defaultParams: $defaultParams, priority: $priority);
 
         if (is_array($routes)) {
             $routes = $this->routeFromArray($routes);

@@ -23,7 +23,6 @@ use function sprintf;
  *
  * @template TRoute of RouteInterface
  * @template-implements RouteStackInterface<TRoute>
- * @psalm-consistent-constructor
  */
 readonly class SimpleRouteStack implements RouteStackInterface
 {
