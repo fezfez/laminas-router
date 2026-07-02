@@ -29,7 +29,6 @@ use function strlen;
  *
  * @template TRoute of HttpRouteInterface
  * @template-extends SimpleRouteStack<TRoute>
- * @psalm-consistent-constructor
  */
 readonly class TreeRouteStack extends SimpleRouteStack
 {
@@ -101,50 +100,23 @@ readonly class TreeRouteStack extends SimpleRouteStack
     #[Override]
     final protected function routeFromArray(array $specs): RouteInterface
     {
-        if (isset($specs['chain_routes'])) {
-            if (! is_array($specs['chain_routes'])) {
-                throw new Exception\InvalidArgumentException('Chain routes must be an array');
-            }
-
-            $chainRoutes = array_merge([$specs], $specs['chain_routes']);
-            if (isset($chainRoutes[0]['chain_routes'])) {
-                unset($chainRoutes[0]['chain_routes']);
-            }
-
-            if (isset($specs['child_routes']) && isset($chainRoutes[0]['child_routes'])) {
-                unset($chainRoutes[0]['child_routes']);
-            }
-
-            $options = [
-                'routes'        => $chainRoutes,
-                'route_plugins' => $this->routePluginManager,
-                'priority'      => $specs['priority'] ?? null,
-            ];
-
-            $route = $this->routePluginManager->build(Chain::class, $options);
-        } else {
-            $route = parent::routeFromArray($specs);
-        }
+        $route = $this->buildChainRoute($specs);
 
         if (! $route instanceof HttpRouteInterface) {
             throw new Exception\RuntimeException('Given route does not implement HTTP route interface');
         }
 
         if (isset($specs['child_routes'])) {
-            $options = [
-                'route'         => $route,
-                'may_terminate' => isset($specs['may_terminate']) && $specs['may_terminate'] === true,
-                'child_routes'  => $specs['child_routes'],
-                'route_plugins' => $this->routePluginManager,
-            ];
-
             $route = $this->routePluginManager->build(Part::class, [
-                ...$options,
+                ...[
+                    'route'         => $route,
+                    'may_terminate' => isset($specs['may_terminate']) && $specs['may_terminate'] === true,
+                    'child_routes'  => $specs['child_routes'],
+                    'route_plugins' => $this->routePluginManager,
+                ],
                 'priority' => $route->getPriority(),
             ]);
         }
-
-        assert($route instanceof HttpRouteInterface);
 
         /** @psalm-var TRoute $route */
         return $route;
@@ -172,13 +144,7 @@ readonly class TreeRouteStack extends SimpleRouteStack
             if ($match instanceof HttpRouteMatch && ($pathLength === null || $match->getLength() === $pathLength)) {
                 $match = $match->setMatchedRouteName($name);
 
-                foreach ($this->defaultParams as $paramName => $value) {
-                    if ($match->getParam($paramName) === null) {
-                        $match = $match->setParam($paramName, $value);
-                    }
-                }
-
-                return $match;
+                return $match->setDefaults($this->defaultParams);
             }
         }
 
@@ -284,5 +250,31 @@ readonly class TreeRouteStack extends SimpleRouteStack
     public function getPriority(): ?int
     {
         return $this->priority;
+    }
+
+    private function buildChainRoute(array $specs): RouteInterface
+    {
+        if (! isset($specs['chain_routes'])) {
+            return parent::routeFromArray($specs);
+        }
+
+        if (! is_array($specs['chain_routes'])) {
+            throw new Exception\InvalidArgumentException('Chain routes must be an array');
+        }
+
+        $chainRoutes = array_merge([$specs], $specs['chain_routes']);
+        if (isset($chainRoutes[0]['chain_routes'])) {
+            unset($chainRoutes[0]['chain_routes']);
+        }
+
+        if (isset($specs['child_routes']) && isset($chainRoutes[0]['child_routes'])) {
+            unset($chainRoutes[0]['child_routes']);
+        }
+
+        return $this->routePluginManager->build(Chain::class, [
+            'routes'        => $chainRoutes,
+            'route_plugins' => $this->routePluginManager,
+            'priority'      => $specs['priority'] ?? null,
+        ]);
     }
 }

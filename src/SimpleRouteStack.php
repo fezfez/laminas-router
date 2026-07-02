@@ -23,7 +23,6 @@ use function sprintf;
  *
  * @template TRoute of RouteInterface
  * @template-implements RouteStackInterface<TRoute>
- * @psalm-consistent-constructor
  */
 readonly class SimpleRouteStack implements RouteStackInterface
 {
@@ -172,16 +171,9 @@ readonly class SimpleRouteStack implements RouteStackInterface
     {
         foreach ($this->routes->getAsArray() as $name => $route) {
             $match = $route->match($request);
-            if ($match instanceof RouteMatch) {
+            if ($match !== null) {
                 $match = $match->setMatchedRouteName($name);
-
-                foreach ($this->defaultParams as $paramName => $value) {
-                    if ($match->getParam($paramName) === null) {
-                        $match = $match->setParam($paramName, $value);
-                    }
-                }
-
-                return $match;
+                return $match->setDefaults($this->defaultParams);
             }
         }
 

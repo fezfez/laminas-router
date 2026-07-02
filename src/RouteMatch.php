@@ -82,4 +82,18 @@ class RouteMatch
 
         return $default;
     }
+
+    /**
+     * @param array<non-empty-string, non-empty-string> $defaults
+     */
+    public function setDefaults(array $defaults): static
+    {
+        foreach ($defaults as $paramName => $value) {
+            if ($this->getParam($paramName) === null) {
+                $this->params[$paramName] = $value;
+            }
+        }
+
+        return $this;
+    }
 }
