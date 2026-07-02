@@ -45,12 +45,14 @@ final readonly class Segment implements HttpRouteInterface
      *
      * @param array<string, string> $constraints
      * @param array<string, string> $defaults
+     * @param array<non-empty-string, bool> $disableSegmentEncoding
      */
     public function __construct(
         string $route,
         array $constraints = [],
         private array $defaults = [],
         private int|null $priority = null,
+        private array $disableSegmentEncoding = []
     ) {
         $this->parts                 = $this->parseRouteDefinition($route);
         $this->routeRegexBuildResult = $this->buildRegex($this->parts->getParts(), $constraints);
@@ -70,12 +72,14 @@ final readonly class Segment implements HttpRouteInterface
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;
+        /** @psalm-var array<non-empty-string, bool> $disableSegmentEncoding */
+        $disableSegmentEncoding = $options['disable_segment_encoding'] ?? [];
 
         if (! is_string($route)) {
             throw new Exception\InvalidArgumentException('Missing "route" in options array');
         }
 
-        return new self($route, $constraints, $defaults, $priority);
+        return new self($route, $constraints, $defaults, $priority, $disableSegmentEncoding);
     }
 
     /**
@@ -247,7 +251,11 @@ final readonly class Segment implements HttpRouteInterface
                     $skip = false;
                 }
 
-                $path .= SegmentPathEncoder::encode((string) $mergedParams[$part->name]);
+                if ($this->isSegmentEncodingEnabled($part->name)) {
+                    $path .= SegmentPathEncoder::encode((string) $mergedParams[$part->name]);
+                } else {
+                    $path .= (string) $mergedParams[$part->name];
+                }
 
                 $assembledParams[] = $part->name;
                 continue;
@@ -325,7 +333,11 @@ final readonly class Segment implements HttpRouteInterface
 
         foreach ($this->routeRegexBuildResult->paramMap as $index => $name) {
             if (isset($matches[$index]) && $matches[$index] !== '') {
-                $params[$name] = SegmentPathEncoder::decode($matches[$index]);
+                if ($this->isSegmentEncodingEnabled($name)) {
+                    $params[$name] = SegmentPathEncoder::decode($matches[$index]);
+                } else {
+                    $params[$name] = $matches[$index];
+                }
             }
         }
 
@@ -354,5 +366,13 @@ final readonly class Segment implements HttpRouteInterface
     public function getPriority(): ?int
     {
         return $this->priority;
+    }
+
+    private function isSegmentEncodingEnabled(string $name): bool
+    {
+        if (! array_key_exists($name, $this->disableSegmentEncoding)) {
+            return true;
+        }
+        return $this->disableSegmentEncoding[$name] !== true;
     }
 }

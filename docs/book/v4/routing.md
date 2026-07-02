@@ -79,6 +79,7 @@ at a time using `addRoute()`, or in bulk using `addRoutes()`.
 ```php
 // One at a time:
 $route = Literal::factory([
+    'route_plugins' => new \Laminas\Router\RoutePluginManager(new \Laminas\ServiceManager\ServiceManager()),
     'route' => '/foo',
     'defaults' => [
         'controller' => 'foo-index',
@@ -172,6 +173,7 @@ and contained exactly 2 digits following, the following route would be needed:
 
 ```php
 $route = Hostname::factory([
+    'route_plugins' => new \Laminas\Router\RoutePluginManager(new \Laminas\ServiceManager\ServiceManager()),
     'route' => ':subdomain.domain.tld',
     'constraints' => [
         'subdomain' => 'fw\d{2}',
@@ -186,6 +188,7 @@ defaults.
 
 ```php
 $route = Hostname::factory([
+    'route_plugins' => new \Laminas\Router\RoutePluginManager(new \Laminas\ServiceManager\ServiceManager()),
     'route' => ':subdomain.domain.tld',
     'constraints' => [
         'subdomain' => 'fw\d{2}',
@@ -207,6 +210,7 @@ parameters you want returned on a match.
 
 ```php
 $route = Literal::factory([
+    'route_plugins' => new \Laminas\Router\RoutePluginManager(new \Laminas\ServiceManager\ServiceManager()),
     'route' => '/foo',
     'defaults' => [
         'controller' => 'Application\Controller\IndexController',
@@ -226,6 +230,7 @@ against multiple methods by providing a comma-separated list of method tokens.
 
 ```php
 $route = Method::factory([
+    'route_plugins' => new \Laminas\Router\RoutePluginManager(new \Laminas\ServiceManager\ServiceManager()),
     'verb' => 'post,put',
     'defaults' => [
         'controller' => 'Application\Controller\IndexController',
@@ -439,6 +444,7 @@ include in the `RouteMatch` when successfully matched.
 
 ```php
 $route = Regex::factory([
+    'route_plugins' => new \Laminas\Router\RoutePluginManager(new \Laminas\ServiceManager\ServiceManager()),
     'regex' => '/blog/(?<id>[a-zA-Z0-9_-]+)(\.(?<format>(json|html|xml|rss)))?',
     'defaults' => [
         'controller' => 'Application\Controller\BlogController',
@@ -462,6 +468,7 @@ and the "defaults", parameters to return on a match.
 
 ```php
 $route = Scheme::factory([
+    'route_plugins' => new \Laminas\Router\RoutePluginManager(new \Laminas\ServiceManager\ServiceManager()),
     'scheme' => 'https',
     'defaults' => [
         'https' => true,
@@ -497,6 +504,7 @@ As a complex example:
 
 ```php
 $route = Segment::factory([
+    'route_plugins' => new \Laminas\Router\RoutePluginManager(new \Laminas\ServiceManager\ServiceManager()),
     'route' => '/:controller[/:action]',
     'constraints' => [
         'controller' => '[a-zA-Z][a-zA-Z0-9_-]+',
@@ -508,6 +516,45 @@ $route = Segment::factory([
     ],
 ]);
 ```
+
+#### Disable segment encoding
+
+By default, each segment parameter is URL-encoded when assembling a URL, and
+decoded when matching one. This means a parameter value containing a `/` will
+be percent-encoded (as `%2F`) rather than being treated as a path separator:
+
+```php
+$route = Segment::factory([
+    'route_plugins' => new \Laminas\Router\RoutePluginManager(new \Laminas\ServiceManager\ServiceManager()),
+    'route' => '/example/route/with/:token',
+]);
+
+$route->assemble(['token' => 'token/with/slashes']);
+// /example/route/with/token%2Fwith%2Fslashes
+```
+
+If you need the raw, unencoded value in the resulting URL — for instance, when
+a parameter is itself expected to contain slashes — disable encoding for that
+parameter using the `disable_segment_encoding` option. This option accepts a
+map of parameter name to boolean, and affects both `assemble()` and `match()`:
+
+```php
+$route = Segment::factory([
+    'route_plugins' => new \Laminas\Router\RoutePluginManager(new \Laminas\ServiceManager\ServiceManager()),
+    'route' => '/example/route/with/:token',
+    'disable_segment_encoding' => [
+        'token' => true,
+    ],
+]);
+
+$route->assemble(['token' => 'token/with/slashes']);
+// /example/route/with/token/with/slashes
+```
+
+> **Warning**: Disabling encoding for a parameter means its value is inserted
+> into (or read from) the URL as-is. Use this with care, as unencoded values
+> can introduce ambiguity with the surrounding route structure or with other
+> segments/delimiters in the route definition.
 
 ## HTTP Routing Examples
 
