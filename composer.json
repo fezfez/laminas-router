@@ -1,6 +1,6 @@
 {
     "name": "laminas/laminas-router",
-    "description": "Flexible routing system for HTTP and console applications",
+    "description": "Flexible routing for PSR-7 applications",
     "license": "BSD-3-Clause",
     "keywords": [
         "laminas",
