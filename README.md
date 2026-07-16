@@ -18,10 +18,9 @@
 >
 > You trust us enough to use our software. We ask that you trust us to say the truth on this. We need your help. Go out and protest this unnecessary war. Stop the bloodshed. Say "stop the war!"
 
-laminas-router provides flexible HTTP routing.
+laminas-router provides flexible routing for PSR-7 applications.
 
-Routing currently works against the [laminas-http](https://github.com/laminas/laminas-http)
-request and responses, and provides capabilities around:
+Routing currently works with PSR-7 request and response objects, and provides capabilities around:
 
 - Literal path matches
 - Path segment matches (at path boundaries, and optionally validated using regex)
