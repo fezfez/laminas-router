@@ -8,6 +8,7 @@ use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Http\HttpRouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Override;
 use Psr\Http\Message\RequestInterface;
 
@@ -35,6 +36,7 @@ final readonly class Regex implements HttpRouteInterface
      * @param array<non-empty-string, string|int> $defaults
      */
     public function __construct(
+        private string $name,
         /**
          * Regex to match.
          */
@@ -62,6 +64,7 @@ final readonly class Regex implements HttpRouteInterface
     #[Override]
     public static function factory(array $options = []): self
     {
+        $name     = $options['name'] ?? null;
         $regex    = $options['regex'] ?? null;
         $spec     = $options['spec'] ?? null;
         $defaults = $options['defaults'] ?? [];
@@ -74,17 +77,23 @@ final readonly class Regex implements HttpRouteInterface
         if (! is_string($spec) || $spec === '') {
             throw new Exception\InvalidArgumentException('Missing "spec" in options array');
         }
+        if (! is_string($name)) {
+            throw new Exception\InvalidArgumentException('Missing "name" in options array');
+        }
         assert(is_array($defaults));
 
         /** @psalm-var array<non-empty-string, non-empty-string> $defaults */
 
-        return new self($regex, $spec, $defaults, $priority);
+        return new self($name, $regex, $spec, $defaults, $priority);
     }
 
     /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?RouteMatchInterface {
         $path = $request->getUri()->getPath();
 
         if ($pathOffset !== null) {
@@ -107,7 +116,7 @@ final readonly class Regex implements HttpRouteInterface
             }
         }
 
-        return new HttpRouteMatch(array_merge($this->defaults, $cleanMatches), $matchedLength);
+        return new HttpRouteMatch(array_merge($this->defaults, $cleanMatches), $this->name, $matchedLength);
     }
 
     /** @inheritDoc */

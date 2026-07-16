@@ -7,7 +7,7 @@ namespace Laminas\Router\Http;
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\RuntimeException;
-use Laminas\Router\RouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Translator\TranslatorInterface;
 use Override;
@@ -77,8 +77,11 @@ final readonly class TranslatorAwareTreeRouteStack extends TreeRouteStack
      * @param int|null $pathOffset
      */
     #[Override]
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?RouteMatch
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?RouteMatchInterface {
         if ($this->isTranslatorEnabled() && ! isset($options['translator'])) {
             $options['translator'] = $this->getTranslator();
         }

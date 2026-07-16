@@ -7,7 +7,6 @@ namespace Laminas\Router;
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\PriorityList;
-use Laminas\Router\RouteMatch;
 use Override;
 use Psr\Http\Message\RequestInterface;
 
@@ -93,7 +92,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
     public function addRoute(string $name, array|RouteInterface $route, ?int $priority = null): void
     {
         if (is_array($route)) {
-            $route = $this->routeFromArray($route);
+            $route = $this->routeFromArray($name, $route);
         }
 
         $this->routes->insert($name, $route, $priority);
@@ -149,7 +148,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
      * @return TRoute
      * @throws Exception\InvalidArgumentException
      */
-    protected function routeFromArray(array $specs): RouteInterface
+    protected function routeFromArray(string $name, array $specs): RouteInterface
     {
         $type = $specs['type'] ?? null;
         /** @var array<string, string> $option */
@@ -160,19 +159,22 @@ readonly class SimpleRouteStack implements RouteStackInterface
         }
 
         /** @psalm-var TRoute $route */
-        $route = $this->routePluginManager->build($type, [...$option, 'priority' => $specs['priority'] ?? null]);
+        $route = $this->routePluginManager->build($type, [
+            ...$option,
+            'priority' => $specs['priority'] ?? null,
+            'name'     => $name,
+        ]);
 
         return $route;
     }
 
     /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request): ?RouteMatch
+    public function match(RequestInterface $request): ?RouteMatchInterface
     {
-        foreach ($this->routes->getAsArray() as $name => $route) {
+        foreach ($this->routes->getAsArray() as $route) {
             $match = $route->match($request);
             if ($match !== null) {
-                $match = $match->setMatchedRouteName($name);
                 return $match->setDefaults($this->defaultParams);
             }
         }

@@ -29,42 +29,43 @@ final class HostnameTest extends TestCase
     {
         return [
             'simple-match'                                                   => [
-                new Hostname(':foo.example.com'),
+                new Hostname('foo', ':foo.example.com'),
                 'bar.example.com',
                 ['foo' => 'bar'],
             ],
             'no-match-on-different-hostname'                                 => [
-                new Hostname('foo.example.com'),
+                new Hostname('foo', 'foo.example.com'),
                 'bar.example.com',
                 null,
             ],
             'no-match-with-different-number-of-parts'                        => [
-                new Hostname('foo.example.com'),
+                new Hostname('foo', 'foo.example.com'),
                 'example.com',
                 null,
             ],
             'no-match-with-different-number-of-parts-2'                      => [
-                new Hostname('example.com'),
+                new Hostname('foo', 'example.com'),
                 'foo.example.com',
                 null,
             ],
             'match-overrides-default'                                        => [
-                new Hostname(':foo.example.com', [], ['foo' => 'baz']),
+                new Hostname('foo', ':foo.example.com', [], ['foo' => 'baz']),
                 'bat.example.com',
                 ['foo' => 'bat'],
             ],
             'constraints-prevent-match'                                      => [
-                new Hostname(':foo.example.com', ['foo' => '\d+']),
+                new Hostname('foo', ':foo.example.com', ['foo' => '\d+']),
                 'bar.example.com',
                 null,
             ],
             'constraints-allow-match'                                        => [
-                new Hostname(':foo.example.com', ['foo' => '\d+']),
+                new Hostname('foo', ':foo.example.com', ['foo' => '\d+']),
                 '123.example.com',
                 ['foo' => '123'],
             ],
             'constraints-allow-match-2'                                      => [
                 new Hostname(
+                    'foo',
                     'www.:domain.com',
                     ['domain' => '(mydomain|myaltdomain1|myaltdomain2)'],
                     ['domain' => 'mydomain']
@@ -73,92 +74,92 @@ final class HostnameTest extends TestCase
                 ['domain' => 'mydomain'],
             ],
             'optional-subdomain'                                             => [
-                new Hostname('[:foo.]example.com'),
+                new Hostname('foo', '[:foo.]example.com'),
                 'bar.example.com',
                 ['foo' => 'bar'],
             ],
             'two-optional-subdomain'                                         => [
-                new Hostname('[:foo.][:bar.]example.com'),
+                new Hostname('foo', '[:foo.][:bar.]example.com'),
                 'baz.bat.example.com',
                 ['foo' => 'baz', 'bar' => 'bat'],
             ],
             'missing-optional-subdomain'                                     => [
-                new Hostname('[:foo.]example.com'),
+                new Hostname('foo', '[:foo.]example.com'),
                 'example.com',
                 ['foo' => null],
             ],
             'one-of-two-missing-optional-subdomain'                          => [
-                new Hostname('[:foo.][:bar.]example.com'),
+                new Hostname('foo', '[:foo.][:bar.]example.com'),
                 'bat.example.com',
                 ['foo' => 'bat'],
             ],
             'two-missing-optional-subdomain'                                 => [
-                new Hostname('[:foo.][:bar.]example.com'),
+                new Hostname('foo', '[:foo.][:bar.]example.com'),
                 'example.com',
                 ['foo' => null, 'bar' => null],
             ],
             'two-optional-subdomain-nested'                                  => [
-                new Hostname('[[:foo.]:bar.]example.com'),
+                new Hostname('foo', '[[:foo.]:bar.]example.com'),
                 'baz.bat.example.com',
                 ['foo' => 'baz', 'bar' => 'bat'],
             ],
             'one-of-two-missing-optional-subdomain-nested'                   => [
-                new Hostname('[[:foo.]:bar.]example.com'),
+                new Hostname('foo', '[[:foo.]:bar.]example.com'),
                 'bat.example.com',
                 ['foo' => null, 'bar' => 'bat'],
             ],
             'two-missing-optional-subdomain-nested'                          => [
-                new Hostname('[[:foo.]:bar.]example.com'),
+                new Hostname('foo', '[[:foo.]:bar.]example.com'),
                 'example.com',
                 ['foo' => null, 'bar' => null],
             ],
             'no-match-on-different-hostname-and-optional-subdomain'          => [
-                new Hostname('[:foo.]example.com'),
+                new Hostname('foo', '[:foo.]example.com'),
                 'bar.test.com',
                 null,
             ],
             'no-match-with-different-number-of-parts-and-optional-subdomain' => [
-                new Hostname('[:foo.]example.com'),
+                new Hostname('foo', '[:foo.]example.com'),
                 'bar.baz.example.com',
                 null,
             ],
             'match-overrides-default-optional-subdomain'                     => [
-                new Hostname('[:foo.]:bar.example.com', [], ['bar' => 'baz']),
+                new Hostname('foo', '[:foo.]:bar.example.com', [], ['bar' => 'baz']),
                 'bat.qux.example.com',
                 ['foo' => 'bat', 'bar' => 'qux'],
             ],
             'constraints-prevent-match-optional-subdomain'                   => [
-                new Hostname('[:foo.]example.com', ['foo' => '\d+']),
+                new Hostname('foo', '[:foo.]example.com', ['foo' => '\d+']),
                 'bar.example.com',
                 null,
             ],
             'constraints-allow-match-optional-subdomain'                     => [
-                new Hostname('[:foo.]example.com', ['foo' => '\d+']),
+                new Hostname('foo', '[:foo.]example.com', ['foo' => '\d+']),
                 '123.example.com',
                 ['foo' => '123'],
             ],
             'middle-subdomain-optional'                                      => [
-                new Hostname(':foo.[:bar.]example.com'),
+                new Hostname('foo', ':foo.[:bar.]example.com'),
                 'baz.bat.example.com',
                 ['foo' => 'baz', 'bar' => 'bat'],
             ],
             'missing-middle-subdomain-optional'                              => [
-                new Hostname(':foo.[:bar.]example.com'),
+                new Hostname('foo', ':foo.[:bar.]example.com'),
                 'baz.example.com',
                 ['foo' => 'baz'],
             ],
             'non-standard-delimeter'                                         => [
-                new Hostname('user-:username.example.com'),
+                new Hostname('foo', 'user-:username.example.com'),
                 'user-jdoe.example.com',
                 ['username' => 'jdoe'],
             ],
             'non-standard-delimeter-optional'                                => [
-                new Hostname(':page{-}[-:username].example.com'),
+                new Hostname('foo', ':page{-}[-:username].example.com'),
                 'article-jdoe.example.com',
                 ['page' => 'article', 'username' => 'jdoe'],
             ],
             'missing-non-standard-delimeter-optional'                        => [
-                new Hostname(':page{-}[-:username].example.com'),
+                new Hostname('foo', ':page{-}[-:username].example.com'),
                 'article.example.com',
                 ['page' => 'article'],
             ],
@@ -207,7 +208,7 @@ final class HostnameTest extends TestCase
 
     public function testNoMatchWithoutUriMethod(): void
     {
-        $route   = new Hostname('example.com');
+        $route   = new Hostname('foo', 'example.com');
         $request = new Request();
 
         $this->assertNull($route->match($request));
@@ -215,7 +216,7 @@ final class HostnameTest extends TestCase
 
     public function testNoMatchWithRelativeUri(): void
     {
-        $route   = new Hostname('example.com');
+        $route   = new Hostname('foo', 'example.com');
         $request = new Request();
         $request = $request->withUri(new Uri('/relative/path'));
 
@@ -224,7 +225,7 @@ final class HostnameTest extends TestCase
 
     public function testNoMatchWithPlaceholderOnRelativeUri(): void
     {
-        $route   = new Hostname(':domain');
+        $route   = new Hostname('foo', ':domain');
         $request = new Request();
         $request = $request->withUri(new Uri('/relative/path'));
 
@@ -233,7 +234,7 @@ final class HostnameTest extends TestCase
 
     public function testMatchesRelativeUriWithFullyOptionalDefinition(): void
     {
-        $route   = new Hostname('[:domain]');
+        $route   = new Hostname('foo', '[:domain]');
         $request = new Request();
         $request = $request->withUri(new Uri('/relative/path'));
 
@@ -244,7 +245,7 @@ final class HostnameTest extends TestCase
 
     public function testAssemblingWithMissingParameter(): void
     {
-        $route = new Hostname(':foo.example.com');
+        $route = new Hostname('foo', ':foo.example.com');
         $uri   = new Uri();
 
         $this->expectException(InvalidArgumentException::class);
@@ -254,7 +255,7 @@ final class HostnameTest extends TestCase
 
     public function testGetAssembledParams(): void
     {
-        $route = new Hostname(':foo.example.com');
+        $route = new Hostname('foo', ':foo.example.com');
         $uri   = new Uri();
         $this->assertEquals(
             ['foo'],
@@ -264,7 +265,7 @@ final class HostnameTest extends TestCase
 
     public function testMatchIncludesDefaultsNotCapturedInHostname(): void
     {
-        $route   = new Hostname('www.example.com', [], ['env' => 'prod']);
+        $route   = new Hostname('foo', 'www.example.com', [], ['env' => 'prod']);
         $request = (new Request())->withUri(new Uri('http://www.example.com/'));
         $match   = $route->match($request);
 
@@ -274,7 +275,7 @@ final class HostnameTest extends TestCase
 
     public function testAssembleUsesDefaultsWhenParameterMissing(): void
     {
-        $route  = new Hostname(':foo.example.com', [], ['foo' => 'baz']);
+        $route  = new Hostname('foo', ':foo.example.com', [], ['foo' => 'baz']);
         $result = $route->assemble([]);
 
         $this->assertSame('baz.example.com', $result->host);
@@ -282,7 +283,7 @@ final class HostnameTest extends TestCase
 
     public function testAssembleOmitsOptionalWhenParameterEqualsDefault(): void
     {
-        $route = new Hostname('[:foo.]example.com', [], ['foo' => 'bar']);
+        $route = new Hostname('foo', '[:foo.]example.com', [], ['foo' => 'bar']);
 
         $this->assertSame('example.com', $route->assemble([])->host);
         $this->assertSame('example.com', $route->assemble(['foo' => 'bar'])->host);
@@ -290,7 +291,7 @@ final class HostnameTest extends TestCase
 
     public function testAssembleIncludesOptionalWhenParameterDiffersFromDefault(): void
     {
-        $route = new Hostname('[:foo.]example.com', [], ['foo' => 'bar']);
+        $route = new Hostname('foo', '[:foo.]example.com', [], ['foo' => 'bar']);
 
         $this->assertSame('baz.example.com', $route->assemble(['foo' => 'baz'])->host);
     }
@@ -298,6 +299,7 @@ final class HostnameTest extends TestCase
     public function testAssembleOmitsNestedOptionalWhenAllParametersEqualDefaults(): void
     {
         $route = new Hostname(
+            'foo',
             '[[:foo.]:bar.]example.com',
             [],
             ['foo' => 'a', 'bar' => 'b'],
@@ -309,6 +311,7 @@ final class HostnameTest extends TestCase
     public function testAssembleIncludesNestedOptionalWhenInnerParameterDiffersFromDefault(): void
     {
         $route = new Hostname(
+            'foo',
             '[[:foo.]:bar.]example.com',
             [],
             ['foo' => 'a', 'bar' => 'b'],
@@ -319,7 +322,7 @@ final class HostnameTest extends TestCase
 
     public function testAssembleNestedOptionalCollectsAssembledParamsFromBothLevels(): void
     {
-        $route = new Hostname('[[:foo.]:bar.]example.com');
+        $route = new Hostname('foo', '[[:foo.]:bar.]example.com');
 
         $this->assertSame(
             ['foo', 'bar'],
@@ -329,7 +332,7 @@ final class HostnameTest extends TestCase
 
     public function testMatchCapturesThreeParametersInOrder(): void
     {
-        $route   = new Hostname(':one.:two.:three.example.com');
+        $route   = new Hostname('foo', ':one.:two.:three.example.com');
         $request = (new Request())->withUri(new Uri('http://a.b.c.example.com/'));
         $match   = $route->match($request);
 
@@ -346,7 +349,7 @@ final class HostnameTest extends TestCase
 
     public function testConstructWithEmptyRoute(): void
     {
-        $route   = new Hostname('');
+        $route   = new Hostname('foo', '');
         $request = (new Request())->withUri((new Uri())->withHost(''));
         $match   = $route->match($request);
 
@@ -386,12 +389,13 @@ final class HostnameTest extends TestCase
     {
         $this->expectException($exception);
         $this->expectExceptionMessage($message);
-        new Hostname($route);
+        new Hostname('toto', $route);
     }
 
     public function testFactoryAppliesConstraintsDefaultsAndPriority(): void
     {
         $route = Hostname::factory([
+            'name'        => 'foo',
             'route'       => ':foo.example.com',
             'constraints' => ['foo' => '\d+'],
             'defaults'    => ['foo' => '999'],
@@ -422,9 +426,11 @@ final class HostnameTest extends TestCase
             Hostname::class,
             [
                 'route' => 'Missing "route" in options array',
+                'name'  => 'Missing "name" in options array',
             ],
             [
                 'route' => 'example.com',
+                'name'  => 'foo',
             ]
         );
     }
@@ -433,6 +439,6 @@ final class HostnameTest extends TestCase
     public function testFailedHostnameSegmentMatchDoesNotEmitErrors(): void
     {
         $this->expectException(RuntimeException::class);
-        new Hostname(':subdomain.with_underscore.com');
+        new Hostname('toto', ':subdomain.with_underscore.com');
     }
 }

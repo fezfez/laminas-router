@@ -15,7 +15,7 @@ final class RoutePluginManagerTest extends TestCase
     {
         $routes = new RoutePluginManager(new ServiceManager());
         $this->expectException(ServiceNotFoundException::class);
-        $routes->get('foo');
+        $routes->build('foo', ['name' => 'foo']);
     }
 
     public function testCanLoadAnyRoute(): void
@@ -25,7 +25,7 @@ final class RoutePluginManagerTest extends TestCase
                 'DummyRoute' => TestAsset\DummyRoute::class,
             ],
         ]);
-        $route  = $routes->get('DummyRoute');
+        $route  = $routes->build('DummyRoute', ['name' => 'foo']);
 
         $this->assertInstanceOf(TestAsset\DummyRoute::class, $route);
     }

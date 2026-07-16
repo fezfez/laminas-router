@@ -30,31 +30,31 @@ final class LiteralTest extends TestCase
     {
         return [
             'simple-match'                    => [
-                new Literal('/foo'),
+                new Literal('foo', '/foo'),
                 '/foo',
                 null,
                 true,
             ],
             'no-match-without-leading-slash'  => [
-                new Literal('foo'),
+                new Literal('foo', 'foo'),
                 '/foo',
                 null,
                 false,
             ],
             'no-match-with-trailing-slash'    => [
-                new Literal('/foo'),
+                new Literal('foo', '/foo'),
                 '/foo/',
                 null,
                 false,
             ],
             'offset-skips-beginning'          => [
-                new Literal('foo'),
+                new Literal('foo', 'foo'),
                 '/foo',
                 1,
                 true,
             ],
             'offset-enables-partial-matching' => [
-                new Literal('/foo'),
+                new Literal('foo', '/foo'),
                 '/foo/bar',
                 0,
                 true,
@@ -100,7 +100,7 @@ final class LiteralTest extends TestCase
 
     public function testNoMatchWithoutUriMethod(): void
     {
-        $route   = new Literal('/foo');
+        $route   = new Literal('foo', '/foo');
         $request = new Request();
 
         $this->assertNull($route->match($request));
@@ -108,7 +108,7 @@ final class LiteralTest extends TestCase
 
     public function testGetAssembledParams(): void
     {
-        $route = new Literal('/foo');
+        $route = new Literal('foo', '/foo');
         $this->assertEquals([], $route->assemble(['foo' => 'bar'])->assembledParams);
     }
 
@@ -119,9 +119,11 @@ final class LiteralTest extends TestCase
             Literal::class,
             [
                 'route' => 'Missing "route" in options array',
+                'name'  => 'Missing "name" in options array',
             ],
             [
                 'route' => '/foo',
+                'name'  => 'foo',
             ]
         );
     }
@@ -130,7 +132,7 @@ final class LiteralTest extends TestCase
     public function testEmptyLiteral(): void
     {
         $request = new Request();
-        $route   = new Literal('');
+        $route   = new Literal('foo', '');
         $this->assertNull($route->match($request, 0));
     }
 
@@ -138,27 +140,27 @@ final class LiteralTest extends TestCase
     {
         $request = (new Request())->withUri(new Uri('http://example.com/foo'));
 
-        $this->assertNull((new Literal('/foo'))->match($request, 10));
+        $this->assertNull((new Literal('foo', '/foo'))->match($request, 10));
     }
 
     public function testMatchWithNegativeOffsetReturnsNull(): void
     {
         $request = (new Request())->withUri(new Uri('http://example.com/foo'));
 
-        $this->assertNull((new Literal('/foo'))->match($request, -1));
+        $this->assertNull((new Literal('foo', '/foo'))->match($request, -1));
     }
 
     public function testMatchWithOffsetMisalignedReturnsNull(): void
     {
         $request = (new Request())->withUri(new Uri('http://example.com/x/foo'));
 
-        $this->assertNull((new Literal('foo'))->match($request, 1));
+        $this->assertNull((new Literal('foo', 'foo'))->match($request, 1));
     }
 
     public function testMatchWithOffsetReturnsSegmentLength(): void
     {
         $request = (new Request())->withUri(new Uri('http://example.com/foo'));
-        $match   = (new Literal('foo'))->match($request, 1);
+        $match   = (new Literal('foo', 'foo'))->match($request, 1);
 
         $this->assertInstanceOf(HttpRouteMatch::class, $match);
         $this->assertSame(3, $match->getLength());
@@ -168,13 +170,13 @@ final class LiteralTest extends TestCase
     {
         $request = (new Request())->withUri(new Uri('http://example.com/foo'));
 
-        $this->assertNull((new Literal('/foo'))->match($request, 4));
+        $this->assertNull((new Literal('foo', '/foo'))->match($request, 4));
     }
 
     public function testMatchWithOffsetEnablesMatchAtLastCharacter(): void
     {
         $request = (new Request())->withUri(new Uri('http://example.com/foo'));
-        $match   = (new Literal('o'))->match($request, 3);
+        $match   = (new Literal('foo', 'o'))->match($request, 3);
 
         $this->assertInstanceOf(HttpRouteMatch::class, $match);
         $this->assertSame(1, $match->getLength());

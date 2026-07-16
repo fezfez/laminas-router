@@ -24,19 +24,19 @@ final class MethodTest extends TestCase
     {
         return [
             'simple-match'                   => [
-                new HttpMethod('get'),
+                new HttpMethod('foo', 'get'),
                 'get',
             ],
             'match-comma-separated-verbs'    => [
-                new HttpMethod('get,post'),
+                new HttpMethod('foo', 'get,post'),
                 'get',
             ],
             'match-comma-separated-verbs-ws' => [
-                new HttpMethod('get ,   post , put'),
+                new HttpMethod('foo', 'get ,   post , put'),
                 'post',
             ],
             'match-ignores-case'             => [
-                new HttpMethod('Get'),
+                new HttpMethod('foo', 'Get'),
                 'get',
             ],
         ];
@@ -55,7 +55,7 @@ final class MethodTest extends TestCase
 
     public function testNoMatchWithoutVerb(): void
     {
-        $route   = new HttpMethod('get');
+        $route   = new HttpMethod('foo', 'get');
         $request = (new Request())->withMethod('POST');
 
         $this->assertNull($route->match($request));
@@ -68,9 +68,11 @@ final class MethodTest extends TestCase
             HttpMethod::class,
             [
                 'verb' => 'Missing "verb" in options array',
+                'name' => 'Missing "name" in options array',
             ],
             [
                 'verb' => 'get',
+                'name' => 'foo',
             ]
         );
     }

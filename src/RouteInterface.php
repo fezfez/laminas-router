@@ -20,7 +20,7 @@ interface RouteInterface
     /**
      * Match a given request.
      */
-    public function match(RequestInterface $request): RouteMatch|null;
+    public function match(RequestInterface $request): RouteMatchInterface|null;
 
     /**
      * Assemble the route.

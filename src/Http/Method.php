@@ -7,6 +7,7 @@ namespace Laminas\Router\Http;
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Override;
 use Psr\Http\Message\RequestInterface;
 
@@ -28,6 +29,7 @@ final readonly class Method implements HttpRouteInterface
      * @param array<string, string> $defaults
      */
     public function __construct(
+        private string $name,
         /**
          * Verb to match.
          */
@@ -47,6 +49,7 @@ final readonly class Method implements HttpRouteInterface
     #[Override]
     public static function factory(array $options = []): self
     {
+        $name = $options['name'] ?? null;
         /** @var mixed $verb */
         $verb = $options['verb'] ?? null;
         /** @psalm-var array<string, string> $defaults */
@@ -58,19 +61,26 @@ final readonly class Method implements HttpRouteInterface
             throw new Exception\InvalidArgumentException('Missing "verb" in options array');
         }
 
-        return new self($verb, $defaults, $priority);
+        if (! is_string($name)) {
+            throw new Exception\InvalidArgumentException('Missing "name" in options array');
+        }
+
+        return new self($name, $verb, $defaults, $priority);
     }
 
     /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?RouteMatchInterface {
         $requestVerb = strtoupper($request->getMethod());
         $matchVerbs  = explode(',', strtoupper($this->verb));
         $matchVerbs  = array_map(trim(...), $matchVerbs);
 
         if (in_array($requestVerb, $matchVerbs)) {
-            return new HttpRouteMatch($this->defaults);
+            return new HttpRouteMatch($this->defaults, $this->name, 0);
         }
 
         return null;

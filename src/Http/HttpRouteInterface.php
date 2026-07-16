@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\RouteInterface;
-use Laminas\Router\RouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -13,5 +13,9 @@ use Psr\Http\Message\RequestInterface;
  */
 interface HttpRouteInterface extends RouteInterface
 {
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): RouteMatch|null;
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): RouteMatchInterface|null;
 }

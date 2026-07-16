@@ -7,6 +7,7 @@ namespace Laminas\Router\Http;
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Override;
 use Psr\Http\Message\RequestInterface;
 
@@ -27,6 +28,7 @@ final readonly class Literal implements HttpRouteInterface
      * @param  array<string, string> $defaults
      */
     public function __construct(
+        private string $name,
         /**
          * RouteInterface to match.
          */
@@ -46,6 +48,7 @@ final readonly class Literal implements HttpRouteInterface
     #[Override]
     public static function factory(array $options = []): self
     {
+        $name     = $options['name'] ?? null;
         $route    = $options['route'] ?? null;
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
@@ -55,23 +58,30 @@ final readonly class Literal implements HttpRouteInterface
             throw new Exception\InvalidArgumentException('Missing "route" in options array');
         }
 
+        if (! is_string($name)) {
+            throw new Exception\InvalidArgumentException('Missing "name" in options array');
+        }
+
         assert(is_array($defaults));
 
         /** @psalm-var array<string, string> $defaults */
 
-        return new self($route, $defaults, $priority);
+        return new self($name, $route, $defaults, $priority);
     }
 
     /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?RouteMatchInterface {
         $path = $request->getUri()->getPath();
 
         if ($pathOffset !== null) {
             if ($pathOffset >= 0 && strlen($path) >= $pathOffset && ! empty($this->route)) {
                 if (strpos($path, $this->route, $pathOffset) === $pathOffset) {
-                    return new HttpRouteMatch($this->defaults, strlen($this->route));
+                    return new HttpRouteMatch($this->defaults, $this->name, strlen($this->route));
                 }
             }
 
@@ -79,11 +89,11 @@ final readonly class Literal implements HttpRouteInterface
         }
 
         if ($path === $this->route) {
-            return new HttpRouteMatch($this->defaults, strlen($this->route));
+            return new HttpRouteMatch($this->defaults, $this->name, strlen($this->route));
         }
 
         if ($this->route === '/' && ($path === '' || $path === '/')) {
-            return new HttpRouteMatch($this->defaults, strlen($this->route));
+            return new HttpRouteMatch($this->defaults, $this->name, strlen($this->route));
         }
 
         return null;

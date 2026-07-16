@@ -6,7 +6,7 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
-use Laminas\Router\RouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Laminas\Router\RoutePluginManager;
 use Override;
 use Psr\Http\Message\RequestInterface;
@@ -55,7 +55,7 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
         parent::__construct($routePluginManager, defaultParams: $defaultParams, priority: $priority);
 
         if (is_array($routes)) {
-            $routes = $this->routeFromArray($routes);
+            $routes = $this->routeFromArray('', $routes);
         }
 
         if ($routes instanceof self) {
@@ -114,7 +114,7 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
         RequestInterface $request,
         int|null $pathOffset = null,
         array $options = []
-    ): RouteMatch|null {
+    ): RouteMatchInterface|null {
         $pathOffset ??= 0;
         $match        = $this->route->match($request, $pathOffset, $options);
 
@@ -136,11 +136,11 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
                 }
             }
 
-            foreach ($this->routes->getAsArray() as $name => $route) {
+            foreach ($this->routes->getAsArray() as $route) {
                 $subMatch = $route->match($request, $nextOffset, $options);
                 if ($subMatch instanceof HttpRouteMatch) {
                     if (($match->getLength() + $subMatch->getLength() + $pathOffset) === $pathLength) {
-                        return $match->merge($subMatch)->setMatchedRouteName($name);
+                        return $match->merge($subMatch);
                     }
                 }
             }

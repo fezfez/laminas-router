@@ -10,6 +10,8 @@ use Laminas\Router\Http\HttpRouteMatch;
 use Override;
 use Psr\Http\Message\RequestInterface;
 
+use function is_string;
+
 /**
  * Placeholder route.
  */
@@ -19,6 +21,7 @@ final readonly class Placeholder implements HttpRouteInterface
      * @param array<string, string> $defaults
      */
     public function __construct(
+        private string $name,
         /** @var array<string, string> */
         private array $defaults,
         private int|null $priority = null
@@ -32,12 +35,17 @@ final readonly class Placeholder implements HttpRouteInterface
     #[Override]
     public static function factory(array $options = []): self
     {
+        $name = $options['name'] ?? null;
         /** @var array<string, string> $defaults */
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;
 
-        return new self($defaults, $priority);
+        if (! is_string($name)) {
+            throw new Exception\InvalidArgumentException('Missing "name" in options array');
+        }
+
+        return new self($name, $defaults, $priority);
     }
 
     /** @inheritDoc */
@@ -47,7 +55,7 @@ final readonly class Placeholder implements HttpRouteInterface
         int|null $pathOffset = null,
         array $options = []
     ): HttpRouteMatch|null {
-        return new HttpRouteMatch($this->defaults);
+        return new HttpRouteMatch($this->defaults, $this->name, 0);
     }
 
     /** @inheritDoc */

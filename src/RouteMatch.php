@@ -9,45 +9,26 @@ use function array_key_exists;
 /**
  * RouteInterface match.
  */
-class RouteMatch
+final readonly class RouteMatch implements RouteMatchInterface
 {
-    /**
-     * Matched route name.
-     *
-     * @var non-empty-string|null
-     */
-    protected string|null $matchedRouteName = null;
-
     /**
      * Create a RouteMatch with given parameters.
      *
-     * @param  array<string, string|int|null> $params
+     * @param array<string, string|int|null> $params
      */
     public function __construct(
         /**
          * Match parameters.
          */
-        protected array $params
+        private array $params,
+        private string $matchedRouteName
     ) {
     }
 
     /**
-     * Set name of matched route.
-     *
-     * @param non-empty-string $name
-     */
-    public function setMatchedRouteName(string $name): static
-    {
-        $this->matchedRouteName = $name;
-        return $this;
-    }
-
-    /**
      * Get name of matched route.
-     *
-     * @return non-empty-string|null
      */
-    public function getMatchedRouteName(): string|null
+    public function getMatchedRouteName(): string
     {
         return $this->matchedRouteName;
     }
@@ -55,10 +36,12 @@ class RouteMatch
     /**
      * Set a parameter.
      */
-    public function setParam(string $name, string $value): static
+    public function setParam(string $name, string $value): self
     {
-        $this->params[$name] = $value;
-        return $this;
+        $params        = $this->params;
+        $params[$name] = $value;
+
+        return new self($params, $this->matchedRouteName);
     }
 
     /**
@@ -86,14 +69,16 @@ class RouteMatch
     /**
      * @param array<non-empty-string, non-empty-string> $defaults
      */
-    public function setDefaults(array $defaults): static
+    public function setDefaults(array $defaults): self
     {
+        $params = $this->params;
+
         foreach ($defaults as $paramName => $value) {
             if ($this->getParam($paramName) === null) {
-                $this->params[$paramName] = $value;
+                $params[$paramName] = $value;
             }
         }
 
-        return $this;
+        return new self($params, $this->matchedRouteName);
     }
 }

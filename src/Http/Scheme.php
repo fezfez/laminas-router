@@ -7,6 +7,7 @@ namespace Laminas\Router\Http;
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Override;
 use Psr\Http\Message\RequestInterface;
 
@@ -23,6 +24,7 @@ final readonly class Scheme implements HttpRouteInterface
      * @param array<string, string> $defaults
      */
     public function __construct(
+        private string $name,
         /**
          * Scheme to match.
          *
@@ -40,6 +42,7 @@ final readonly class Scheme implements HttpRouteInterface
     #[Override]
     public static function factory(array $options = []): self
     {
+        $name = $options['name'] ?? null;
         /** @psalm-var string|null $scheme */
         $scheme = $options['scheme'] ?? null;
         /** @psalm-var array<string, string> $defaults */
@@ -51,18 +54,25 @@ final readonly class Scheme implements HttpRouteInterface
             throw new Exception\InvalidArgumentException('Missing "scheme" in options array');
         }
 
-        return new self($scheme, $defaults, $priority);
+        if (! is_string($name)) {
+            throw new Exception\InvalidArgumentException('Missing "name" in options array');
+        }
+
+        return new self($name, $scheme, $defaults, $priority);
     }
 
     /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?RouteMatchInterface {
         if ($request->getUri()->getScheme() !== $this->scheme) {
             return null;
         }
 
-        return new HttpRouteMatch($this->defaults);
+        return new HttpRouteMatch($this->defaults, $this->name, 0);
     }
 
     /** @inheritDoc */

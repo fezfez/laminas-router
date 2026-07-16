@@ -29,49 +29,49 @@ final class RegexTest extends TestCase
     {
         return [
             'simple-match'                             => [
-                new Regex('/(?<foo>[^/]+)', '/%foo%'),
+                new Regex('foo', '/(?<foo>[^/]+)', '/%foo%'),
                 '/bar',
                 null,
                 ['foo' => 'bar'],
             ],
             'no-match-without-leading-slash'           => [
-                new Regex('(?<foo>[^/]+)', '%foo%'),
+                new Regex('foo', '(?<foo>[^/]+)', '%foo%'),
                 '/bar',
                 null,
                 null,
             ],
             'no-match-with-trailing-slash'             => [
-                new Regex('/(?<foo>[^/]+)', '/%foo%'),
+                new Regex('foo', '/(?<foo>[^/]+)', '/%foo%'),
                 '/bar/',
                 null,
                 null,
             ],
             'offset-skips-beginning'                   => [
-                new Regex('(?<foo>[^/]+)', '%foo%'),
+                new Regex('foo', '(?<foo>[^/]+)', '%foo%'),
                 '/bar',
                 1,
                 ['foo' => 'bar'],
             ],
             'offset-enables-partial-matching'          => [
-                new Regex('/(?<foo>[^/]+)', '/%foo%'),
+                new Regex('foo', '/(?<foo>[^/]+)', '/%foo%'),
                 '/bar/baz',
                 0,
                 ['foo' => 'bar'],
             ],
             'url-encoded-parameters-are-decoded'       => [
-                new Regex('/(?<foo>[^/]+)', '/%foo%'),
+                new Regex('foo', '/(?<foo>[^/]+)', '/%foo%'),
                 '/foo%20bar',
                 null,
                 ['foo' => 'foo bar'],
             ],
             'empty-matches-are-replaced-with-defaults' => [
-                new Regex('/foo(?:/(?<bar>[^/]+))?/baz-(?<baz>[^/]+)', '/foo/baz-%baz%', ['bar' => 'bar']),
+                new Regex('foo', '/foo(?:/(?<bar>[^/]+))?/baz-(?<baz>[^/]+)', '/foo/baz-%baz%', ['bar' => 'bar']),
                 '/foo/baz-baz',
                 null,
                 ['bar' => 'bar', 'baz' => 'baz'],
             ],
             'params-contain-non-string-scalar-values'  => [
-                new Regex('/id/(?<id>\d+)/scale/(?<scale>\d+\.\d+)', '/id/%id%/scale/%scale%'),
+                new Regex('foo', '/id/(?<id>\d+)/scale/(?<scale>\d+\.\d+)', '/id/%id%/scale/%scale%'),
                 '/id/42/scale/4.2',
                 null,
                 ['id' => 42, 'scale' => 4.2],
@@ -127,7 +127,7 @@ final class RegexTest extends TestCase
 
     public function testNoMatchWithoutUriMethod(): void
     {
-        $route   = new Regex('/foo', '/foo');
+        $route   = new Regex('foo', '/foo', '/foo');
         $request = new Request();
 
         $this->assertNull($route->match($request));
@@ -135,20 +135,20 @@ final class RegexTest extends TestCase
 
     public function testGetAssembledParams(): void
     {
-        $route = new Regex('/(?<foo>.+)', '/%foo%');
+        $route = new Regex('foo', '/(?<foo>.+)', '/%foo%');
         $this->assertEquals(['foo'], $route->assemble(['foo' => 'bar', 'baz' => 'bat'])->assembledParams);
     }
 
     public function testAssemblingUsesDefaultsForMissingParams(): void
     {
-        $route = new Regex('/foo', '/foo-%bar%', ['bar' => 'baz']);
+        $route = new Regex('foo', '/foo', '/foo-%bar%', ['bar' => 'baz']);
 
         $this->assertSame('/foo-baz', $route->assemble([])->toString());
     }
 
     public function testAssemblingParamsOverrideDefaults(): void
     {
-        $route = new Regex('/foo', '/foo-%bar%', ['bar' => 'baz']);
+        $route = new Regex('foo', '/foo', '/foo-%bar%', ['bar' => 'baz']);
 
         $this->assertSame('/foo-qux', $route->assemble(['bar' => 'qux'])->toString());
     }
@@ -161,10 +161,12 @@ final class RegexTest extends TestCase
             [
                 'regex' => 'Missing "regex" in options array',
                 'spec'  => 'Missing "spec" in options array',
+                'name'  => 'Missing "name" in options array',
             ],
             [
                 'regex' => '/foo',
                 'spec'  => '/foo',
+                'name'  => 'foo',
             ]
         );
     }
@@ -176,7 +178,7 @@ final class RegexTest extends TestCase
         $raw     = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`-=[]\\;\',.~!@$^&*()_+{}|:"<>';
         $request = new Request();
         $request = $request->withUri(new Uri('http://example.com/' . $raw));
-        $route   = new Regex('/(?<foo>[^/]+)', '/%foo%');
+        $route   = new Regex('foo', '/(?<foo>[^/]+)', '/%foo%');
         $match   = $route->match($request);
 
         $this->assertNotNull($match);
@@ -193,7 +195,7 @@ final class RegexTest extends TestCase
 
         $request = new Request();
         $request = $request->withUri(new Uri('http://example.com/' . $in));
-        $route   = new Regex('/(?<foo>[^/]+)', '/%foo%');
+        $route   = new Regex('foo', '/(?<foo>[^/]+)', '/%foo%');
         $match   = $route->match($request);
 
         $this->assertNotNull($match);

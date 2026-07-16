@@ -7,6 +7,7 @@ namespace Laminas\Router\Http;
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Http\HttpRouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Laminas\Router\RoutePluginManager;
 use Override;
 use Psr\Http\Message\RequestInterface;
@@ -75,11 +76,14 @@ final readonly class Chain extends TreeRouteStack implements HttpRouteInterface
 
     /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?RouteMatchInterface {
         $mustTerminate = $pathOffset === null;
         $pathOffset  ??= 0;
-        $match         = new HttpRouteMatch([]);
+        $match         = new HttpRouteMatch([], '', 0);
         $pathLength    = strlen($request->getUri()->getPath());
 
         foreach ($this->routes->getAsArray() as $route) {
