@@ -93,7 +93,7 @@ final readonly class Chain extends TreeRouteStack implements HttpRouteInterface
                 return null;
             }
 
-            $match       = $match === null ? $subMatch : $match->merge($subMatch);
+            $match       = $match instanceof RouteMatchInterface ? $match->merge($subMatch) : $subMatch;
             $pathOffset += $subMatch->getLength();
         }
 
