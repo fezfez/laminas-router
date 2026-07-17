@@ -18,7 +18,7 @@ final readonly class HttpRouteMatch implements RouteMatchInterface
     /**
      * Create a part RouteMatch with given parameters and length.
      *
-     * @param array<string, string|int|null> $params
+     * @param array<string, string|int|float|null> $params
      */
     public function __construct(
         /**
@@ -36,7 +36,7 @@ final readonly class HttpRouteMatch implements RouteMatchInterface
     /**
      * Merge parameters from another match.
      */
-    public function merge(HttpRouteMatch $match): self
+    public function merge(RouteMatchInterface $match): self
     {
         $params = array_merge($this->params, $match->getParams());
         $length = $this->length + $match->getLength();
@@ -75,20 +75,9 @@ final readonly class HttpRouteMatch implements RouteMatchInterface
     }
 
     /**
-     * Set a parameter.
-     */
-    public function setParam(string $name, string $value): self
-    {
-        $params        = $this->params;
-        $params[$name] = $value;
-
-        return new self($params, $this->matchedRouteName, $this->length);
-    }
-
-    /**
      * Get all parameters.
      *
-     * @return array<string, string|int|null>
+     * @return array<string, string|int|float|null>
      */
     public function getParams(): array
     {
@@ -98,27 +87,12 @@ final readonly class HttpRouteMatch implements RouteMatchInterface
     /**
      * Get a specific parameter.
      */
-    public function getParam(string $name, ?string $default = null): int|string|null
+    public function getParam(string $name, ?string $default = null): int|float|string|null
     {
         if (array_key_exists($name, $this->params)) {
             return $this->params[$name];
         }
 
         return $default;
-    }
-
-    /**
-     * @param array<non-empty-string, non-empty-string> $defaults
-     */
-    public function setDefaults(array $defaults): self
-    {
-        $params = $this->params;
-        foreach ($defaults as $paramName => $value) {
-            if ($this->getParam($paramName) === null) {
-                $params[$paramName] = $value;
-            }
-        }
-
-        return new self($params, $this->matchedRouteName, $this->length);
     }
 }

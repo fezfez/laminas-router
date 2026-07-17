@@ -21,7 +21,7 @@ final readonly class Scheme implements HttpRouteInterface
     /**
      * Create a new scheme route.
      *
-     * @param array<string, string> $defaults
+     * @param array<string, string|int|float|null> $defaults
      */
     public function __construct(
         private string $name,
@@ -45,7 +45,7 @@ final readonly class Scheme implements HttpRouteInterface
         $name = $options['name'] ?? null;
         /** @psalm-var string|null $scheme */
         $scheme = $options['scheme'] ?? null;
-        /** @psalm-var array<string, string> $defaults */
+        /** @psalm-var array<string, string|int|float|null>  $defaults */
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;

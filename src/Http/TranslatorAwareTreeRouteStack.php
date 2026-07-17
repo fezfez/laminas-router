@@ -25,7 +25,7 @@ final readonly class TranslatorAwareTreeRouteStack extends TreeRouteStack
 {
     /**
      * @param array<non-empty-string|array-key, array|TRoute> $routes
-     * @param array<non-empty-string, non-empty-string> $defaultParams
+     * @param array<string, string|int|float|null> $defaultParams
      */
     public function __construct(
         RoutePluginManager $routePluginManager,
@@ -48,7 +48,7 @@ final readonly class TranslatorAwareTreeRouteStack extends TreeRouteStack
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
         $routes       = $options['routes'] ?? [];
         $routePlugins = $options['route_plugins'] ?? null;
-        /** @psalm-var array<non-empty-string, non-empty-string> $defaultParams */
+        /** @psalm-var array<string, string|int|float|null> $defaultParams */
         $defaultParams        = $options['default_params'] ?? [];
         $translator           = $options['translator'] ?? null;
         $translatorTextDomain = $options['translator_text_domain'] ?? TranslatorInterface::DEFAULT_TEXT_DOMAIN;

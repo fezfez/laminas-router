@@ -18,11 +18,10 @@ use function is_string;
 final readonly class Placeholder implements HttpRouteInterface
 {
     /**
-     * @param array<string, string> $defaults
+     * @param array<string, string|int|float|null> $defaults
      */
     public function __construct(
         private string $name,
-        /** @var array<string, string> */
         private array $defaults,
         private int|null $priority = null
     ) {
@@ -36,7 +35,7 @@ final readonly class Placeholder implements HttpRouteInterface
     public static function factory(array $options = []): self
     {
         $name = $options['name'] ?? null;
-        /** @var array<string, string> $defaults */
+        /** @psalm-var array<string, string|int|float|null>  $defaults */
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;

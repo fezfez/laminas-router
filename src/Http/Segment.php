@@ -45,7 +45,7 @@ final readonly class Segment implements HttpRouteInterface
      * Create a new regex route.
      *
      * @param array<string, string> $constraints
-     * @param array<string, string> $defaults
+     * @param array<string, string|int|float|null> $defaults
      */
     public function __construct(
         private string $name,
@@ -69,7 +69,7 @@ final readonly class Segment implements HttpRouteInterface
         $route = $options['route'] ?? null;
         /** @psalm-var array<non-empty-string, string> $constraints */
         $constraints = $options['constraints'] ?? [];
-        /** @psalm-var array<non-empty-string, string> $defaults */
+        /** @psalm-var array<string, string|int|float|null>  $defaults */
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;

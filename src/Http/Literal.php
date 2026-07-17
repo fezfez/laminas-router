@@ -11,8 +11,6 @@ use Laminas\Router\RouteMatchInterface;
 use Override;
 use Psr\Http\Message\RequestInterface;
 
-use function assert;
-use function is_array;
 use function is_string;
 use function strlen;
 use function strpos;
@@ -25,7 +23,7 @@ final readonly class Literal implements HttpRouteInterface
     /**
      * Create a new literal route.
      *
-     * @param  array<string, string> $defaults
+     * @param  array<string, string|int|float|null> $defaults
      */
     public function __construct(
         private string $name,
@@ -48,8 +46,9 @@ final readonly class Literal implements HttpRouteInterface
     #[Override]
     public static function factory(array $options = []): self
     {
-        $name     = $options['name'] ?? null;
-        $route    = $options['route'] ?? null;
+        $name  = $options['name'] ?? null;
+        $route = $options['route'] ?? null;
+        /** @psalm-var array<string, string|int|float|null> $defaults */
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;
@@ -61,10 +60,6 @@ final readonly class Literal implements HttpRouteInterface
         if (! is_string($name)) {
             throw new Exception\InvalidArgumentException('Missing "name" in options array');
         }
-
-        assert(is_array($defaults));
-
-        /** @psalm-var array<string, string> $defaults */
 
         return new self($name, $route, $defaults, $priority);
     }

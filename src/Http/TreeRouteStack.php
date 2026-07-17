@@ -34,7 +34,7 @@ readonly class TreeRouteStack extends SimpleRouteStack
 {
     /**
      * @param array<non-empty-string|array-key, array|TRoute> $routes
-     * @param array<non-empty-string, non-empty-string> $defaultParams
+     * @param array<string, string|int|float|null> $defaultParams
      */
     public function __construct(
         private RoutePluginManager $routePluginManager,
@@ -55,7 +55,7 @@ readonly class TreeRouteStack extends SimpleRouteStack
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
         $routes       = $options['routes'] ?? [];
         $routePlugins = $options['route_plugins'] ?? null;
-        /** @psalm-var array<non-empty-string, non-empty-string> $defaultParams */
+        /** @psalm-var array<string, string|int|float|null> $defaultParams */
         $defaultParams = $options['default_params'] ?? [];
 
         if (! $routePlugins instanceof RoutePluginManager) {
@@ -107,13 +107,16 @@ readonly class TreeRouteStack extends SimpleRouteStack
         }
 
         if (isset($specs['child_routes'])) {
-            $route = $this->routePluginManager->build(Part::class, [
+            /** @psalm-var array<string, string|int|float|null> $defaults */
+            $defaults = $specs['defaults'] ?? [];
+            $route    = $this->routePluginManager->build(Part::class, [
                 'name'          => $name,
                 'route'         => $route,
                 'may_terminate' => isset($specs['may_terminate']) && $specs['may_terminate'] === true,
                 'child_routes'  => $specs['child_routes'],
                 'route_plugins' => $this->routePluginManager,
                 'priority'      => $route->getPriority(),
+                'defaults'      => array_merge($defaults, $this->defaultParams),
             ]);
         }
 
@@ -141,7 +144,7 @@ readonly class TreeRouteStack extends SimpleRouteStack
         foreach ($this->routes->getAsArray() as $route) {
             $match = $route->match($request, $baseUrlLength, $options);
             if ($match instanceof HttpRouteMatch && ($pathLength === null || $match->getLength() === $pathLength)) {
-                return $match->setDefaults($this->defaultParams);
+                return $match; //->setDefaults($this->defaultParams);
             }
         }
 

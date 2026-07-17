@@ -6,8 +6,8 @@ namespace LaminasTest\Router\TestAsset;
 
 use InvalidArgumentException;
 use Laminas\Router\AssembledUrl;
+use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\RouteInterface;
-use Laminas\Router\RouteMatch;
 use Laminas\Router\RouteMatchInterface;
 use Psr\Http\Message\RequestInterface;
 
@@ -28,7 +28,7 @@ final readonly class DummyRouteWithParam implements RouteInterface
     /** @inheritDoc */
     public function match(RequestInterface $request): RouteMatchInterface
     {
-        return new RouteMatch(['foo' => 'bar'], $this->name);
+        return new HttpRouteMatch(['foo' => 'bar'], $this->name);
     }
 
     /** @inheritDoc */

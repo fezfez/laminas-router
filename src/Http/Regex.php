@@ -13,8 +13,6 @@ use Override;
 use Psr\Http\Message\RequestInterface;
 
 use function array_merge;
-use function assert;
-use function is_array;
 use function is_string;
 use function preg_match;
 use function rawurldecode;
@@ -33,7 +31,7 @@ final readonly class Regex implements HttpRouteInterface
      *
      * @param non-empty-string $regex
      * @param non-empty-string $spec
-     * @param array<non-empty-string, string|int> $defaults
+     * @param array<string, string|int|float|null> $defaults
      */
     public function __construct(
         private string $name,
@@ -49,8 +47,6 @@ final readonly class Regex implements HttpRouteInterface
         private string $spec,
         /**
          * Default values.
-         *
-         * @var array<non-empty-string, string|int>
          */
         private array $defaults = [],
         private int|null $priority = null,
@@ -64,9 +60,10 @@ final readonly class Regex implements HttpRouteInterface
     #[Override]
     public static function factory(array $options = []): self
     {
-        $name     = $options['name'] ?? null;
-        $regex    = $options['regex'] ?? null;
-        $spec     = $options['spec'] ?? null;
+        $name  = $options['name'] ?? null;
+        $regex = $options['regex'] ?? null;
+        $spec  = $options['spec'] ?? null;
+        /** @psalm-var array<string, string|int|float|null>  $defaults */
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;
@@ -80,7 +77,6 @@ final readonly class Regex implements HttpRouteInterface
         if (! is_string($name)) {
             throw new Exception\InvalidArgumentException('Missing "name" in options array');
         }
-        assert(is_array($defaults));
 
         /** @psalm-var array<non-empty-string, non-empty-string> $defaults */
 

@@ -16,7 +16,6 @@ use function array_diff_key;
 use function array_flip;
 use function array_key_last;
 use function array_reverse;
-use function assert;
 use function is_array;
 use function is_bool;
 use function strlen;
@@ -31,7 +30,7 @@ final readonly class Chain extends TreeRouteStack implements HttpRouteInterface
      * Create a new part route.
      *
      * @param array<array-key, array|TRoute> $routes
-     * @param array<non-empty-string, non-empty-string> $defaultParams
+     * @param array<string, string|int|float|null> $defaultParams
      */
     public function __construct(
         RoutePluginManager $routePluginManager,
@@ -65,11 +64,13 @@ final readonly class Chain extends TreeRouteStack implements HttpRouteInterface
 
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;
+        /** @psalm-var array<string, string|int|float|null> $defaults */
+        $defaults = $options['defaults'] ?? [];
 
         return new self(
             $routePlugins,
             $routes,
-            [],
+            $defaults,
             $priority,
         );
     }
@@ -83,7 +84,7 @@ final readonly class Chain extends TreeRouteStack implements HttpRouteInterface
     ): ?RouteMatchInterface {
         $mustTerminate = $pathOffset === null;
         $pathOffset  ??= 0;
-        $match         = new HttpRouteMatch([], '', 0);
+        $match         = new HttpRouteMatch($this->defaultParams, '', 0);
         $pathLength    = strlen($request->getUri()->getPath());
 
         foreach ($this->routes->getAsArray() as $route) {
@@ -92,8 +93,6 @@ final readonly class Chain extends TreeRouteStack implements HttpRouteInterface
             if ($subMatch === null) {
                 return null;
             }
-
-            assert($subMatch instanceof HttpRouteMatch);
 
             $match       = $match->merge($subMatch);
             $pathOffset += $subMatch->getLength();

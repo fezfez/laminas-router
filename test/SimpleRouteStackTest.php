@@ -17,7 +17,7 @@ use Laminas\Router\Http\Scheme;
 use Laminas\Router\Http\Segment;
 use Laminas\Router\PriorityList;
 use Laminas\Router\RouteInterface;
-use Laminas\Router\RouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Router\SimpleRouteStack;
 use Laminas\ServiceManager\ServiceManager;
@@ -44,7 +44,7 @@ final class SimpleRouteStackTest extends TestCase
             'foo' => new TestAsset\DummyRoute('foo'),
         ]);
 
-        $this->assertInstanceOf(RouteMatch::class, $stack->match(new Request()));
+        $this->assertInstanceOf(RouteMatchInterface::class, $stack->match(new Request()));
     }
 
     public function testSetRoutesAsArray(): void
@@ -55,7 +55,7 @@ final class SimpleRouteStackTest extends TestCase
             'foo' => new TestAsset\DummyRoute('foo'),
         ]);
 
-        $this->assertInstanceOf(RouteMatch::class, $stack->match(new Request()));
+        $this->assertInstanceOf(RouteMatchInterface::class, $stack->match(new Request()));
 
         $stack->setRoutes([]);
 
@@ -81,7 +81,7 @@ final class SimpleRouteStackTest extends TestCase
             'type' => TestAsset\DummyRoute::class,
         ]);
 
-        $this->assertInstanceOf(RouteMatch::class, $stack->match(new Request()));
+        $this->assertInstanceOf(RouteMatchInterface::class, $stack->match(new Request()));
     }
 
     public function testAddRouteAsArrayWithOptions(): void
@@ -92,7 +92,7 @@ final class SimpleRouteStackTest extends TestCase
             'options' => [],
         ]);
 
-        $this->assertInstanceOf(RouteMatch::class, $stack->match(new Request()));
+        $this->assertInstanceOf(RouteMatchInterface::class, $stack->match(new Request()));
     }
 
     public function testAddRouteAsArrayWithoutType(): void
@@ -180,11 +180,24 @@ final class SimpleRouteStackTest extends TestCase
         $stack->assemble([], ['name' => 'foo']);
     }
 
-    public function testDefaultParamIsAddedToMatch(): void
+    public function testDefaultParamIsNotAddedToMatchWhenRouteIsAnObject(): void
     {
         /** @var SimpleRouteStack<RouteInterface> $stack */
         $stack = new SimpleRouteStack(new RoutePluginManager(new ServiceManager()), defaultParams: ['foo' => 'bar']);
         $stack->addRoute('foo', new TestAsset\DummyRoute('foo'));
+
+        $match = $stack->match(new Request());
+        self::assertNotNull($match);
+
+        $this->assertNull($match->getParam('foo'));
+    }
+
+    public function testDefaultParamIsAddedToMatchWhenRouteIsAnArray(): void
+    {
+        $stack = new SimpleRouteStack($this->createRoutePluginManager(), defaultParams: ['foo' => 'bar']);
+        $stack->addRoute('foo', [
+            'type' => TestAsset\DummyRoute::class,
+        ]);
 
         $match = $stack->match(new Request());
         self::assertNotNull($match);
