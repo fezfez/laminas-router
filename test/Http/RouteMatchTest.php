@@ -11,53 +11,48 @@ final class RouteMatchTest extends TestCase
 {
     public function testParamsAreStored(): void
     {
-        $match = new HttpRouteMatch(['foo' => 'bar']);
+        $match = new HttpRouteMatch(['foo' => 'bar'], 'foo');
 
         $this->assertEquals(['foo' => 'bar'], $match->getParams());
     }
 
     public function testLengthIsStored(): void
     {
-        $match = new HttpRouteMatch([], 10);
+        $match = new HttpRouteMatch([], 'foo', 10);
 
         $this->assertEquals(10, $match->getLength());
     }
 
     public function testLengthIsMerged(): void
     {
-        $match = new HttpRouteMatch([], 10);
-        $match = $match->merge(new HttpRouteMatch([], 5));
+        $match = new HttpRouteMatch([], 'foo', 10);
+        $match = $match->merge(new HttpRouteMatch([], 'foo', 5));
 
         $this->assertEquals(15, $match->getLength());
     }
 
     public function testMatchedRouteNameIsSet(): void
     {
-        $match = new HttpRouteMatch([]);
-        $match = $match->setMatchedRouteName('foo');
+        $match = new HttpRouteMatch([], 'foo');
 
         $this->assertEquals('foo', $match->getMatchedRouteName());
     }
 
     public function testMatchedRouteNameIsPrependedWhenAlreadySet(): void
     {
-        $match = new HttpRouteMatch([]);
-        $match = $match->setMatchedRouteName('foo');
-        $match = $match->setMatchedRouteName('bar');
+        $match = new HttpRouteMatch([], 'foo');
+        $match = $match->merge(new HttpRouteMatch([], 'bar'));
 
-        $this->assertEquals('bar/foo', $match->getMatchedRouteName());
+        $this->assertEquals('foo/bar', $match->getMatchedRouteName());
     }
 
     public function testMatchedRouteNameIsOverriddenOnMerge(): void
     {
-        $match = new HttpRouteMatch([]);
-        $match = $match->setMatchedRouteName('foo');
-
-        $subMatch = new HttpRouteMatch([]);
-        $subMatch = $subMatch->setMatchedRouteName('bar');
+        $match    = new HttpRouteMatch([], 'foo');
+        $subMatch = new HttpRouteMatch([], 'bar');
 
         $match = $match->merge($subMatch);
 
-        $this->assertEquals('bar', $match->getMatchedRouteName());
+        $this->assertEquals('foo/bar', $match->getMatchedRouteName());
     }
 }

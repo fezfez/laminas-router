@@ -15,6 +15,7 @@ use Laminas\Router\Http\RouteDefinition\RouteDefinitionOption;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionParameter;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionPartInterface;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionTranslatedLiteral;
+use Laminas\Router\RouteMatchInterface;
 use Laminas\Translator\TranslatorInterface as Translator;
 use Override;
 use Psr\Http\Message\RequestInterface;
@@ -44,9 +45,10 @@ final readonly class Segment implements HttpRouteInterface
      * Create a new regex route.
      *
      * @param array<string, string> $constraints
-     * @param array<string, string> $defaults
+     * @param array<string, string|int|float|null> $defaults
      */
     public function __construct(
+        private string $name,
         string $route,
         array $constraints = [],
         private array $defaults = [],
@@ -63,10 +65,11 @@ final readonly class Segment implements HttpRouteInterface
     #[Override]
     public static function factory(array $options = []): self
     {
+        $name  = $options['name'] ?? null;
         $route = $options['route'] ?? null;
         /** @psalm-var array<non-empty-string, string> $constraints */
         $constraints = $options['constraints'] ?? [];
-        /** @psalm-var array<non-empty-string, string> $defaults */
+        /** @psalm-var array<string, string|int|float|null>  $defaults */
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;
@@ -75,7 +78,11 @@ final readonly class Segment implements HttpRouteInterface
             throw new Exception\InvalidArgumentException('Missing "route" in options array');
         }
 
-        return new self($route, $constraints, $defaults, $priority);
+        if (! is_string($name)) {
+            throw new Exception\InvalidArgumentException('Missing "name" in options array');
+        }
+
+        return new self($name, $route, $constraints, $defaults, $priority);
     }
 
     /**
@@ -289,8 +296,11 @@ final readonly class Segment implements HttpRouteInterface
      * @throws Exception\RuntimeException
      */
     #[Override]
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?RouteMatchInterface {
         $path  = $request->getUri()->getPath();
         $regex = $this->routeRegexBuildResult->regex;
 
@@ -329,7 +339,7 @@ final readonly class Segment implements HttpRouteInterface
             }
         }
 
-        return new HttpRouteMatch(array_merge($this->defaults, $params), $matchedLength);
+        return new HttpRouteMatch(array_merge($this->defaults, $params), $this->name, $matchedLength);
     }
 
     /** @inheritDoc */

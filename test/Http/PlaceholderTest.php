@@ -51,7 +51,7 @@ final class PlaceholderTest extends TestCase
     ];
     public function testMatch(): void
     {
-        $route = new Placeholder([]);
+        $route = new Placeholder('foo', []);
 
         $request = new Request();
         $request = $request->withUri(new Uri('http://example.com/'));
@@ -62,20 +62,28 @@ final class PlaceholderTest extends TestCase
 
     public function testAssembling(): void
     {
-        $route = new Placeholder([]);
+        $route = new Placeholder('foo', []);
         $this->assertEquals('', $route->assemble()->toString());
     }
 
     public function testGetAssembledParams(): void
     {
-        $route = new Placeholder([]);
+        $route = new Placeholder('foo', []);
         $this->assertEquals([], $route->assemble([])->assembledParams);
     }
 
     public function testFactory(): void
     {
         $tester = new FactoryTester();
-        $tester->testFactory(Placeholder::class, [], []);
+        $tester->testFactory(
+            Placeholder::class,
+            [
+                'name' => 'Missing "name" in options array',
+            ],
+            [
+                'name' => 'foo',
+            ]
+        );
     }
 
     #[DataProvider('placeholderProvider')]

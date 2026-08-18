@@ -14,6 +14,7 @@ use Laminas\Router\Http\RouteDefinition\RouteDefinitionLiteral;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionOption;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionParameter;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionPartInterface;
+use Laminas\Router\RouteMatchInterface;
 use Override;
 use Psr\Http\Message\RequestInterface;
 
@@ -42,9 +43,10 @@ final readonly class Hostname implements HttpRouteInterface
      * Create a new hostname route.
      *
      * @param array<non-empty-string, string> $constraints
-     * @param array<string, string> $defaults
+     * @param array<string, string|int|float|null> $defaults
      */
     public function __construct(
+        private string $name,
         string $route,
         array $constraints = [],
         private array $defaults = [],
@@ -61,10 +63,11 @@ final readonly class Hostname implements HttpRouteInterface
     #[Override]
     public static function factory(array $options = []): self
     {
+        $name  = $options['name'] ?? null;
         $route = $options['route'] ?? null;
         /** @psalm-var array<non-empty-string, string> $constraints */
         $constraints = $options['constraints'] ?? [];
-        /** @psalm-var array<string, string> $defaults */
+        /** @psalm-var array<string, string|int|float|null> $defaults */
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;
@@ -73,7 +76,11 @@ final readonly class Hostname implements HttpRouteInterface
             throw new Exception\InvalidArgumentException('Missing "route" in options array');
         }
 
-        return new self($route, $constraints, $defaults, $priority);
+        if (! is_string($name)) {
+            throw new Exception\InvalidArgumentException('Missing "name" in options array');
+        }
+
+        return new self($name, $route, $constraints, $defaults, $priority);
     }
 
     /**
@@ -238,8 +245,11 @@ final readonly class Hostname implements HttpRouteInterface
 
     /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?RouteMatchInterface {
         $host   = $request->getUri()->getHost();
         $result = preg_match('(^' . $this->routeRegexBuildResult->regex . '$)', $host, $matches);
 
@@ -255,7 +265,7 @@ final readonly class Hostname implements HttpRouteInterface
             }
         }
 
-        return new HttpRouteMatch(array_merge($this->defaults, $params));
+        return new HttpRouteMatch(array_merge($this->defaults, $params), $this->name, 0);
     }
 
     /** @inheritDoc */

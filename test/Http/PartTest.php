@@ -13,7 +13,7 @@ use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Part;
 use Laminas\Router\Http\Segment;
 use Laminas\Router\RouteInvokableFactory;
-use Laminas\Router\RouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
 use Laminas\Translator\TranslatorInterface;
@@ -308,7 +308,7 @@ final class PartTest extends TestCase
                 'route_plugins' => 'Missing "route_plugins" in options array',
             ],
             [
-                'route'         => new Literal('/foo'),
+                'route'         => new Literal('foo', '/foo'),
                 'route_plugins' => self::getRoutePlugins(),
             ]
         );
@@ -350,7 +350,7 @@ final class PartTest extends TestCase
         $request = $request->withUri($uri);
 
         $match = $route->match($request);
-        $this->assertInstanceOf(RouteMatch::class, $match);
+        $this->assertInstanceOf(RouteMatchInterface::class, $match);
         $this->assertEquals('resource', $match->getParam('action'));
     }
 

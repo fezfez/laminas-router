@@ -6,7 +6,7 @@ namespace Laminas\Router\Http;
 
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
-use Laminas\Router\RouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Laminas\Router\RoutePluginManager;
 use Override;
 use Psr\Http\Message\RequestInterface;
@@ -38,7 +38,7 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
      *
      * @param TRoute|array           $routes
      * @param array<non-empty-string, array|TRoute> $childRoutes
-     * @param array<non-empty-string, non-empty-string> $defaultParams
+     * @param array<string, string|int|float|null> $defaultParams
      * @throws Exception\InvalidArgumentException
      */
     public function __construct(
@@ -55,7 +55,7 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
         parent::__construct($routePluginManager, defaultParams: $defaultParams, priority: $priority);
 
         if (is_array($routes)) {
-            $routes = $this->routeFromArray($routes);
+            $routes = $this->routeFromArray('', $routes);
         }
 
         if ($routes instanceof self) {
@@ -81,6 +81,8 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
         $mayTerminate = $options['may_terminate'] ?? false;
         /** @var array<non-empty-string, TRoute> $childRoutes */
         $childRoutes = $options['child_routes'] ?? [];
+        /** @psalm-var array<string, string|int|float|null> $defaults */
+        $defaults = $options['defaults'] ?? [];
 
         if (! $routePlugins instanceof RoutePluginManager) {
             throw new Exception\InvalidArgumentException('Missing "route_plugins" in options array');
@@ -101,7 +103,7 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
         return new self(
             $routePlugins,
             $routes,
-            [],
+            $defaults,
             is_int($priority) ? $priority : null,
             $mayTerminate,
             $childRoutes,
@@ -114,7 +116,7 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
         RequestInterface $request,
         int|null $pathOffset = null,
         array $options = []
-    ): RouteMatch|null {
+    ): RouteMatchInterface|null {
         $pathOffset ??= 0;
         $match        = $this->route->match($request, $pathOffset, $options);
 
@@ -136,11 +138,11 @@ final readonly class Part extends TreeRouteStack implements HttpRouteInterface
                 }
             }
 
-            foreach ($this->routes->getAsArray() as $name => $route) {
+            foreach ($this->routes->getAsArray() as $route) {
                 $subMatch = $route->match($request, $nextOffset, $options);
-                if ($subMatch instanceof HttpRouteMatch) {
+                if ($subMatch instanceof RouteMatchInterface) {
                     if (($match->getLength() + $subMatch->getLength() + $pathOffset) === $pathLength) {
-                        return $match->merge($subMatch)->setMatchedRouteName($name);
+                        return $match->merge($subMatch);
                     }
                 }
             }

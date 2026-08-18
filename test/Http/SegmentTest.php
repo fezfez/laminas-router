@@ -36,145 +36,145 @@ final class SegmentTest extends TestCase
     {
         return [
             'simple-match'                                             => [
-                new Segment('/:foo'),
+                new Segment('foo', '/:foo'),
                 '/bar',
                 null,
                 ['foo' => 'bar'],
             ],
             'no-match-without-leading-slash'                           => [
-                new Segment(':foo'),
+                new Segment('foo', ':foo'),
                 '/bar/',
                 null,
                 null,
             ],
             'no-match-with-trailing-slash'                             => [
-                new Segment('/:foo'),
+                new Segment('foo', '/:foo'),
                 '/bar/',
                 null,
                 null,
             ],
             'offset-skips-beginning'                                   => [
-                new Segment(':foo'),
+                new Segment('foo', ':foo'),
                 '/bar',
                 1,
                 ['foo' => 'bar'],
             ],
             'offset-enables-partial-matching'                          => [
-                new Segment('/:foo'),
+                new Segment('foo', '/:foo'),
                 '/bar/baz',
                 0,
                 ['foo' => 'bar'],
             ],
             'match-overrides-default'                                  => [
-                new Segment('/:foo', [], ['foo' => 'baz']),
+                new Segment('foo', '/:foo', [], ['foo' => 'baz']),
                 '/bar',
                 null,
                 ['foo' => 'bar'],
             ],
             'constraints-prevent-match'                                => [
-                new Segment('/:foo', ['foo' => '\d+']),
+                new Segment('foo', '/:foo', ['foo' => '\d+']),
                 '/bar',
                 null,
                 null,
             ],
             'constraints-allow-match'                                  => [
-                new Segment('/:foo', ['foo' => '\d+']),
+                new Segment('foo', '/:foo', ['foo' => '\d+']),
                 '/123',
                 null,
                 ['foo' => '123'],
             ],
             'constraints-override-non-standard-delimiter'              => [
-                new Segment('/:foo{-}/bar', ['foo' => '[^/]+']),
+                new Segment('foo', '/:foo{-}/bar', ['foo' => '[^/]+']),
                 '/foo-bar/bar',
                 null,
                 ['foo' => 'foo-bar'],
             ],
             'constraints-with-parantheses-dont-break-parameter-map'    => [
-                new Segment('/:foo/:bar', ['foo' => '(bar)']),
+                new Segment('foo', '/:foo/:bar', ['foo' => '(bar)']),
                 '/bar/baz',
                 null,
                 ['foo' => 'bar', 'bar' => 'baz'],
             ],
             'simple-match-with-optional-parameter'                     => [
-                new Segment('/[:foo]', [], ['foo' => 'bar']),
+                new Segment('foo', '/[:foo]', [], ['foo' => 'bar']),
                 '/',
                 null,
                 ['foo' => 'bar'],
             ],
             'optional-parameter-is-ignored'                            => [
-                new Segment('/:foo[/:bar]'),
+                new Segment('foo', '/:foo[/:bar]'),
                 '/bar',
                 null,
                 ['foo' => 'bar'],
             ],
             'optional-parameter-is-provided-with-default'              => [
-                new Segment('/:foo[/:bar]', [], ['bar' => 'baz']),
+                new Segment('foo', '/:foo[/:bar]', [], ['bar' => 'baz']),
                 '/bar',
                 null,
                 ['foo' => 'bar', 'bar' => 'baz'],
             ],
             'optional-parameter-is-consumed'                           => [
-                new Segment('/:foo[/:bar]'),
+                new Segment('foo', '/:foo[/:bar]'),
                 '/bar/baz',
                 null,
                 ['foo' => 'bar', 'bar' => 'baz'],
             ],
             'optional-group-is-discared-with-missing-parameter'        => [
-                new Segment('/:foo[/:bar/:baz]', [], ['bar' => 'baz']),
+                new Segment('foo', '/:foo[/:bar/:baz]', [], ['bar' => 'baz']),
                 '/bar',
                 null,
                 ['foo' => 'bar', 'bar' => 'baz'],
             ],
             'optional-group-within-optional-group-is-ignored'          => [
-                new Segment('/:foo[/:bar[/:baz]]', [], ['bar' => 'baz', 'baz' => 'bat']),
+                new Segment('foo', '/:foo[/:bar[/:baz]]', [], ['bar' => 'baz', 'baz' => 'bat']),
                 '/bar',
                 null,
                 ['foo' => 'bar', 'bar' => 'baz', 'baz' => 'bat'],
             ],
             'non-standard-delimiter-before-parameter'                  => [
-                new Segment('/foo-:bar'),
+                new Segment('foo', '/foo-:bar'),
                 '/foo-baz',
                 null,
                 ['bar' => 'baz'],
             ],
             'non-standard-delimiter-between-parameters'                => [
-                new Segment('/:foo{-}-:bar'),
+                new Segment('foo', '/:foo{-}-:bar'),
                 '/bar-baz',
                 null,
                 ['foo' => 'bar', 'bar' => 'baz'],
             ],
             'non-standard-delimiter-before-optional-parameter'         => [
-                new Segment('/:foo{-/}[-:bar]/:baz'),
+                new Segment('foo', '/:foo{-/}[-:bar]/:baz'),
                 '/bar-baz/bat',
                 null,
                 ['foo' => 'bar', 'bar' => 'baz', 'baz' => 'bat'],
             ],
             'non-standard-delimiter-before-ignored-optional-parameter' => [
-                new Segment('/:foo{-/}[-:bar]/:baz'),
+                new Segment('foo', '/:foo{-/}[-:bar]/:baz'),
                 '/bar/bat',
                 null,
                 ['foo' => 'bar', 'baz' => 'bat'],
             ],
             'parameter-with-dash-in-name'                              => [
-                new Segment('/:foo-bar'),
+                new Segment('foo', '/:foo-bar'),
                 '/baz',
                 null,
                 ['foo-bar' => 'baz'],
             ],
             'url-encoded-parameters-are-decoded'                       => [
-                new Segment('/:foo'),
+                new Segment('foo', '/:foo'),
                 '/foo%20bar',
                 null,
                 ['foo' => 'foo bar'],
             ],
             'urlencode-flaws-corrected'                                => [
-                new Segment('/:foo'),
+                new Segment('foo', '/:foo'),
                 "/!$&'()*,-.:;=@_~+",
                 null,
                 ['foo' => "!$&'()*,-.:;=@_~+"],
             ],
             'empty-matches-are-replaced-with-defaults'                 => [
-                new Segment('/foo[/:bar]/baz-:baz', [], ['bar' => 'bar']),
+                new Segment('foo', '/foo[/:bar]/baz-:baz', [], ['bar' => 'bar']),
                 '/foo/baz-baz',
                 null,
                 ['bar' => 'bar', 'baz' => 'baz'],
@@ -221,28 +221,28 @@ final class SegmentTest extends TestCase
             });
 
         $this->matchingWithL10n(
-            new Segment('/{fw}', [], []),
+            new Segment('foo', '/{fw}', [], []),
             '/framework',
             null,
             [],
             ['translator' => $translator]
         );
         $this->matchingWithL10n(
-            new Segment('/{fw}', [], []),
+            new Segment('foo', '/{fw}', [], []),
             '/baukasten',
             null,
             [],
             ['translator' => $translator, 'locale' => 'de-DE']
         );
         $this->matchingWithL10n(
-            new Segment('/{fw}', [], []),
+            new Segment('foo', '/{fw}', [], []),
             '/fw',
             null,
             [],
             ['translator' => $translator, 'locale' => 'fr-FR']
         );
         $this->matchingWithL10n(
-            new Segment('/{fw}', [], []),
+            new Segment('foo', '/{fw}', [], []),
             '/fw-alternative',
             null,
             [],
@@ -250,28 +250,28 @@ final class SegmentTest extends TestCase
         );
 
         $this->assemblingWithL10n(
-            new Segment('/{fw}', [], []),
+            new Segment('foo', '/{fw}', [], []),
             '/framework',
             null,
             [],
             ['translator' => $translator]
         );
         $this->assemblingWithL10n(
-            new Segment('/{fw}', [], []),
+            new Segment('foo', '/{fw}', [], []),
             '/baukasten',
             null,
             [],
             ['translator' => $translator, 'locale' => 'de-DE']
         );
         $this->assemblingWithL10n(
-            new Segment('/{fw}', [], []),
+            new Segment('foo', '/{fw}', [], []),
             '/fw',
             null,
             [],
             ['translator' => $translator, 'locale' => 'fr-FR']
         );
         $this->assemblingWithL10n(
-            new Segment('/{fw}', [], []),
+            new Segment('foo', '/{fw}', [], []),
             '/fw-alternative',
             null,
             [],
@@ -423,12 +423,12 @@ final class SegmentTest extends TestCase
     {
         $this->expectException($exceptionName);
         $this->expectExceptionMessage($exceptionMessage);
-        new Segment($route);
+        new Segment('foo', $route);
     }
 
     public function testAssemblingWithMissingParameterInRoot(): void
     {
-        $route = new Segment('/:foo');
+        $route = new Segment('foo', '/:foo');
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing parameter "foo"');
@@ -437,7 +437,7 @@ final class SegmentTest extends TestCase
 
     public function testTranslatedAssemblingThrowsExceptionWithoutTranslator(): void
     {
-        $route = new Segment('/{foo}');
+        $route = new Segment('foo', '/{foo}');
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No translator provided');
@@ -446,7 +446,7 @@ final class SegmentTest extends TestCase
 
     public function testTranslatedMatchingThrowsExceptionWithoutTranslator(): void
     {
-        $route = new Segment('/{foo}');
+        $route = new Segment('foo', '/{foo}');
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No translator provided');
@@ -455,7 +455,7 @@ final class SegmentTest extends TestCase
 
     public function testNoMatchWithoutUriMethod(): void
     {
-        $route   = new Segment('/foo');
+        $route   = new Segment('foo', '/foo');
         $request = new Request();
 
         $this->assertNull($route->match($request));
@@ -463,7 +463,7 @@ final class SegmentTest extends TestCase
 
     public function testAssemblingWithExistingChild(): void
     {
-        $route = new Segment('/[:foo]', [], ['foo' => 'bar']);
+        $route = new Segment('foo', '/[:foo]', [], ['foo' => 'bar']);
         $path  = $route->assemble([], ['has_child' => true]);
 
         $this->assertEquals('/bar', $path->toString());
@@ -476,10 +476,12 @@ final class SegmentTest extends TestCase
             Segment::class,
             [
                 'route' => 'Missing "route" in options array',
+                'name'  => 'Missing "name" in options array',
             ],
             [
                 'route'       => '/:foo[/:bar{-}]',
                 'constraints' => ['foo' => 'bar'],
+                'name'        => 'foo',
             ]
         );
     }
@@ -491,7 +493,7 @@ final class SegmentTest extends TestCase
         $raw     = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`-=[]\\;\',.~!@$^&*()_+{}|:"<>';
         $request = new Request();
         $request = $request->withUri(new Uri('http://example.com/' . $raw));
-        $route   = new Segment('/:foo');
+        $route   = new Segment('foo', '/:foo');
         $match   = $route->match($request);
 
         self::assertNotNull($match);
@@ -508,7 +510,7 @@ final class SegmentTest extends TestCase
 
         $request = new Request();
         $request = $request->withUri(new Uri('http://example.com/' . $in));
-        $route   = new Segment('/:foo');
+        $route   = new Segment('foo', '/:foo');
         $match   = $route->match($request);
 
         self::assertNotNull($match);
@@ -522,7 +524,7 @@ final class SegmentTest extends TestCase
         $params2 = ['p1' => 6, 'p2' => 'test'];
         $uri2    = 'example.com/' . implode('/', $params2);
 
-        $route   = new Segment('example.com/:p1/:p2');
+        $route   = new Segment('foo', 'example.com/:p1/:p2');
         $request = new Request();
 
         $request = $request->withUri(new Uri($uri1));
@@ -536,14 +538,14 @@ final class SegmentTest extends TestCase
 
     public function testConstructWithEmptyRoute(): void
     {
-        $route = new Segment('');
+        $route = new Segment('foo', '');
 
         $this->assertSame('', $route->assemble([])->toString());
     }
 
     public function testMatchCapturesThreeParametersInOrder(): void
     {
-        $route   = new Segment('/:one/:two/:three');
+        $route   = new Segment('foo', '/:one/:two/:three');
         $request = (new Request())->withUri(new Uri('http://example.com/a/b/c'));
         $match   = $route->match($request);
 
@@ -560,7 +562,7 @@ final class SegmentTest extends TestCase
 
     public function testMatchLiteralWithRegexMetacharacters(): void
     {
-        $route   = new Segment('/foo.bar/:id');
+        $route   = new Segment('foo', '/foo.bar/:id');
         $request = (new Request())->withUri(new Uri('http://example.com/foo.bar/1'));
 
         $this->assertSame('1', $route->match($request)?->getParam('id'));
@@ -571,7 +573,7 @@ final class SegmentTest extends TestCase
 
     public function testAssembleOmitsNestedOptionalWhenDefaults(): void
     {
-        $route = new Segment('[:bar[/:baz]]', [], ['bar' => 'b', 'baz' => 'c']);
+        $route = new Segment('foo', '[:bar[/:baz]]', [], ['bar' => 'b', 'baz' => 'c']);
 
         $this->assertSame('', $route->assemble([])->toString());
         $this->assertSame('x', $route->assemble(['bar' => 'x'])->toString());
@@ -579,7 +581,7 @@ final class SegmentTest extends TestCase
 
     public function testAssembleNestedOptionalCollectsAssembledParamsFromBothLevels(): void
     {
-        $route = new Segment('[:bar[/:baz]]', [], ['bar' => 'b', 'baz' => 'c']);
+        $route = new Segment('foo', '[:bar[/:baz]]', [], ['bar' => 'b', 'baz' => 'c']);
 
         $this->assertSame(
             ['bar', 'baz'],
@@ -598,7 +600,7 @@ final class SegmentTest extends TestCase
             },
         );
 
-        $route   = new Segment('[/{outer}[/{inner}/:bar]]');
+        $route   = new Segment('foo', '[/{outer}[/{inner}/:bar]]');
         $request = (new Request())->withUri(new Uri('http://example.com/OUT/IN/x'));
 
         $match = $route->match($request, null, ['translator' => $translator]);

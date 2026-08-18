@@ -14,7 +14,7 @@ readonly final class AssembledUrl
 {
     /**
      * @param array<string, scalar> $query
-     * @param list<non-empty-string> $assembledParams
+     * @param list<string> $assembledParams
      * @param non-empty-string|null $host
      * @param non-empty-string|null $scheme
      */

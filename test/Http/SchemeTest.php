@@ -18,7 +18,7 @@ final class SchemeTest extends TestCase
         $request = new Request();
         $request = $request->withUri(new Uri('https://example.com/'));
 
-        $route = new Scheme('https');
+        $route = new Scheme('foo', 'https');
         $match = $route->match($request);
 
         $this->assertInstanceOf(HttpRouteMatch::class, $match);
@@ -29,7 +29,7 @@ final class SchemeTest extends TestCase
         $request = new Request();
         $request = $request->withUri(new Uri('http://example.com/'));
 
-        $route = new Scheme('https');
+        $route = new Scheme('foo', 'https');
         $match = $route->match($request);
 
         $this->assertNull($match);
@@ -38,7 +38,7 @@ final class SchemeTest extends TestCase
     public function testAssembling(): void
     {
         $uri    = new Uri();
-        $route  = new Scheme('https');
+        $route  = new Scheme('foo', 'https');
         $result = $route->assemble([], ['uri' => $uri]);
 
         $this->assertEquals('', $result->toString());
@@ -47,7 +47,7 @@ final class SchemeTest extends TestCase
 
     public function testNoMatchWithoutUriMethod(): void
     {
-        $route   = new Scheme('https');
+        $route   = new Scheme('foo', 'https');
         $request = new Request();
 
         $this->assertNull($route->match($request));
@@ -55,7 +55,7 @@ final class SchemeTest extends TestCase
 
     public function testGetAssembledParams(): void
     {
-        $route = new Scheme('https');
+        $route = new Scheme('foo', 'https');
         $this->assertEquals([], $route->assemble(['foo' => 'bar'])->assembledParams);
     }
 
@@ -66,9 +66,11 @@ final class SchemeTest extends TestCase
             Scheme::class,
             [
                 'scheme' => 'Missing "scheme" in options array',
+                'name'   => 'Missing "name" in options array',
             ],
             [
                 'scheme' => 'http',
+                'name'   => 'foo',
             ]
         );
     }

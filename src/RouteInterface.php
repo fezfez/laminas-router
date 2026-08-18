@@ -20,12 +20,12 @@ interface RouteInterface
     /**
      * Match a given request.
      */
-    public function match(RequestInterface $request): RouteMatch|null;
+    public function match(RequestInterface $request): RouteMatchInterface|null;
 
     /**
      * Assemble the route.
      *
-     * @param array<non-empty-string, string|null|int|float> $params
+     * @param array<string, string|int|float|null> $params
      */
     public function assemble(array $params = [], array $options = []): AssembledUrl;
 

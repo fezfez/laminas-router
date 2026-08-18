@@ -8,12 +8,11 @@ use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Http\HttpRouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Override;
 use Psr\Http\Message\RequestInterface;
 
 use function array_merge;
-use function assert;
-use function is_array;
 use function is_string;
 use function preg_match;
 use function rawurldecode;
@@ -32,9 +31,10 @@ final readonly class Regex implements HttpRouteInterface
      *
      * @param non-empty-string $regex
      * @param non-empty-string $spec
-     * @param array<non-empty-string, string|int> $defaults
+     * @param array<string, string|int|float|null> $defaults
      */
     public function __construct(
+        private string $name,
         /**
          * Regex to match.
          */
@@ -47,8 +47,6 @@ final readonly class Regex implements HttpRouteInterface
         private string $spec,
         /**
          * Default values.
-         *
-         * @var array<non-empty-string, string|int>
          */
         private array $defaults = [],
         private int|null $priority = null,
@@ -62,8 +60,10 @@ final readonly class Regex implements HttpRouteInterface
     #[Override]
     public static function factory(array $options = []): self
     {
-        $regex    = $options['regex'] ?? null;
-        $spec     = $options['spec'] ?? null;
+        $name  = $options['name'] ?? null;
+        $regex = $options['regex'] ?? null;
+        $spec  = $options['spec'] ?? null;
+        /** @psalm-var array<string, string|int|float|null>  $defaults */
         $defaults = $options['defaults'] ?? [];
         /** @psalm-var int|null $priority */
         $priority = $options['priority'] ?? null;
@@ -74,17 +74,22 @@ final readonly class Regex implements HttpRouteInterface
         if (! is_string($spec) || $spec === '') {
             throw new Exception\InvalidArgumentException('Missing "spec" in options array');
         }
-        assert(is_array($defaults));
+        if (! is_string($name)) {
+            throw new Exception\InvalidArgumentException('Missing "name" in options array');
+        }
 
         /** @psalm-var array<non-empty-string, non-empty-string> $defaults */
 
-        return new self($regex, $spec, $defaults, $priority);
+        return new self($name, $regex, $spec, $defaults, $priority);
     }
 
     /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request, int|null $pathOffset = null, array $options = []): ?HttpRouteMatch
-    {
+    public function match(
+        RequestInterface $request,
+        int|null $pathOffset = null,
+        array $options = []
+    ): ?RouteMatchInterface {
         $path = $request->getUri()->getPath();
 
         if ($pathOffset !== null) {
@@ -107,7 +112,7 @@ final readonly class Regex implements HttpRouteInterface
             }
         }
 
-        return new HttpRouteMatch(array_merge($this->defaults, $cleanMatches), $matchedLength);
+        return new HttpRouteMatch(array_merge($this->defaults, $cleanMatches), $this->name, $matchedLength);
     }
 
     /** @inheritDoc */

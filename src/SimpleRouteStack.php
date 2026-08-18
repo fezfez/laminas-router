@@ -7,7 +7,6 @@ namespace Laminas\Router;
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\PriorityList;
-use Laminas\Router\RouteMatch;
 use Override;
 use Psr\Http\Message\RequestInterface;
 
@@ -35,14 +34,11 @@ readonly class SimpleRouteStack implements RouteStackInterface
 
     /**
      * @param array<non-empty-string|array-key, array|TRoute> $routes
-     * @param array<non-empty-string, non-empty-string> $defaultParams
+     * @param array<string, string|int|float|null> $defaultParams
      */
     public function __construct(
         private RoutePluginManager $routePluginManager,
         array $routes = [],
-        /**
-         * Default parameters.
-         */
         protected array $defaultParams = []
     ) {
         /** @var PriorityList<TRoute> $priorityList */
@@ -61,7 +57,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
         $routes       = $options['routes'] ?? [];
         $routePlugins = $options['route_plugins'] ?? null;
-        /** @psalm-var array<non-empty-string, non-empty-string> $defaultParams */
+        /** @psalm-var array<string, string|int|float|null> $defaultParams */
         $defaultParams = $options['default_params'] ?? [];
 
         if (! $routePlugins instanceof RoutePluginManager) {
@@ -93,7 +89,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
     public function addRoute(string $name, array|RouteInterface $route, ?int $priority = null): void
     {
         if (is_array($route)) {
-            $route = $this->routeFromArray($route);
+            $route = $this->routeFromArray($name, $route);
         }
 
         $this->routes->insert($name, $route, $priority);
@@ -149,7 +145,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
      * @return TRoute
      * @throws Exception\InvalidArgumentException
      */
-    protected function routeFromArray(array $specs): RouteInterface
+    protected function routeFromArray(string $name, array $specs): RouteInterface
     {
         $type = $specs['type'] ?? null;
         /** @var array<string, string> $option */
@@ -159,21 +155,27 @@ readonly class SimpleRouteStack implements RouteStackInterface
             throw new Exception\InvalidArgumentException('Missing "type" option');
         }
 
+        /** @psalm-var array<string, string|int|float|null> $defaults */
+        $defaults = $option['defaults'] ?? [];
         /** @psalm-var TRoute $route */
-        $route = $this->routePluginManager->build($type, [...$option, 'priority' => $specs['priority'] ?? null]);
+        $route = $this->routePluginManager->build($type, [
+            ...$option,
+            'priority' => $specs['priority'] ?? null,
+            'name'     => $name,
+            'defaults' => array_merge($defaults, $this->defaultParams),
+        ]);
 
         return $route;
     }
 
     /** @inheritDoc */
     #[Override]
-    public function match(RequestInterface $request): ?RouteMatch
+    public function match(RequestInterface $request): ?RouteMatchInterface
     {
-        foreach ($this->routes->getAsArray() as $name => $route) {
+        foreach ($this->routes->getAsArray() as $route) {
             $match = $route->match($request);
             if ($match !== null) {
-                $match = $match->setMatchedRouteName($name);
-                return $match->setDefaults($this->defaultParams);
+                return $match;
             }
         }
 

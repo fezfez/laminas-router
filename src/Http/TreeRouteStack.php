@@ -8,7 +8,7 @@ use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\RouteInterface;
-use Laminas\Router\RouteMatch;
+use Laminas\Router\RouteMatchInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\Router\SimpleRouteStack;
 use Override;
@@ -34,7 +34,7 @@ readonly class TreeRouteStack extends SimpleRouteStack
 {
     /**
      * @param array<non-empty-string|array-key, array|TRoute> $routes
-     * @param array<non-empty-string, non-empty-string> $defaultParams
+     * @param array<string, string|int|float|null> $defaultParams
      */
     public function __construct(
         private RoutePluginManager $routePluginManager,
@@ -55,7 +55,7 @@ readonly class TreeRouteStack extends SimpleRouteStack
         /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
         $routes       = $options['routes'] ?? [];
         $routePlugins = $options['route_plugins'] ?? null;
-        /** @psalm-var array<non-empty-string, non-empty-string> $defaultParams */
+        /** @psalm-var array<string, string|int|float|null> $defaultParams */
         $defaultParams = $options['default_params'] ?? [];
 
         if (! $routePlugins instanceof RoutePluginManager) {
@@ -81,7 +81,7 @@ readonly class TreeRouteStack extends SimpleRouteStack
             );
         }
         if (is_array($route)) {
-            $route = $this->routeFromArray($route);
+            $route = $this->routeFromArray($name, $route);
         }
 
         assert($route instanceof HttpRouteInterface);
@@ -98,23 +98,25 @@ readonly class TreeRouteStack extends SimpleRouteStack
      * @throws Exception\RuntimeException         When a generated routes does not implement the HTTP route interface.
      */
     #[Override]
-    final protected function routeFromArray(array $specs): RouteInterface
+    final protected function routeFromArray(string $name, array $specs): RouteInterface
     {
-        $route = $this->buildChainRoute($specs);
+        $route = $this->buildChainRoute($name, $specs);
 
         if (! $route instanceof HttpRouteInterface) {
             throw new Exception\RuntimeException('Given route does not implement HTTP route interface');
         }
 
         if (isset($specs['child_routes'])) {
-            $route = $this->routePluginManager->build(Part::class, [
-                ...[
-                    'route'         => $route,
-                    'may_terminate' => isset($specs['may_terminate']) && $specs['may_terminate'] === true,
-                    'child_routes'  => $specs['child_routes'],
-                    'route_plugins' => $this->routePluginManager,
-                ],
-                'priority' => $route->getPriority(),
+            /** @psalm-var array<string, string|int|float|null> $defaults */
+            $defaults = $specs['defaults'] ?? [];
+            $route    = $this->routePluginManager->build(Part::class, [
+                'name'          => $name,
+                'route'         => $route,
+                'may_terminate' => isset($specs['may_terminate']) && $specs['may_terminate'] === true,
+                'child_routes'  => $specs['child_routes'],
+                'route_plugins' => $this->routePluginManager,
+                'priority'      => $route->getPriority(),
+                'defaults'      => array_merge($defaults, $this->defaultParams),
             ]);
         }
 
@@ -131,7 +133,7 @@ readonly class TreeRouteStack extends SimpleRouteStack
         RequestInterface $request,
         int|null $pathOffset = null,
         array $options = []
-    ): ?RouteMatch {
+    ): ?RouteMatchInterface {
         $baseUrlLength = $pathOffset;
         $pathLength    = null;
 
@@ -139,12 +141,10 @@ readonly class TreeRouteStack extends SimpleRouteStack
             $pathLength = strlen($request->getUri()->getPath()) - $baseUrlLength;
         }
 
-        foreach ($this->routes->getAsArray() as $name => $route) {
+        foreach ($this->routes->getAsArray() as $route) {
             $match = $route->match($request, $baseUrlLength, $options);
             if ($match instanceof HttpRouteMatch && ($pathLength === null || $match->getLength() === $pathLength)) {
-                $match = $match->setMatchedRouteName($name);
-
-                return $match->setDefaults($this->defaultParams);
+                return $match; //->setDefaults($this->defaultParams);
             }
         }
 
@@ -252,10 +252,10 @@ readonly class TreeRouteStack extends SimpleRouteStack
         return $this->priority;
     }
 
-    private function buildChainRoute(array $specs): RouteInterface
+    private function buildChainRoute(string $name, array $specs): RouteInterface
     {
         if (! isset($specs['chain_routes'])) {
-            return parent::routeFromArray($specs);
+            return parent::routeFromArray($name, $specs);
         }
 
         if (! is_array($specs['chain_routes'])) {

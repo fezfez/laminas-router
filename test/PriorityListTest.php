@@ -21,7 +21,7 @@ final class PriorityListTest extends TestCase
 
     public function testInsert(): void
     {
-        $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
+        $this->list->insert('foo', new TestAsset\DummyRoute('foo'), 0);
 
         $this->assertCount(1, $this->list->getAsArray());
         $this->assertSame(['foo'], array_keys([...$this->list->getAsArray()]));
@@ -29,16 +29,16 @@ final class PriorityListTest extends TestCase
 
     public function testInsertDuplicateRouteThrowsException(): void
     {
-        $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
+        $this->list->insert('foo', new TestAsset\DummyRoute('foo'), 0);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Route with name "foo" already exists');
-        $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
+        $this->list->insert('foo', new TestAsset\DummyRoute('foo'), 0);
     }
 
     public function testInsertAfterRemoveSucceeds(): void
     {
-        $route = new TestAsset\DummyRoute();
+        $route = new TestAsset\DummyRoute('foo');
 
         $this->list->insert('foo', $route, 0);
         $this->list->remove('foo');
@@ -49,8 +49,8 @@ final class PriorityListTest extends TestCase
 
     public function testRemove(): void
     {
-        $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
-        $this->list->insert('bar', new TestAsset\DummyRoute(), 0);
+        $this->list->insert('foo', new TestAsset\DummyRoute('foo'), 0);
+        $this->list->insert('bar', new TestAsset\DummyRoute('bar'), 0);
 
         $this->assertCount(2, $this->list->getAsArray());
 
@@ -67,8 +67,8 @@ final class PriorityListTest extends TestCase
 
     public function testClear(): void
     {
-        $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
-        $this->list->insert('bar', new TestAsset\DummyRoute(), 0);
+        $this->list->insert('foo', new TestAsset\DummyRoute('foo'), 0);
+        $this->list->insert('bar', new TestAsset\DummyRoute('bar'), 0);
 
         $this->assertCount(2, $this->list->getAsArray());
 
@@ -79,7 +79,7 @@ final class PriorityListTest extends TestCase
 
     public function testGet(): void
     {
-        $route = new TestAsset\DummyRoute();
+        $route = new TestAsset\DummyRoute('foo');
 
         $this->list->insert('foo', $route, 0);
 
@@ -89,36 +89,36 @@ final class PriorityListTest extends TestCase
 
     public function testLIFOOnly(): void
     {
-        $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
-        $this->list->insert('bar', new TestAsset\DummyRoute(), 0);
-        $this->list->insert('baz', new TestAsset\DummyRoute(), 0);
+        $this->list->insert('foo', new TestAsset\DummyRoute('foo'), 0);
+        $this->list->insert('bar', new TestAsset\DummyRoute('bar'), 0);
+        $this->list->insert('baz', new TestAsset\DummyRoute('baz'), 0);
 
         $this->assertEquals(['baz', 'bar', 'foo'], array_keys([...$this->list->getAsArray()]));
     }
 
     public function testPriorityOnly(): void
     {
-        $this->list->insert('foo', new TestAsset\DummyRoute(), 1);
-        $this->list->insert('bar', new TestAsset\DummyRoute(), 0);
-        $this->list->insert('baz', new TestAsset\DummyRoute(), 2);
+        $this->list->insert('foo', new TestAsset\DummyRoute('foo'), 1);
+        $this->list->insert('bar', new TestAsset\DummyRoute('bar'), 0);
+        $this->list->insert('baz', new TestAsset\DummyRoute('baz'), 2);
 
         $this->assertEquals(['baz', 'foo', 'bar'], array_keys([...$this->list->getAsArray()]));
     }
 
     public function testLIFOWithPriority(): void
     {
-        $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
-        $this->list->insert('bar', new TestAsset\DummyRoute(), 0);
-        $this->list->insert('baz', new TestAsset\DummyRoute(), 1);
+        $this->list->insert('foo', new TestAsset\DummyRoute('foo'), 0);
+        $this->list->insert('bar', new TestAsset\DummyRoute('bar'), 0);
+        $this->list->insert('baz', new TestAsset\DummyRoute('baz'), 1);
 
         $this->assertEquals(['baz', 'bar', 'foo'], array_keys([...$this->list->getAsArray()]));
     }
 
     public function testPriorityWithNegativesAndNull(): void
     {
-        $this->list->insert('foo', new TestAsset\DummyRoute(), 0);
-        $this->list->insert('bar', new TestAsset\DummyRoute(), 1);
-        $this->list->insert('baz', new TestAsset\DummyRoute(), -1);
+        $this->list->insert('foo', new TestAsset\DummyRoute('foo'), 0);
+        $this->list->insert('bar', new TestAsset\DummyRoute('bar'), 1);
+        $this->list->insert('baz', new TestAsset\DummyRoute('baz'), -1);
 
         $this->assertEquals(['bar', 'foo', 'baz'], array_keys([...$this->list->getAsArray()]));
     }
