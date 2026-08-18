@@ -70,7 +70,7 @@ logic is consolidated into `Laminas\Router\Http\HttpRouteMatch`.
 `Laminas\Router\Http\HttpRouteMatch`.
 
 **Note:** Where you are consuming or producing "Route Match" instances, prefer a type hint of `Laminas\Router\RouteMatchInterface`.
-This interface is implemented by `Laminas\Router\Http\HttpRouteMatch`, and, if you are generating custom route matching results, you must implement this interface to ensure compatibility with version 4. 
+This interface is implemented by `Laminas\Router\Http\HttpRouteMatch`, and, if you are generating custom route matching results, you must implement this interface to ensure compatibility with version 4.
 
 ### Service Manager v2 compatibility
 
