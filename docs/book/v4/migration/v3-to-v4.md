@@ -16,12 +16,12 @@ first. Version 4 requires **PHP 8.2+**, which is already required by 3.18.x.
 
 ## Dependency changes
 
-| Package | v3 | v4 |
-| --- | --- | --- |
-| `laminas/laminas-servicemanager` | `^3.14` | `^4.5` |
-| `psr/http-message` | not required | `^1.1 \|\| ^2.0` (direct) |
-| `laminas/laminas-translator` | not required | `^1.3 \|\| ^2.0` (direct) |
-| `laminas/laminas-uri` | required | **removed** |
+| Package                          | v3           | v4                        |
+|----------------------------------|--------------|---------------------------|
+| `laminas/laminas-servicemanager` | `^3.14`      | `^4.5`                    |
+| `psr/http-message`               | not required | `^1.1 \|\| ^2.0` (direct) |
+| `laminas/laminas-translator`     | not required | `^1.3 \|\| ^2.0` (direct) |
+| `laminas/laminas-uri`            | required     | **removed**               |
 
 URL assembly no longer uses `Laminas\Uri\Http`. Use the new `AssembledUrl` value
 object and PSR-7 `UriInterface` instead (see below).
@@ -68,6 +68,9 @@ logic is consolidated into `Laminas\Router\Http\HttpRouteMatch`.
 
 **Migration:** Replace all references to `Laminas\Router\Http\RouteMatch` with
 `Laminas\Router\Http\HttpRouteMatch`.
+
+**Note:** Where you are consuming or producing "Route Match" instances, prefer a type hint of `Laminas\Router\RouteMatchInterface`.
+This interface is implemented by `Laminas\Router\Http\HttpRouteMatch`, and, if you are generating custom route matching results, you must implement this interface to ensure compatibility with version 4. 
 
 ### Service Manager v2 compatibility
 
@@ -143,14 +146,14 @@ The `'normalize_path'` assemble option has been removed.
 The following methods have been removed from `SimpleRouteStack` and
 `TreeRouteStack`:
 
-| Removed (v3) | v4 replacement |
-| --- | --- |
-| `setRoutePluginManager()` / `getRoutePluginManager()` | Pass a `RoutePluginManager` instance to `factory(['route_plugins' => $manager])` |
-| `setDefaultParams()` / `setDefaultParam()` | `factory(['default_params' => [...]])` |
-| `setBaseUrl()` / `getBaseUrl()` | Pass `$pathOffset` to `TreeRouteStack::match($request, $pathOffset)` |
-| `setRequestUri()` / `getRequestUri()` | Pass `'uri'` assemble option |
-| `addPrototype()` / `addPrototypes()` / `getPrototype()` | Removed |
-| `init()` hook | Removed |
+| Removed (v3)                                            | v4 replacement                                                                   |
+|---------------------------------------------------------|----------------------------------------------------------------------------------|
+| `setRoutePluginManager()` / `getRoutePluginManager()`   | Pass a `RoutePluginManager` instance to `factory(['route_plugins' => $manager])` |
+| `setDefaultParams()` / `setDefaultParam()`              | `factory(['default_params' => [...]])`                                           |
+| `setBaseUrl()` / `getBaseUrl()`                         | Pass `$pathOffset` to `TreeRouteStack::match($request, $pathOffset)`             |
+| `setRequestUri()` / `getRequestUri()`                   | Pass `'uri'` assemble option                                                     |
+| `addPrototype()` / `addPrototypes()` / `getPrototype()` | Removed                                                                          |
+| `init()` hook                                           | Removed                                                                          |
 
 Built-in route classes (`Literal`, `Segment`, `Part`, etc.) are `final readonly`
 and cannot be extended. Implement `RouteInterface` or `HttpRouteInterface`
@@ -237,11 +240,11 @@ segments may still be returned as integers when parsed from the path.
 
 ### `ConfigProvider` output
 
-| v3 | v4 |
-| --- | --- |
-| `'dependencies'` | `'dependencies'` (unchanged key) |
-| `'route_manager'` (empty array) | **removed** |
-| (no router block) | `'router' => ['router_class' => TreeRouteStack::class, 'route_plugins' => RoutePluginManager::class]` |
+| v3                              | v4                                                                                                    |
+|---------------------------------|-------------------------------------------------------------------------------------------------------|
+| `'dependencies'`                | `'dependencies'` (unchanged key)                                                                      |
+| `'route_manager'` (empty array) | **removed**                                                                                           |
+| (no router block)               | `'router' => ['router_class' => TreeRouteStack::class, 'route_plugins' => RoutePluginManager::class]` |
 
 **Migration:** Move custom route plugin manager configuration from the top-level
 `'route_manager'` key to the `'dependencies'` configuration targeting
@@ -269,13 +272,13 @@ segments may still be returned as integers when parsed from the path.
 
 The following aliases are no longer registered by the component:
 
-| Removed alias | Target (v3) |
-| --- | --- |
-| `'HttpRouter'` | `TreeRouteStack::class` |
-| `'router'` / `'Router'` | `RouteStackInterface::class` |
-| `'RoutePluginManager'` | `RoutePluginManager::class` |
-| `'Zend\Router\Http\TreeRouteStack'` | `TreeRouteStack::class` |
-| `'Zend\Router\RoutePluginManager'` | `RoutePluginManager::class` |
+| Removed alias                       | Target (v3)                  |
+|-------------------------------------|------------------------------|
+| `'HttpRouter'`                      | `TreeRouteStack::class`      |
+| `'router'` / `'Router'`             | `RouteStackInterface::class` |
+| `'RoutePluginManager'`              | `RoutePluginManager::class`  |
+| `'Zend\Router\Http\TreeRouteStack'` | `TreeRouteStack::class`      |
+| `'Zend\Router\RoutePluginManager'`  | `RoutePluginManager::class`  |
 | `'Zend\Router\RouteStackInterface'` | `RouteStackInterface::class` |
 
 **Migration:** Resolve services by FQCN:
@@ -340,23 +343,23 @@ silently replaced the existing one.
 
 ## Quick-reference checklist
 
-| Area | Action |
-| --- | --- |
-| PHP version | Ensure 8.2+ |
-| Service Manager | Upgrade to ^4.5 |
-| `Wildcard` routes | Migrate to `Segment` |
-| `Http\RouteMatch` | Use `HttpRouteMatch` |
-| `Http\RouteInterface` | Use `HttpRouteInterface` |
-| `Module` | Use `ConfigProvider` |
-| `'route_manager'` config | Move to `dependencies[RoutePluginManager::class]` |
-| Service aliases (`HttpRouter`, etc.) | Use FQCNs or re-add aliases in app config |
-| `assemble()` return value | Call `->toString()` or use `AssembledUrl` properties |
-| Requests | PSR-7 `RequestInterface` |
-| Mutable router setup | Configure via `factory()` / constructor |
-| Translator | `laminas-translator`; configure at creation time |
-| Canonical URLs | Pass `'uri' => $request->getUri()` with `'force_canonical'` |
-| `laminas-uri` | Remove direct usage; use PSR-7 URIs + `AssembledUrl` |
-| Custom route classes | Implement `getPriority()`, return `AssembledUrl`, accept PSR-7 |
-| Extending built-in routes | Not possible (`final readonly`); implement interfaces instead |
-| Fluent stack chaining | Use separate method calls |
-| Duplicate route names | Handle `InvalidArgumentException` or use unique names |
+| Area                                 | Action                                                         |
+|--------------------------------------|----------------------------------------------------------------|
+| PHP version                          | Ensure 8.2+                                                    |
+| Service Manager                      | Upgrade to ^4.5                                                |
+| `Wildcard` routes                    | Migrate to `Segment`                                           |
+| `Http\RouteMatch`                    | Use `HttpRouteMatch`                                           |
+| `Http\RouteInterface`                | Use `HttpRouteInterface`                                       |
+| `Module`                             | Use `ConfigProvider`                                           |
+| `'route_manager'` config             | Move to `dependencies[RoutePluginManager::class]`              |
+| Service aliases (`HttpRouter`, etc.) | Use FQCNs or re-add aliases in app config                      |
+| `assemble()` return value            | Call `->toString()` or use `AssembledUrl` properties           |
+| Requests                             | PSR-7 `RequestInterface`                                       |
+| Mutable router setup                 | Configure via `factory()` / constructor                        |
+| Translator                           | `laminas-translator`; configure at creation time               |
+| Canonical URLs                       | Pass `'uri' => $request->getUri()` with `'force_canonical'`    |
+| `laminas-uri`                        | Remove direct usage; use PSR-7 URIs + `AssembledUrl`           |
+| Custom route classes                 | Implement `getPriority()`, return `AssembledUrl`, accept PSR-7 |
+| Extending built-in routes            | Not possible (`final readonly`); implement interfaces instead  |
+| Fluent stack chaining                | Use separate method calls                                      |
+| Duplicate route names                | Handle `InvalidArgumentException` or use unique names          |
