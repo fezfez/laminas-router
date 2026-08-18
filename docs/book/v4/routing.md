@@ -32,14 +32,13 @@ A `Route` accepts a `Request`, and determines if it matches. If so, it returns a
 ```php
 namespace Laminas\Router;
 
-class RouteMatch
+interface RouteMatchInterface
 {
-    public function __construct(array $params);
-    public function setMatchedRouteName(string $name): static;
-    public function getMatchedRouteName(): string|null;
-    public function setParam(string $name, string $value): static;
+    public function getMatchedRouteName(): string;
     public function getParams(): array;
-    public function getParam(string $name, string $default = null): int|string|null;
+    public function getParam(string $name, string|null $default = null): int|float|string|null;
+    public function merge(RouteMatchInterface $match): self;
+    public function getLength(): int;
 }
 ```
 
@@ -72,11 +71,14 @@ interface RouteStackInterface extends RouteInterface
 ```
 
 Routes will be queried in a LIFO order, and hence the reason behind the name
-`RouteStack`. laminas-router provides two implementations of this interface,
+`RouteStack`. `laminas-router` provides two implementations of this interface,
 `SimpleRouteStack` and `TreeRouteStack`. In each, you register routes either one
 at a time using `addRoute()`, or in bulk using `addRoutes()`.
 
 ```php
+use Laminas\Router\RouteStackInterface;
+use Laminas\Router\Http\Literal;
+
 // One at a time:
 $route = Literal::factory([
     'route' => '/foo',
@@ -85,6 +87,7 @@ $route = Literal::factory([
         'action'     => 'index',
     ],
 ]);
+assert($router instanceof RouteStackInterface);
 $router->addRoute('foo', $route);
 
 // In bulk:
@@ -353,8 +356,6 @@ You may use any route type as a child route of a `Part` route.
 > of standard HTTP routes.
 
 ### Laminas\\Router\\Http\\Placeholder
-
-- **Since 3.2.0**
 
 A `Placeholder` route is provided for use by reusable modules. The idea is that a
 module can provide a set of routes anchored by a placeholder route type. The end
