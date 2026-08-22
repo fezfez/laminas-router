@@ -48,8 +48,11 @@ final readonly class HttpRouterFactory implements FactoryInterface
 
         $config['route_plugins'] = $routePluginManager;
 
-        if (isset($config['router']['translator'])) {
-            $translator = $container->get($config['router']['translator']);
+        if ($class === TranslatorAwareTreeRouteStack::class) {
+            $translaterServiceName = $config['router']['translator']
+                             ?? TranslatorInterface::class;
+
+            $translator = $container->get($translaterServiceName);
             assert($translator instanceof TranslatorInterface);
             $config['translator'] = $translator;
         }
