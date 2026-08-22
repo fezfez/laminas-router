@@ -10,7 +10,9 @@ use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\TranslatorAwareTreeRouteStack;
+use Laminas\Router\Http\TranslatorAwareTreeRouteStackFactory;
 use Laminas\Router\RoutePluginManager;
+use Laminas\ServiceManager\Exception\ServiceNotFoundException;
 use Laminas\ServiceManager\ServiceManager;
 use Laminas\Translator\TranslatorInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -161,14 +163,21 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
     public function testTranslatorIsRequired(): void
     {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Invalid "translator" option');
+        $this->expectException(ServiceNotFoundException::class);
+        $this->expectExceptionMessage(TranslatorInterface::class);
+
+        $container = new ServiceManager();
+        new RoutePluginManager($container);
 
         self::assertInstanceOf(
             TranslatorAwareTreeRouteStack::class,
-            TranslatorAwareTreeRouteStack::factory([
+            (new TranslatorAwareTreeRouteStackFactory())->__invoke(
+            $container,
+                TranslatorAwareTreeRouteStack::class,
+                [
                 'route_plugins' => new RoutePluginManager(new ServiceManager()),
-            ])
+                ]
+            )
         );
     }
 }

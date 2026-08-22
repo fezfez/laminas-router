@@ -29,9 +29,9 @@ final class SimpleRouteStackTest extends TestCase
     private function createRoutePluginManager(): RoutePluginManager
     {
         return new RoutePluginManager(new ServiceManager(), [
-            'invokables' => [
-                TestAsset\DummyRoute::class          => TestAsset\DummyRoute::class,
-                TestAsset\DummyRouteWithParam::class => TestAsset\DummyRouteWithParam::class,
+            'factories' => [
+                TestAsset\DummyRoute::class          => TestAsset\DummyRouteFactory::class,
+                TestAsset\DummyRouteWithParam::class => TestAsset\DummyRouteWithParamFactory::class,
             ],
         ]);
     }

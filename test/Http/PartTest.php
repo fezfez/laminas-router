@@ -12,7 +12,9 @@ use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Part;
 use Laminas\Router\Http\Segment;
-use Laminas\Router\RouteInvokableFactory;
+use Laminas\Router\Http\LiteralFactory;
+use Laminas\Router\Http\PartFactory;
+use Laminas\Router\Http\SegmentFactory;
 use Laminas\Router\RouteMatchInterface;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
@@ -29,9 +31,10 @@ use function strpos;
 
 final class PartTest extends TestCase
 {
-    public static function getRoutePlugins(): RoutePluginManager
+    public static function getRoutePlugins(?ServiceManager $container = null): RoutePluginManager
     {
-        return new RoutePluginManager(new ServiceManager(), [
+        $container ??= new ServiceManager();
+        $plugins = new RoutePluginManager($container, [
             'aliases'   => [
                 'literal' => Literal::class,
                 'Literal' => Literal::class,
@@ -41,11 +44,12 @@ final class PartTest extends TestCase
                 'Segment' => Segment::class,
             ],
             'factories' => [
-                Literal::class => RouteInvokableFactory::class,
-                Part::class    => RouteInvokableFactory::class,
-                Segment::class => RouteInvokableFactory::class,
+                Literal::class => LiteralFactory::class,
+                Part::class    => PartFactory::class,
+                Segment::class => SegmentFactory::class,
             ],
         ]);
+        return $plugins;
     }
 
     public static function getRoute(): Part
@@ -343,7 +347,13 @@ final class PartTest extends TestCase
             ],
         ];
 
-        $route   = Part::factory($options);
+        $container = new ServiceManager();
+        $plugins   = self::getRoutePlugins($container);
+        $route     = (new PartFactory())->__invoke(
+            $container,
+            Part::class,
+            [...$options, 'route_plugins' => $plugins]
+        );
         $request = new Request();
         $uri     = new Uri('http://example.com/resource?foo=bar');
         $uri     = $uri->withQuery('foo');

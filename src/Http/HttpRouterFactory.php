@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Laminas\Router\Http;
 
 use Laminas\Router\ConfigProvider;
-use Laminas\Router\RoutePluginManager;
 use Laminas\Router\RouteStackInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Laminas\Translator\TranslatorInterface;
@@ -33,28 +32,7 @@ final readonly class HttpRouterFactory implements FactoryInterface
         string $requestedName,
         ?array $options = null
     ): RouteStackInterface {
-        /** @psalm-var RouterConfigShape $config */
-        $config = $container->has('config') ? $container->get('config') : [
-            'router' => [
-                'router_class'  => TreeRouteStack::class,
-                'route_plugins' => RoutePluginManager::class,
-            ],
-        ];
-
-        $class              = $config['router']['router_class'];
-        $routePluginManager = $container->get($config['router']['route_plugins']);
-
-        assert($routePluginManager instanceof RoutePluginManager);
-
-        $config['route_plugins'] = $routePluginManager;
-
-        if (isset($config['router']['translator'])) {
-            $translator = $container->get($config['router']['translator']);
-            assert($translator instanceof TranslatorInterface);
-            $config['translator'] = $translator;
-        }
-
-        $router = $class::factory($config);
+        $router = $container->get(RouteStackInterface::class);
 
         assert($router instanceof RouteStackInterface);
 

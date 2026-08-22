@@ -8,7 +8,9 @@ use Laminas\Router\ConfigProvider;
 use Laminas\Router\Http\HttpRouterFactory;
 use Laminas\Router\Http\TreeRouteStack;
 use Laminas\Router\RoutePluginManager;
+use Laminas\Router\RouteStackInterface;
 use Laminas\Router\RouterFactory;
+use Laminas\ServiceManager\Factory\InvokableFactory;
 use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -37,7 +39,9 @@ class RouterFactoryTest extends TestCase
                 ],
             ],
             'factories' => [
-                TreeRouteStack::class => HttpRouterFactory::class,
+                TreeRouteStack::class => \Laminas\Router\Http\TreeRouteStackFactory::class,
+                RouteStackInterface::class => RouterFactory::class,
+                TestAsset\Router::class => InvokableFactory::class,
                 // @phpcs:disable Generic.Files.LineLength.TooLong
                 RoutePluginManager::class => static fn(ContainerInterface $services): RoutePluginManager => new RoutePluginManager($services),
             ],

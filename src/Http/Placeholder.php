@@ -27,26 +27,6 @@ final readonly class Placeholder implements HttpRouteInterface
     ) {
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception\InvalidArgumentException
-     */
-    #[Override]
-    public static function factory(array $options = []): self
-    {
-        $name = $options['name'] ?? null;
-        /** @psalm-var array<string, string|int|float|null>  $defaults */
-        $defaults = $options['defaults'] ?? [];
-        /** @psalm-var int|null $priority */
-        $priority = $options['priority'] ?? null;
-
-        if (! is_string($name)) {
-            throw new Exception\InvalidArgumentException('Missing "name" in options array');
-        }
-
-        return new self($name, $defaults, $priority);
-    }
-
     /** @inheritDoc */
     #[Override]
     public function match(

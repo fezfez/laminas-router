@@ -10,6 +10,8 @@ use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\Hostname;
 use Laminas\Router\Http\HttpRouteMatch;
+use Laminas\Router\Http\HostnameFactory;
+use Laminas\ServiceManager\ServiceManager;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -394,13 +396,17 @@ final class HostnameTest extends TestCase
 
     public function testFactoryAppliesConstraintsDefaultsAndPriority(): void
     {
-        $route = Hostname::factory([
+        $route = (new HostnameFactory())->__invoke(
+            new ServiceManager(),
+            Hostname::class,
+            [
             'name'        => 'foo',
             'route'       => ':foo.example.com',
             'constraints' => ['foo' => '\d+'],
             'defaults'    => ['foo' => '999'],
             'priority'    => 5,
-        ]);
+            ]
+        );
 
         $this->assertSame(5, $route->getPriority());
         $this->assertSame(

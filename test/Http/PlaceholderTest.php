@@ -11,6 +11,7 @@ use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Placeholder;
 use Laminas\Router\Http\TreeRouteStack;
+use Laminas\Router\Http\TreeRouteStackFactory;
 use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
 use LaminasTest\Router\FactoryTester;
@@ -90,10 +91,16 @@ final class PlaceholderTest extends TestCase
     public function testPlaceholderDefault(array $additionalConfig, string $uri, string $expectedRouteName): void
     {
         $routeConfig = array_replace_recursive(self::$routeConfig, $additionalConfig);
-        $router      = TreeRouteStack::factory([
+        $container   = new ServiceManager();
+        $plugins     = new RoutePluginManager($container);
+        $router      = (new TreeRouteStackFactory())->__invoke(
+            $container,
+            TreeRouteStack::class,
+            [
             'routes'        => $routeConfig,
-            'route_plugins' => new RoutePluginManager(new ServiceManager()),
-        ]);
+            'route_plugins' => $plugins,
+            ]
+        );
 
         $request = new Request();
         $request = $request->withUri(new Uri($uri));

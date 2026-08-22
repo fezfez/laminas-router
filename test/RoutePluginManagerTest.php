@@ -21,8 +21,8 @@ final class RoutePluginManagerTest extends TestCase
     public function testCanLoadAnyRoute(): void
     {
         $routes = new RoutePluginManager(new ServiceManager(), [
-            'invokables' => [
-                'DummyRoute' => TestAsset\DummyRoute::class,
+            'factories' => [
+                'DummyRoute' => TestAsset\DummyRouteFactory::class,
             ],
         ]);
         $route  = $routes->build('DummyRoute', ['name' => 'foo']);

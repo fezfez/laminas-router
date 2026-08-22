@@ -16,6 +16,7 @@ use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
 use LaminasTest\Router\FactoryTester;
 use LaminasTest\Router\TestAsset\DummyRoute;
+use LaminasTest\Router\TestAsset\DummyRouteFactory as RootDummyRouteFactory;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -24,9 +25,9 @@ final class TreeRouteStackTest extends TestCase
     private function createRoutePluginManager(): RoutePluginManager
     {
         return new RoutePluginManager(new ServiceManager(), [
-            'invokables' => [
-                TestAsset\DummyRoute::class          => TestAsset\DummyRoute::class,
-                TestAsset\DummyRouteWithParam::class => TestAsset\DummyRouteWithParam::class,
+            'factories' => [
+                TestAsset\DummyRoute::class          => TestAsset\DummyRouteFactory::class,
+                TestAsset\DummyRouteWithParam::class => TestAsset\DummyRouteWithParamFactory::class,
             ],
         ]);
     }
@@ -44,8 +45,8 @@ final class TreeRouteStackTest extends TestCase
     public function testAddRouteViaStringRequiresHttpSpecificRoute(): void
     {
         $plugins = new RoutePluginManager(new ServiceManager(), [
-            'invokables' => [
-                DummyRoute::class => DummyRoute::class,
+            'factories' => [
+                DummyRoute::class => RootDummyRouteFactory::class,
             ],
         ]);
         $stack   = new TreeRouteStack($plugins);

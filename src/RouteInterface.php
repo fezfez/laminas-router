@@ -13,11 +13,6 @@ use Psr\Http\Message\RequestInterface;
 interface RouteInterface
 {
     /**
-     * Create a new route with given options.
-     */
-    public static function factory(array $options = []): self;
-
-    /**
      * Match a given request.
      */
     public function match(RequestInterface $request): RouteMatchInterface|null;

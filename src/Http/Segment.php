@@ -59,33 +59,6 @@ final readonly class Segment implements HttpRouteInterface
     }
 
     /**
-     * @inheritDoc
-     * @throws Exception\InvalidArgumentException
-     */
-    #[Override]
-    public static function factory(array $options = []): self
-    {
-        $name  = $options['name'] ?? null;
-        $route = $options['route'] ?? null;
-        /** @psalm-var array<non-empty-string, string> $constraints */
-        $constraints = $options['constraints'] ?? [];
-        /** @psalm-var array<string, string|int|float|null>  $defaults */
-        $defaults = $options['defaults'] ?? [];
-        /** @psalm-var int|null $priority */
-        $priority = $options['priority'] ?? null;
-
-        if (! is_string($route)) {
-            throw new Exception\InvalidArgumentException('Missing "route" in options array');
-        }
-
-        if (! is_string($name)) {
-            throw new Exception\InvalidArgumentException('Missing "name" in options array');
-        }
-
-        return new self($name, $route, $constraints, $defaults, $priority);
-    }
-
-    /**
      * Parse a route definition.
      *
      * @throws Exception\RuntimeException

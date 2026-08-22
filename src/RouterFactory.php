@@ -21,7 +21,7 @@ final readonly class RouterFactory implements FactoryInterface
     /**
      * Create and return the router
      *
-     * Delegates to the HttpRouter service.
+    * Delegates to the configured router service.
      */
     #[Override]
     public function __invoke(
@@ -29,7 +29,9 @@ final readonly class RouterFactory implements FactoryInterface
         string $requestedName,
         ?array $options = null
     ): RouteStackInterface {
-        $router = $container->get(Http\TreeRouteStack::class);
+        $config = $container->has('config') ? $container->get('config') : [];
+        $class  = $config['router']['router_class'] ?? Http\TreeRouteStack::class;
+        $router = $container->get($class);
 
         assert($router instanceof RouteStackInterface);
 

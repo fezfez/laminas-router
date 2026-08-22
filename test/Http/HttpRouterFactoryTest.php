@@ -6,7 +6,11 @@ namespace LaminasTest\Router\Http;
 
 use Laminas\Router\Http\HttpRouterFactory;
 use Laminas\Router\Http\TranslatorAwareTreeRouteStack;
+use Laminas\Router\Http\TreeRouteStack;
 use Laminas\Router\RoutePluginManager;
+use Laminas\Router\RouteStackInterface;
+use Laminas\Router\RouterFactory;
+use Laminas\ServiceManager\Factory\InvokableFactory;
 use Laminas\ServiceManager\ServiceManager;
 use Laminas\Translator\TranslatorInterface;
 use LaminasTest\Router\RouterFactoryTest as TestCase;
@@ -27,6 +31,12 @@ final class HttpRouterFactoryTest extends TestCase
                 ],
             ],
             'factories' => [
+                TreeRouteStack::class => \Laminas\Router\Http\TreeRouteStackFactory::class,
+                TranslatorAwareTreeRouteStack::class => \Laminas\Router\Http\TranslatorAwareTreeRouteStackFactory::class,
+                RouteStackInterface::class => RouterFactory::class,
+                \Laminas\Router\Http\TreeRouteStackFactory::class => InvokableFactory::class,
+                \Laminas\Router\Http\TranslatorAwareTreeRouteStackFactory::class => InvokableFactory::class,
+                \LaminasTest\Router\TestAsset\Router::class => InvokableFactory::class,
                 // @phpcs:disable Generic.Files.LineLength.TooLong
                 RoutePluginManager::class => static fn(ContainerInterface $services): RoutePluginManager => new RoutePluginManager($services),
             ],
