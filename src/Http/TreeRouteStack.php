@@ -7,11 +7,10 @@ namespace Laminas\Router\Http;
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception;
 use Laminas\Router\Exception\RuntimeException;
+use Laminas\Router\RouteBuilderRegistry;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RouteMatchInterface;
-use Laminas\Router\RoutePluginManager;
 use Laminas\Router\SimpleRouteStack;
-use Override;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\UriInterface;
 
@@ -37,42 +36,17 @@ readonly class TreeRouteStack extends SimpleRouteStack
      * @param array<string, string|int|float|null> $defaultParams
      */
     public function __construct(
-        private RoutePluginManager $routePluginManager,
+        RouteBuilderRegistry $routeBuilderRegistry,
         array $routes = [],
         array $defaultParams = [],
         protected int|null $priority = null,
     ) {
-        parent::__construct($this->routePluginManager, $routes, $defaultParams);
-    }
-
-    /**
-     * @inheritDoc
-     * @throws Exception\InvalidArgumentException
-     */
-    #[Override]
-    public static function factory(array $options = []): self
-    {
-        /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
-        $routes       = $options['routes'] ?? [];
-        $routePlugins = $options['route_plugins'] ?? null;
-        /** @psalm-var array<string, string|int|float|null> $defaultParams */
-        $defaultParams = $options['default_params'] ?? [];
-
-        if (! $routePlugins instanceof RoutePluginManager) {
-            throw new RuntimeException('Missing "route_plugins" in options array');
-        }
-
-        return new self(
-            $routePlugins,
-            $routes,
-            $defaultParams,
-        );
+        parent::__construct($routeBuilderRegistry, $routes, $defaultParams);
     }
 
     /**
      * @inheritDoc
      */
-    #[Override]
     public function addRoute(string $name, array|RouteInterface $route, ?int $priority = null): void
     {
         if ($route instanceof RouteInterface && ! $route instanceof HttpRouteInterface) {
@@ -97,7 +71,6 @@ readonly class TreeRouteStack extends SimpleRouteStack
      * @throws Exception\InvalidArgumentException When chain routes are not an array nor traversable.
      * @throws Exception\RuntimeException         When a generated routes does not implement the HTTP route interface.
      */
-    #[Override]
     final protected function routeFromArray(string $name, array $specs): RouteInterface
     {
         $route = $this->buildChainRoute($name, $specs);
@@ -109,12 +82,11 @@ readonly class TreeRouteStack extends SimpleRouteStack
         if (isset($specs['child_routes'])) {
             /** @psalm-var array<string, string|int|float|null> $defaults */
             $defaults = $specs['defaults'] ?? [];
-            $route    = $this->routePluginManager->build(Part::class, [
+            $route    = $this->routeBuilderRegistry->build(Part::class, [
                 'name'          => $name,
                 'route'         => $route,
                 'may_terminate' => isset($specs['may_terminate']) && $specs['may_terminate'] === true,
                 'child_routes'  => $specs['child_routes'],
-                'route_plugins' => $this->routePluginManager,
                 'priority'      => $route->getPriority(),
                 'defaults'      => array_merge($defaults, $this->defaultParams),
             ]);
@@ -128,7 +100,6 @@ readonly class TreeRouteStack extends SimpleRouteStack
      * @inheritDoc
      * @param int|null $pathOffset
      */
-    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -156,7 +127,8 @@ readonly class TreeRouteStack extends SimpleRouteStack
      */
     private function getRouteName(array $options): array
     {
-        $name = $options['name'] ?? '';
+        /** @psalm-var string|null $name */
+        $name = $options['name'] ?? null;
         if (! is_string($name) || $name === '') {
             throw new Exception\InvalidArgumentException('Missing "name" option');
         }
@@ -178,7 +150,6 @@ readonly class TreeRouteStack extends SimpleRouteStack
      * @throws Exception\InvalidArgumentException
      * @throws Exception\RuntimeException
      */
-    #[Override]
     public function assemble(array $params = [], array $options = []): AssembledUrl
     {
         $names = $this->getRouteName($options);
@@ -246,7 +217,6 @@ readonly class TreeRouteStack extends SimpleRouteStack
         );
     }
 
-    #[Override]
     public function getPriority(): ?int
     {
         return $this->priority;
@@ -271,10 +241,9 @@ readonly class TreeRouteStack extends SimpleRouteStack
             unset($chainRoutes[0]['child_routes']);
         }
 
-        return $this->routePluginManager->build(Chain::class, [
-            'routes'        => $chainRoutes,
-            'route_plugins' => $this->routePluginManager,
-            'priority'      => $specs['priority'] ?? null,
+        return $this->routeBuilderRegistry->build(Chain::class, [
+            'routes'   => $chainRoutes,
+            'priority' => $specs['priority'] ?? null,
         ]);
     }
 }

@@ -8,6 +8,7 @@ use Laminas\Diactoros\Request;
 use Laminas\Diactoros\Uri;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Scheme;
+use Laminas\Router\Http\SchemeBuilder;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\TestCase;
 
@@ -63,6 +64,7 @@ final class SchemeTest extends TestCase
     {
         $tester = new FactoryTester();
         $tester->testFactory(
+            new SchemeBuilder(),
             Scheme::class,
             [
                 'scheme' => 'Missing "scheme" in options array',

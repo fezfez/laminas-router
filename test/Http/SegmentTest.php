@@ -10,6 +10,7 @@ use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Segment;
+use Laminas\Router\Http\SegmentBuilder;
 use Laminas\Translator\TranslatorInterface;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -338,6 +339,7 @@ final class SegmentTest extends TestCase
 
     /**
      * @param array<non-empty-string, string|null|int>|null $params
+     * @param array<string, mixed> $options
      */
     #[DataProvider('routeProvider')]
     public function testAssembling(
@@ -393,6 +395,7 @@ final class SegmentTest extends TestCase
 
     /**
      * @param array<non-empty-string, non-empty-string>|null $params
+     * @param array<string, mixed> $options
      */
     private function assemblingWithL10n(
         Segment $route,
@@ -473,6 +476,7 @@ final class SegmentTest extends TestCase
     {
         $tester = new FactoryTester();
         $tester->testFactory(
+            new SegmentBuilder(),
             Segment::class,
             [
                 'route' => 'Missing "route" in options array',

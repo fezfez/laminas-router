@@ -7,7 +7,6 @@ namespace Laminas\Router;
 use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\PriorityList;
-use Override;
 use Psr\Http\Message\RequestInterface;
 
 use function array_merge;
@@ -37,7 +36,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
      * @param array<string, string|int|float|null> $defaultParams
      */
     public function __construct(
-        private RoutePluginManager $routePluginManager,
+        protected RouteBuilderRegistry $routeBuilderRegistry,
         array $routes = [],
         protected array $defaultParams = []
     ) {
@@ -47,31 +46,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
         $this->addRoutes($routes);
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception\InvalidArgumentException
-     */
-    #[Override]
-    public static function factory(array $options = []): self
-    {
-        /** @psalm-var array<non-empty-string, array|TRoute>  $routes */
-        $routes       = $options['routes'] ?? [];
-        $routePlugins = $options['route_plugins'] ?? null;
-        /** @psalm-var array<string, string|int|float|null> $defaultParams */
-        $defaultParams = $options['default_params'] ?? [];
-
-        if (! $routePlugins instanceof RoutePluginManager) {
-            throw new RuntimeException('Missing "route_plugins" in options array');
-        }
-        return new self(
-            $routePlugins,
-            $routes,
-            $defaultParams
-        );
-    }
-
     /** @inheritDoc */
-    #[Override]
     public function addRoutes(array $routes): void
     {
         foreach ($routes as $name => $route) {
@@ -85,7 +60,6 @@ readonly class SimpleRouteStack implements RouteStackInterface
      * @inheritDoc
      * @throws Exception\InvalidArgumentException
      */
-    #[Override]
     public function addRoute(string $name, array|RouteInterface $route, ?int $priority = null): void
     {
         if (is_array($route)) {
@@ -96,14 +70,12 @@ readonly class SimpleRouteStack implements RouteStackInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function removeRoute(string $name): void
     {
         $this->routes->remove($name);
     }
 
     /** @inheritDoc */
-    #[Override]
     public function setRoutes(array $routes): void
     {
         $this->routes->clear();
@@ -158,7 +130,7 @@ readonly class SimpleRouteStack implements RouteStackInterface
         /** @psalm-var array<string, string|int|float|null> $defaults */
         $defaults = $option['defaults'] ?? [];
         /** @psalm-var TRoute $route */
-        $route = $this->routePluginManager->build($type, [
+        $route = $this->routeBuilderRegistry->build($type, [
             ...$option,
             'priority' => $specs['priority'] ?? null,
             'name'     => $name,
@@ -169,7 +141,6 @@ readonly class SimpleRouteStack implements RouteStackInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function match(RequestInterface $request): ?RouteMatchInterface
     {
         foreach ($this->routes->getAsArray() as $route) {
@@ -182,7 +153,6 @@ readonly class SimpleRouteStack implements RouteStackInterface
         return null;
     }
 
-    #[Override]
     public function getPriority(): ?int
     {
         return null;
@@ -193,7 +163,6 @@ readonly class SimpleRouteStack implements RouteStackInterface
      * @throws Exception\InvalidArgumentException
      * @throws RuntimeException
      */
-    #[Override]
     public function assemble(array $params = [], array $options = []): AssembledUrl
     {
         $name = $options['name'] ?? null;

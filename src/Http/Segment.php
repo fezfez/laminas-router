@@ -17,13 +17,12 @@ use Laminas\Router\Http\RouteDefinition\RouteDefinitionPartInterface;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionTranslatedLiteral;
 use Laminas\Router\RouteMatchInterface;
 use Laminas\Translator\TranslatorInterface as Translator;
-use Override;
 use Psr\Http\Message\RequestInterface;
 
 use function array_key_exists;
 use function array_merge;
+use function assert;
 use function count;
-use function is_string;
 use function preg_match;
 use function preg_quote;
 use function sprintf;
@@ -59,33 +58,6 @@ final readonly class Segment implements HttpRouteInterface
     }
 
     /**
-     * @inheritDoc
-     * @throws Exception\InvalidArgumentException
-     */
-    #[Override]
-    public static function factory(array $options = []): self
-    {
-        $name  = $options['name'] ?? null;
-        $route = $options['route'] ?? null;
-        /** @psalm-var array<non-empty-string, string> $constraints */
-        $constraints = $options['constraints'] ?? [];
-        /** @psalm-var array<string, string|int|float|null>  $defaults */
-        $defaults = $options['defaults'] ?? [];
-        /** @psalm-var int|null $priority */
-        $priority = $options['priority'] ?? null;
-
-        if (! is_string($route)) {
-            throw new Exception\InvalidArgumentException('Missing "route" in options array');
-        }
-
-        if (! is_string($name)) {
-            throw new Exception\InvalidArgumentException('Missing "name" in options array');
-        }
-
-        return new self($name, $route, $constraints, $defaults, $priority);
-    }
-
-    /**
      * Parse a route definition.
      *
      * @throws Exception\RuntimeException
@@ -99,7 +71,7 @@ final readonly class Segment implements HttpRouteInterface
         while ($currentPos < $length) {
             preg_match('(\G(?P<literal>[^:{\[\]]*)(?P<token>[:{\[\]]|$))', $def, $matches, 0, $currentPos);
 
-            $currentPos += strlen($matches[0]);
+            $currentPos += strlen($matches[0] ?? '');
 
             if (isset($matches['literal']) && $matches['literal'] !== '') {
                 $routeDefinition->addPart(new RouteDefinitionLiteral($matches['literal']));
@@ -118,7 +90,7 @@ final readonly class Segment implements HttpRouteInterface
                     throw new Exception\RuntimeException('Found empty parameter name');
                 }
 
-                /** @psalm-var non-empty-string $nameAndDelimitersMatch['name'] */
+                assert($nameAndDelimitersMatch['name'] !== '');
                 $routeDefinition->addPart(new RouteDefinitionParameter(
                     $nameAndDelimitersMatch['name'],
                     $nameAndDelimitersMatch['delimiters'] ?? null
@@ -130,7 +102,7 @@ final readonly class Segment implements HttpRouteInterface
                     throw new Exception\RuntimeException('Translated literal missing closing bracket');
                 }
 
-                $currentPos += strlen($literalMatch[0]);
+                $currentPos += strlen($literalMatch[0] ?? '');
 
                 $routeDefinition->addPart(new RouteDefinitionTranslatedLiteral($literalMatch['literal']));
             } elseif ($matches['token'] === '[') {
@@ -295,7 +267,6 @@ final readonly class Segment implements HttpRouteInterface
      * @inheritDoc
      * @throws Exception\RuntimeException
      */
-    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -330,7 +301,7 @@ final readonly class Segment implements HttpRouteInterface
             return null;
         }
 
-        $matchedLength = strlen($matches[0]);
+        $matchedLength = strlen($matches[0] ?? '');
         $params        = [];
 
         foreach ($this->routeRegexBuildResult->paramMap as $index => $name) {
@@ -343,7 +314,6 @@ final readonly class Segment implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function assemble(array $params = [], array $options = []): AssembledUrl
     {
         $result = $this->buildPath(
@@ -360,7 +330,6 @@ final readonly class Segment implements HttpRouteInterface
         );
     }
 
-    #[Override]
     public function getPriority(): ?int
     {
         return $this->priority;

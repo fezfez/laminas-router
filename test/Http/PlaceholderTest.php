@@ -10,10 +10,10 @@ use Laminas\Router\Http\Hostname;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Placeholder;
+use Laminas\Router\Http\PlaceholderBuilder;
 use Laminas\Router\Http\TreeRouteStack;
-use Laminas\Router\RoutePluginManager;
-use Laminas\ServiceManager\ServiceManager;
 use LaminasTest\Router\FactoryTester;
+use LaminasTest\Router\TestAsset\RouteBuilderRegistryFactory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -76,6 +76,7 @@ final class PlaceholderTest extends TestCase
     {
         $tester = new FactoryTester();
         $tester->testFactory(
+            new PlaceholderBuilder(),
             Placeholder::class,
             [
                 'name' => 'Missing "name" in options array',
@@ -90,10 +91,10 @@ final class PlaceholderTest extends TestCase
     public function testPlaceholderDefault(array $additionalConfig, string $uri, string $expectedRouteName): void
     {
         $routeConfig = array_replace_recursive(self::$routeConfig, $additionalConfig);
-        $router      = TreeRouteStack::factory([
-            'routes'        => $routeConfig,
-            'route_plugins' => new RoutePluginManager(new ServiceManager()),
-        ]);
+        $router      = new TreeRouteStack(
+            RouteBuilderRegistryFactory::withDefaults(),
+            $routeConfig
+        );
 
         $request = new Request();
         $request = $request->withUri(new Uri($uri));

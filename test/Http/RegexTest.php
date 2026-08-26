@@ -8,6 +8,7 @@ use Laminas\Diactoros\Request;
 use Laminas\Diactoros\Uri;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Regex;
+use Laminas\Router\Http\RegexBuilder;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -157,6 +158,7 @@ final class RegexTest extends TestCase
     {
         $tester = new FactoryTester();
         $tester->testFactory(
+            new RegexBuilder(),
             Regex::class,
             [
                 'regex' => 'Missing "regex" in options array',

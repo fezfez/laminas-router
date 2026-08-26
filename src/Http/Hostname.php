@@ -15,11 +15,10 @@ use Laminas\Router\Http\RouteDefinition\RouteDefinitionOption;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionParameter;
 use Laminas\Router\Http\RouteDefinition\RouteDefinitionPartInterface;
 use Laminas\Router\RouteMatchInterface;
-use Override;
 use Psr\Http\Message\RequestInterface;
 
 use function array_merge;
-use function is_string;
+use function assert;
 use function preg_match;
 use function preg_quote;
 use function sprintf;
@@ -27,9 +26,6 @@ use function strlen;
 
 /**
  * Hostname route.
- *
- * Note: the following type is recursive, but Psalm doesn't understand array shape recursion (yet). For now, we only
- *       represented recursion of the 'optional' part type to 1 level, to ease analysis.
  */
 final readonly class Hostname implements HttpRouteInterface
 {
@@ -57,33 +53,6 @@ final readonly class Hostname implements HttpRouteInterface
     }
 
     /**
-     * @inheritDoc
-     * @throws Exception\InvalidArgumentException
-     */
-    #[Override]
-    public static function factory(array $options = []): self
-    {
-        $name  = $options['name'] ?? null;
-        $route = $options['route'] ?? null;
-        /** @psalm-var array<non-empty-string, string> $constraints */
-        $constraints = $options['constraints'] ?? [];
-        /** @psalm-var array<string, string|int|float|null> $defaults */
-        $defaults = $options['defaults'] ?? [];
-        /** @psalm-var int|null $priority */
-        $priority = $options['priority'] ?? null;
-
-        if (! is_string($route)) {
-            throw new Exception\InvalidArgumentException('Missing "route" in options array');
-        }
-
-        if (! is_string($name)) {
-            throw new Exception\InvalidArgumentException('Missing "name" in options array');
-        }
-
-        return new self($name, $route, $constraints, $defaults, $priority);
-    }
-
-    /**
      * Parse a route definition.
      *
      * @throws Exception\RuntimeException
@@ -99,7 +68,7 @@ final readonly class Hostname implements HttpRouteInterface
                 throw new Exception\RuntimeException('Matched hostname literal contains a disallowed character');
             }
 
-            $currentPos += strlen($matches[0]);
+            $currentPos += strlen($matches[0] ?? '');
 
             if (isset($matches['literal']) && $matches['literal'] !== '') {
                 $routeDefinition->addPart(new RouteDefinitionLiteral($matches['literal']));
@@ -118,7 +87,7 @@ final readonly class Hostname implements HttpRouteInterface
                     throw new Exception\RuntimeException('Found empty parameter name');
                 }
 
-                /** @psalm-var non-empty-string $nameAndDelimitersMatch['name'] */
+                assert($nameAndDelimitersMatch['name'] !== '');
 
                 $routeDefinition->addPart(new RouteDefinitionParameter(
                     $nameAndDelimitersMatch['name'],
@@ -244,7 +213,6 @@ final readonly class Hostname implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function match(
         RequestInterface $request,
         int|null $pathOffset = null,
@@ -269,7 +237,6 @@ final readonly class Hostname implements HttpRouteInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function assemble(array $params = [], array $options = []): AssembledUrl
     {
         $result = $this->buildHost(
@@ -284,7 +251,6 @@ final readonly class Hostname implements HttpRouteInterface
         );
     }
 
-    #[Override]
     public function getPriority(): ?int
     {
         return $this->priority;

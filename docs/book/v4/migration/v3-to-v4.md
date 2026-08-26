@@ -10,18 +10,22 @@ first. Version 4 requires **PHP 8.2+**, which is already required by 3.18.x.
 ## Upgrade order
 
 1. Upgrade to PHP 8.2 or later (if not already).
-2. Upgrade `laminas/laminas-servicemanager` to **^4.5**.
-3. Upgrade `laminas/laminas-router` to **^4.0**.
-4. Run your test suite and address deprecations reported during the 3.18.x cycle.
+2. Upgrade `laminas/laminas-router` to **^4.0**.
+3. Run your test suite and address deprecations reported during the 3.18.x cycle.
+
+If you use `ConfigProvider` with laminas-servicemanager (Mezzio, laminas-mvc),
+upgrade `laminas/laminas-servicemanager` to **^4.5** before or alongside the
+router upgrade. Service Manager is **not** a runtime dependency of
+laminas-router itself.
 
 ## Dependency changes
 
-| Package                          | v3           | v4                        |
-|----------------------------------|--------------|---------------------------|
-| `laminas/laminas-servicemanager` | `^3.14`      | `^4.5`                    |
-| `psr/http-message`               | not required | `^1.1 \|\| ^2.0` (direct) |
-| `laminas/laminas-translator`     | not required | `^1.3 \|\| ^2.0` (direct) |
-| `laminas/laminas-uri`            | required     | **removed**               |
+| Package                          | v3                 | v4                                                     |
+|----------------------------------|--------------------|--------------------------------------------------------|
+| `laminas/laminas-servicemanager` | `^3.14` (required) | **optional** (ConfigProvider / Mezzio / MVC only)      |
+| `psr/http-message`               | not required       | `^1.1 \|\| ^2.0` (direct)                              |
+| `laminas/laminas-translator`     | not required       | `^1.3 \|\| ^2.0` (direct)                              |
+| `laminas/laminas-uri`            | required           | **removed**                                            |
 
 URL assembly no longer uses `Laminas\Uri\Http`. Use the new `AssembledUrl` value
 object and PSR-7 `UriInterface` instead (see below).
@@ -37,8 +41,8 @@ parameter names that were consumed during assembly.
 ### Immutable routes and stacks
 
 Built-in route classes and route stacks are now `final readonly`. Configuration
-must be supplied at construction time via `factory()` options rather than
-post-hoc mutation.
+must be supplied at construction time via constructors or route builders — the
+`factory()` static method has been removed from `RouteInterface`.
 
 ### Stricter types
 
@@ -72,15 +76,25 @@ logic is consolidated into `Laminas\Router\Http\HttpRouteMatch`.
 **Note:** Where you are consuming or producing "Route Match" instances, prefer a type hint of `Laminas\Router\RouteMatchInterface`.
 This interface is implemented by `Laminas\Router\Http\HttpRouteMatch`, and, if you are generating custom route matching results, you must implement this interface to ensure compatibility with version 4.
 
+### `RoutePluginManager`, `RouteInvokableFactory`, and `HttpRouterFactory`
+
+Route creation no longer goes through a plugin manager. The following classes
+have been removed:
+
+- `Laminas\Router\RoutePluginManager`
+- `Laminas\Router\RoutePluginManagerFactory`
+- `Laminas\Router\RouteInvokableFactory`
+- `Laminas\Router\Http\HttpRouterFactory`
+
+**Migration:** Use route constructors, `RouteBuilderInterface` implementations,
+or `RouteBuilderRegistry::build()` (resolve the registry from the container).
+See [Route builders](#route-builders) below.
+
 ### Service Manager v2 compatibility
 
-All Service Manager v2 factory methods have been removed:
+All Service Manager v2 factory methods have been removed from remaining factories:
 
-- `HttpRouterFactory::createService()`
 - `RouterFactory::createService()`
-- `RoutePluginManagerFactory::createService()`
-- `RouteInvokableFactory::createService()`, `createServiceWithName()`, `setCreationOptions()`
-- `RoutePluginManager::validatePlugin()`
 
 **Migration:** Use PSR-11 / Service Manager v4 `FactoryInterface` with
 `__invoke(ContainerInterface, string, ?array)` only.
@@ -146,14 +160,15 @@ The `'normalize_path'` assemble option has been removed.
 The following methods have been removed from `SimpleRouteStack` and
 `TreeRouteStack`:
 
-| Removed (v3)                                            | v4 replacement                                                                   |
-|---------------------------------------------------------|----------------------------------------------------------------------------------|
-| `setRoutePluginManager()` / `getRoutePluginManager()`   | Pass a `RoutePluginManager` instance to `factory(['route_plugins' => $manager])` |
-| `setDefaultParams()` / `setDefaultParam()`              | `factory(['default_params' => [...]])`                                           |
-| `setBaseUrl()` / `getBaseUrl()`                         | Pass `$pathOffset` to `TreeRouteStack::match($request, $pathOffset)`             |
-| `setRequestUri()` / `getRequestUri()`                   | Pass `'uri'` assemble option                                                     |
-| `addPrototype()` / `addPrototypes()` / `getPrototype()` | Removed                                                                          |
-| `init()` hook                                           | Removed                                                                          |
+| Removed (v3)                                            | v4 replacement                                                       |
+|---------------------------------------------------------|----------------------------------------------------------------------|
+| `setRoutePluginManager()` / `getRoutePluginManager()`   | Pass `RouteBuilderRegistry` to the stack constructor                 |
+| `setDefaultParams()` / `setDefaultParam()`              | Pass `$defaultParams` to the stack constructor or builder options    |
+| `setBaseUrl()` / `getBaseUrl()`                         | Pass `$pathOffset` to `TreeRouteStack::match($request, $pathOffset)` |
+| `setRequestUri()` / `getRequestUri()`                   | Pass `'uri'` assemble option                                         |
+| `addPrototype()` / `addPrototypes()` / `getPrototype()` | Removed                                                              |
+| `init()` hook                                           | Removed                                                              |
+| `RouteInterface::factory()`                             | Constructor or `RouteBuilderRegistry::build()`                       |
 
 Built-in route classes (`Literal`, `Segment`, `Part`, etc.) are `final readonly`
 and cannot be extended. Implement `RouteInterface` or `HttpRouteInterface`
@@ -168,21 +183,25 @@ $router->setDefaultParams(['lang' => 'en']);
 $router->setRoutePluginManager($routePlugins);
 
 // v4
-$router = TreeRouteStack::factory([
+$registry = $container->get(RouteBuilderRegistry::class);
+$router   = new TreeRouteStack($registry, $routes, ['lang' => 'en']);
+
+// Or via a builder:
+$router = $registry->build(TreeRouteStack::class, [
     'routes'         => $routes,
     'default_params' => ['lang' => 'en'],
-    'route_plugins'  => $routePlugins, // must be a RoutePluginManager instance
 ]);
 ```
 
-When calling `factory()` manually, `route_plugins` must be a
-`RoutePluginManager` **instance**, not a class name string.
+Route stacks and composite routes (`Part`, `Chain`) take a
+`RouteBuilderRegistry` in their constructor. The `route_plugins` option has
+been removed.
 
 ## Route priority
 
 The public `$priority` property on routes and stacks has been removed. Priority
-is now set via factory options or route specifications and exposed through
-`RouteInterface::getPriority()`.
+is now set via constructor/builder options or route specifications and exposed
+through `RouteInterface::getPriority()`.
 
 ```php
 // v3
@@ -240,15 +259,14 @@ segments may still be returned as integers when parsed from the path.
 
 ### `ConfigProvider` output
 
-| v3                              | v4                                                                                                    |
-|---------------------------------|-------------------------------------------------------------------------------------------------------|
-| `'dependencies'`                | `'dependencies'` (unchanged key)                                                                      |
-| `'route_manager'` (empty array) | **removed**                                                                                           |
-| (no router block)               | `'router' => ['router_class' => TreeRouteStack::class, 'route_plugins' => RoutePluginManager::class]` |
+| v3                              | v4                                                                                 |
+|---------------------------------|------------------------------------------------------------------------------------|
+| `'dependencies'`                | `'dependencies'` (unchanged key)                                                   |
+| `'route_manager'` (empty array) | **removed**                                                                        |
+| (no router block)               | `'router' => ['router_class' => TreeRouteStack::class, 'route_builders' => [...]]` |
 
-**Migration:** Move custom route plugin manager configuration from the top-level
-`'route_manager'` key to the `'dependencies'` configuration targeting
-`RoutePluginManager::class`:
+**Migration:** Register custom route builders in `dependencies.factories` and
+map route types to builder service ids in `router.route_builders`:
 
 ```php
 // v3 application config
@@ -260,13 +278,20 @@ segments may still be returned as integers when parsed from the path.
 
 // v4 application config
 'dependencies' => [
-    RoutePluginManager::class => [
-        'factories' => [
-            MyCustomRoute::class => MyCustomRouteFactory::class,
-        ],
+    'factories' => [
+        VanityRouteBuilder::class => VanityRouteBuilderFactory::class,
+    ],
+],
+'router' => [
+    'route_builders' => [
+        VanityRoute::class => VanityRouteBuilder::class,
     ],
 ],
 ```
+
+The `router.route_builders` key maps a route type or alias to a builder service
+id. It is **not** the Service Manager `factories` shape — builders are
+registered separately in `dependencies.factories`.
 
 ### Removed service aliases
 
@@ -284,9 +309,9 @@ The following aliases are no longer registered by the component:
 **Migration:** Resolve services by FQCN:
 
 ```php
-$router = $container->get(RouteStackInterface::class);
-$router = $container->get(TreeRouteStack::class);
-$plugins = $container->get(RoutePluginManager::class);
+$router   = $container->get(RouteStackInterface::class);
+$router   = $container->get(TreeRouteStack::class);
+$registry = $container->get(RouteBuilderRegistry::class);
 ```
 
 Re-register aliases in your application configuration if legacy string service
@@ -309,28 +334,59 @@ The following runtime setters have been removed:
 - `setTranslatorTextDomain()`
 - `hasTranslator()`
 
-**Migration:** Configure the translator at router creation time:
+**Migration:** Configure the translator at router creation time via
+`TranslatorAwareTreeRouteStackBuilder` or the constructor. When using the
+container-backed builder, a `TranslatorInterface` service is resolved
+automatically if not passed in options:
 
 ```php
-$router = TranslatorAwareTreeRouteStack::factory([
-    'routes'                  => $routes,
-    'route_plugins'           => $routePlugins,
-    'translator'              => $translator,
-    'translator_text_domain'  => 'default',
+$registry = $container->get(RouteBuilderRegistry::class);
+$router   = $registry->build(TranslatorAwareTreeRouteStack::class, [
+    'routes'                 => $routes,
+    'translator_text_domain' => 'default',
 ]);
 ```
 
 `isTranslatorEnabled()` now returns `true` when a translator instance is
 configured, and `false` when `translator` is `null`.
 
-## Route plugin manager changes
+## Route builders
 
-- Default route type registration moved from `TreeRouteStack::init()` to
-  `RoutePluginManager::CONFIG`.
-- The `Wildcard` route type is no longer registered.
-- v2 normalized route type names (e.g. `laminasmvcrouterhttpsegment`) are no
-  longer supported.
-- `RoutePluginManager` is now `final`.
+Routes are created via constructors or `RouteBuilderInterface` implementations,
+not `factory()` methods or a plugin manager.
+
+- `RouteBuilderInterface::build(array $options = []): RouteInterface` — builds
+  a route from data-only options; object dependencies are constructor-injected
+  into the builder.
+- `RouteBuilderRegistry` — resolves builders by type or alias and delegates to
+  `build()`. Obtain it via `$container->get(RouteBuilderRegistry::class)` with
+  Mezzio / MVC (`ConfigProvider`).
+- `router.route_builders` configuration maps route type/alias → builder service
+  id (see [ConfigProvider output](#configprovider-output)).
+
+**Leaf route example:**
+
+```php
+// v3
+$route = Literal::factory([
+    'route'    => '/foo',
+    'defaults' => ['action' => 'index'],
+]);
+
+// v4 — constructor
+$route = new Literal('foo', '/foo', ['action' => 'index']);
+
+// v4 — registry
+$route = $registry->build('literal', [
+    'name'     => 'foo',
+    'route'    => '/foo',
+    'defaults' => ['action' => 'index'],
+]);
+```
+
+Default route type registration lives in `RouteBuilderRegistry::defaultBuilderMap()`.
+The `Wildcard` route type is no longer registered. v2 normalized route type
+names (e.g. `laminasmvcrouterhttpsegment`) are no longer supported.
 
 **Migration:** Use standard aliases (`segment`, `literal`, `part`, etc.) or
 FQCNs when defining route types in configuration.
@@ -343,23 +399,25 @@ silently replaced the existing one.
 
 ## Quick-reference checklist
 
-| Area                                 | Action                                                         |
-|--------------------------------------|----------------------------------------------------------------|
-| PHP version                          | Ensure 8.2+                                                    |
-| Service Manager                      | Upgrade to ^4.5                                                |
-| `Wildcard` routes                    | Migrate to `Segment`                                           |
-| `Http\RouteMatch`                    | Use `HttpRouteMatch`                                           |
-| `Http\RouteInterface`                | Use `HttpRouteInterface`                                       |
-| `Module`                             | Use `ConfigProvider`                                           |
-| `'route_manager'` config             | Move to `dependencies[RoutePluginManager::class]`              |
-| Service aliases (`HttpRouter`, etc.) | Use FQCNs or re-add aliases in app config                      |
-| `assemble()` return value            | Call `->toString()` or use `AssembledUrl` properties           |
-| Requests                             | PSR-7 `RequestInterface`                                       |
-| Mutable router setup                 | Configure via `factory()` / constructor                        |
-| Translator                           | `laminas-translator`; configure at creation time               |
-| Canonical URLs                       | Pass `'uri' => $request->getUri()` with `'force_canonical'`    |
-| `laminas-uri`                        | Remove direct usage; use PSR-7 URIs + `AssembledUrl`           |
-| Custom route classes                 | Implement `getPriority()`, return `AssembledUrl`, accept PSR-7 |
-| Extending built-in routes            | Not possible (`final readonly`); implement interfaces instead  |
-| Fluent stack chaining                | Use separate method calls                                      |
-| Duplicate route names                | Handle `InvalidArgumentException` or use unique names          |
+| Area                                 | Action                                                                            |
+|--------------------------------------|-----------------------------------------------------------------------------------|
+| PHP version                          | Ensure 8.2+                                                                       |
+| Service Manager                      | Optional; upgrade to ^4.5 only if using ConfigProvider / MVC                      |
+| `RoutePluginManager`                 | Use `RouteBuilderRegistry` and route builders                                     |
+| `RouteInterface::factory()`          | Use constructors or `$registry->build()`                                          |
+| `Wildcard` routes                    | Migrate to `Segment`                                                              |
+| `Http\RouteMatch`                    | Use `HttpRouteMatch`                                                              |
+| `Http\RouteInterface`                | Use `HttpRouteInterface`                                                          |
+| `Module`                             | Use `ConfigProvider`                                                              |
+| `'route_manager'` config             | Register builders in `dependencies.factories`; map in `router.route_builders`     |
+| Service aliases (`HttpRouter`, etc.) | Use FQCNs or re-add aliases in app config                                         |
+| `assemble()` return value            | Call `->toString()` or use `AssembledUrl` properties                              |
+| Requests                             | PSR-7 `RequestInterface`                                                          |
+| Mutable router setup                 | Configure via constructor / builders                                              |
+| Translator                           | `laminas-translator`; configure via builder or constructor                        |
+| Canonical URLs                       | Pass `'uri' => $request->getUri()` with `'force_canonical'`                       |
+| `laminas-uri`                        | Remove direct usage; use PSR-7 URIs + `AssembledUrl`                              |
+| Custom route classes                 | Implement `getPriority()`, return `AssembledUrl`, accept PSR-7; provide a builder |
+| Extending built-in routes            | Not possible (`final readonly`); implement interfaces instead                     |
+| Fluent stack chaining                | Use separate method calls                                                         |
+| Duplicate route names                | Handle `InvalidArgumentException` or use unique names                             |

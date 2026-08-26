@@ -5,86 +5,76 @@ declare(strict_types=1);
 namespace LaminasTest\Router;
 
 use Laminas\Router\ConfigProvider;
-use Laminas\Router\Http\HttpRouterFactory;
 use Laminas\Router\Http\TreeRouteStack;
-use Laminas\Router\RoutePluginManager;
 use Laminas\Router\RouterFactory;
 use Laminas\ServiceManager\ServiceManager;
+use LaminasTest\Router\TestAsset\RouterBuilder;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 
-use function array_merge_recursive;
+use function array_merge;
 
-/**
- * @see ConfigInterface
- *
- * @psalm-import-type ServiceManagerConfiguration from ServiceManager
- */
-class RouterFactoryTest extends TestCase
+final class RouterFactoryTest extends TestCase
 {
-    /** @psalm-var ServiceManagerConfiguration */
-    protected array $defaultServiceConfig;
-    protected HttpRouterFactory|RouterFactory $factory;
+    private RouterFactory $factory;
 
     public function setUp(): void
     {
-        $this->defaultServiceConfig = [
-            'services'  => [
-                'config' => [
-                    'router' => [
-                        'route_plugins' => RoutePluginManager::class,
-                    ],
-                ],
-            ],
-            'factories' => [
-                TreeRouteStack::class => HttpRouterFactory::class,
-                // @phpcs:disable Generic.Files.LineLength.TooLong
-                RoutePluginManager::class => static fn(ContainerInterface $services): RoutePluginManager => new RoutePluginManager($services),
-            ],
-        ];
-
         $this->factory = new RouterFactory();
+    }
+
+    /**
+     * @param array<string, mixed> $routerOverrides
+     */
+    private function createServiceManager(array $routerOverrides = []): ServiceManager
+    {
+        $provider       = new ConfigProvider();
+        $providerConfig = $provider();
+        $dependencies   = $providerConfig['dependencies'];
+
+        $dependencies['factories'][RouterBuilder::class] = static fn (): RouterBuilder => new RouterBuilder();
+
+        /** @var array{
+         *     router_class: class-string,
+         *     route_builders: array<string, class-string>
+         * } $routerConfig
+         */
+        $routerConfig = array_merge($providerConfig['router'], $routerOverrides);
+
+        if (($routerOverrides['router_class'] ?? null) === TestAsset\Router::class) {
+            $routerConfig['route_builders'][TestAsset\Router::class] = RouterBuilder::class;
+        }
+
+        $services = new ServiceManager($dependencies);
+        $services->setService('config', ['router' => $routerConfig]);
+
+        return $services;
     }
 
     public function testFactoryCanCreateRouterBasedOnConfiguredName(): void
     {
-        $config   = array_merge_recursive($this->defaultServiceConfig, [
-            'services' => [
-                'config' => [
-                    'router' => [
-                        'router_class' => TestAsset\Router::class,
-                    ],
-                ],
-            ],
+        $services = $this->createServiceManager([
+            'router_class' => TestAsset\Router::class,
         ]);
-        $services = new ServiceManager($config);
 
-        $router = $this->factory->__invoke($services, 'router');
+        $router = $this->factory->__invoke($services);
         $this->assertInstanceOf(TestAsset\Router::class, $router);
     }
 
     public function testFactoryCanCreateRouterWhenOnlyHttpRouterConfigPresent(): void
     {
-        $config   = array_merge_recursive($this->defaultServiceConfig, [
-            'services' => [
-                'config' => [
-                    'router' => [
-                        'router_class' => TestAsset\Router::class,
-                    ],
-                ],
-            ],
+        $services = $this->createServiceManager([
+            'router_class' => TestAsset\Router::class,
         ]);
-        $services = new ServiceManager($config);
 
-        $router = $this->factory->__invoke($services, 'router');
+        $router = $this->factory->__invoke($services);
         $this->assertInstanceOf(TestAsset\Router::class, $router);
     }
 
     public function testDefaultConfig(): void
     {
-        $services = new ServiceManager((new ConfigProvider())->getDependencyConfig());
+        $services = $this->createServiceManager();
 
-        $router = $this->factory->__invoke($services, 'router');
+        $router = $this->factory->__invoke($services);
         $this->assertInstanceOf(TreeRouteStack::class, $router);
     }
 }

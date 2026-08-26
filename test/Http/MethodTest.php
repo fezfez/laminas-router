@@ -8,6 +8,7 @@ use Laminas\Diactoros\Request;
 use Laminas\Diactoros\Uri;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Method as HttpMethod;
+use Laminas\Router\Http\MethodBuilder;
 use LaminasTest\Router\FactoryTester;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -65,6 +66,7 @@ final class MethodTest extends TestCase
     {
         $tester = new FactoryTester();
         $tester->testFactory(
+            new MethodBuilder(),
             HttpMethod::class,
             [
                 'verb' => 'Missing "verb" in options array',

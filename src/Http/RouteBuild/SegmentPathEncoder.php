@@ -57,12 +57,14 @@ final class SegmentPathEncoder
 
     public static function encode(string $value): string
     {
-        if (! isset(self::$cacheEncode[$value])) {
-            self::$cacheEncode[$value] = rawurlencode($value);
-            self::$cacheEncode[$value] = strtr(self::$cacheEncode[$value], self::$urlencodeCorrectionMap);
+        if (isset(self::$cacheEncode[$value])) {
+            return self::$cacheEncode[$value];
         }
 
-        return self::$cacheEncode[$value];
+        $encoded                   = strtr(rawurlencode($value), self::$urlencodeCorrectionMap);
+        self::$cacheEncode[$value] = $encoded;
+
+        return $encoded;
     }
 
     public static function decode(string $value): string

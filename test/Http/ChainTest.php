@@ -7,11 +7,11 @@ namespace LaminasTest\Router\Http;
 use Laminas\Diactoros\Request;
 use Laminas\Diactoros\Uri;
 use Laminas\Router\Http\Chain;
+use Laminas\Router\Http\ChainBuilder;
 use Laminas\Router\Http\HttpRouteMatch;
 use Laminas\Router\Http\Segment;
-use Laminas\Router\RoutePluginManager;
-use Laminas\ServiceManager\ServiceManager;
 use LaminasTest\Router\FactoryTester;
+use LaminasTest\Router\TestAsset\RouteBuilderRegistryFactory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -22,10 +22,8 @@ final class ChainTest extends TestCase
 {
     public static function getRoute(): Chain
     {
-        $routePlugins = new RoutePluginManager(new ServiceManager());
-
         return new Chain(
-            $routePlugins,
+            RouteBuilderRegistryFactory::withDefaults(),
             [
                 [
                     'type'    => Segment::class,
@@ -51,10 +49,8 @@ final class ChainTest extends TestCase
 
     public static function getRouteWithOptionalParam(): Chain
     {
-        $routePlugins = new RoutePluginManager(new ServiceManager());
-
         return new Chain(
-            $routePlugins,
+            RouteBuilderRegistryFactory::withDefaults(),
             [
                 [
                     'type'    => Segment::class,
@@ -206,9 +202,8 @@ final class ChainTest extends TestCase
 
     public function testAssemblingPropagatesHasChildOptionToLastSegment(): void
     {
-        $routePlugins = new RoutePluginManager(new ServiceManager());
-        $route        = new Chain(
-            $routePlugins,
+        $route = new Chain(
+            RouteBuilderRegistryFactory::withDefaults(),
             [
                 [
                     'type'    => Segment::class,
@@ -232,9 +227,8 @@ final class ChainTest extends TestCase
 
     public function testAssemblingStripsConsumedParamsBetweenSegments(): void
     {
-        $routePlugins = new RoutePluginManager(new ServiceManager());
-        $route        = new Chain(
-            $routePlugins,
+        $route = new Chain(
+            RouteBuilderRegistryFactory::withDefaults(),
             [
                 [
                     'type'    => Segment::class,
@@ -269,14 +263,13 @@ final class ChainTest extends TestCase
     {
         $tester = new FactoryTester();
         $tester->testFactory(
+            new ChainBuilder(RouteBuilderRegistryFactory::withDefaults()),
             Chain::class,
             [
-                'routes'        => 'Missing "routes" in options array',
-                'route_plugins' => 'Missing "route_plugins" in options array',
+                'routes' => 'Missing "routes" in options array',
             ],
             [
-                'routes'        => [],
-                'route_plugins' => new RoutePluginManager(new ServiceManager()),
+                'routes' => [],
             ]
         );
     }

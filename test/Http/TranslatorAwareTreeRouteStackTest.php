@@ -10,9 +10,8 @@ use Laminas\Router\AssembledUrl;
 use Laminas\Router\Exception\RuntimeException;
 use Laminas\Router\Http\HttpRouteInterface;
 use Laminas\Router\Http\TranslatorAwareTreeRouteStack;
-use Laminas\Router\RoutePluginManager;
-use Laminas\ServiceManager\ServiceManager;
 use Laminas\Translator\TranslatorInterface;
+use LaminasTest\Router\TestAsset\RouteBuilderRegistryFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use UnexpectedValueException;
@@ -81,7 +80,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
             );
 
         /** @var TranslatorAwareTreeRouteStack<HttpRouteInterface> $stack */
-        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
+        $stack = new TranslatorAwareTreeRouteStack(RouteBuilderRegistryFactory::withDefaults());
         $stack->addRoute('test', $route);
 
         $stack->match($request, null, ['translator' => $translator]);
@@ -101,7 +100,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
             )->willReturn(new AssembledUrl());
 
         /** @var TranslatorAwareTreeRouteStack<HttpRouteInterface> $stack */
-        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
+        $stack = new TranslatorAwareTreeRouteStack(RouteBuilderRegistryFactory::withDefaults());
         $stack->addRoute('test', $route);
 
         $stack->assemble([], ['name' => 'test', 'translator' => $translator, 'uri' => $uri]);
@@ -111,7 +110,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
     {
         $translator = $this->getTranslator(2);
         $stack      = new TranslatorAwareTreeRouteStack(
-            new RoutePluginManager(new ServiceManager()),
+            RouteBuilderRegistryFactory::withDefaults(),
             translator: $translator,
             translatorTextDomain: 'route'
         );
@@ -134,7 +133,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
     {
         $translator = $this->getTranslator(1);
         $stack      = new TranslatorAwareTreeRouteStack(
-            new RoutePluginManager(new ServiceManager()),
+            RouteBuilderRegistryFactory::withDefaults(),
             translator: $translator,
             translatorTextDomain: 'route'
         );
@@ -156,7 +155,7 @@ final class TranslatorAwareTreeRouteStackTest extends TestCase
 
     public function testMatchDoesNotTranslateWhenTranslatorDisabled(): void
     {
-        $stack = new TranslatorAwareTreeRouteStack(new RoutePluginManager(new ServiceManager()));
+        $stack = new TranslatorAwareTreeRouteStack(RouteBuilderRegistryFactory::withDefaults());
         $stack->addRoute('foo', $this->fooRoute);
 
         $request = (new Request())->withUri(new Uri('http://example.com/de/hauptseite'));

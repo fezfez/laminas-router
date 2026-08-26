@@ -6,6 +6,7 @@ namespace Laminas\Router;
 
 use Laminas\Router\Exception\InvalidArgumentException;
 
+use function array_key_exists;
 use function sprintf;
 use function uasort;
 
@@ -72,7 +73,7 @@ final class PriorityList
      */
     public function get(string $name): RouteInterface|null
     {
-        if (! isset($this->items[$name])) {
+        if (! array_key_exists($name, $this->items)) {
             return null;
         }
 

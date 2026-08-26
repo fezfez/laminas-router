@@ -20,9 +20,9 @@ use Psr\Http\Message\RequestInterface;
 
 interface RouteInterface
 {
-    public static function factory(array $options = []): self;
-    public function match(RequestInterface $request): RouteMatch|null;
+    public function match(RequestInterface $request): RouteMatchInterface|null;
     public function assemble(array $params = [], array $options = []): AssembledUrl;
+    public function getPriority(): int|null;
 }
 ```
 
@@ -76,12 +76,24 @@ Routes will be queried in a LIFO order, and hence the reason behind the name
 at a time using `addRoute()`, or in bulk using `addRoutes()`.
 
 ```php
-use Laminas\Router\RouteStackInterface;
 use Laminas\Router\Http\Literal;
+use Laminas\Router\Http\TreeRouteStack;
+use Laminas\Router\RouteBuilderRegistry;
+use Laminas\Router\RouteStackInterface;
+
+$registry = $container->get(RouteBuilderRegistry::class);
+
+$router = new TreeRouteStack($registry);
 
 // One at a time:
-$route = Literal::factory([
-    'route' => '/foo',
+$route = new Literal('foo', '/foo', [
+    'controller' => 'foo-index',
+    'action'     => 'index',
+]);
+// Or via the registry:
+$route = $registry->build('literal', [
+    'name'     => 'foo',
+    'route'    => '/foo',
     'defaults' => [
         'controller' => 'foo-index',
         'action'     => 'index',
@@ -136,8 +148,8 @@ single route with many children.
 A `TreeRouteStack` will consist of the following configuration:
 
 - A base "route", which describes the base match needed, the root of the tree.
-- An optional `route_plugins`, which is a configured
-  `Laminas\Router\RoutePluginManager` that can lazy-load routes.
+- A `RouteBuilderRegistry` (passed to the stack constructor) that resolves route
+  builders by type or alias and builds routes from configuration arrays.
 - The option `may_terminate`, which hints to the router that no other segments
   will follow it.
 - An optional `child_routes` array, which contains additional routes that stem
@@ -174,8 +186,18 @@ example, if the "subdomain" segment needed to match only if it started with "fw"
 and contained exactly 2 digits following, the following route would be needed:
 
 ```php
-$route = Hostname::factory([
-    'route' => ':subdomain.domain.tld',
+use Laminas\Router\Http\Hostname;
+use Laminas\Router\RouteBuilderRegistry;
+
+$registry = $container->get(RouteBuilderRegistry::class);
+
+$route = new Hostname('api', ':subdomain.domain.tld', [
+    'subdomain' => 'fw\d{2}',
+]);
+// Or:
+$route = $registry->build('hostname', [
+    'name'        => 'api',
+    'route'       => ':subdomain.domain.tld',
     'constraints' => [
         'subdomain' => 'fw\d{2}',
     ],
@@ -188,14 +210,10 @@ or a default value to return for the subdomain, you need to also provide
 defaults.
 
 ```php
-$route = Hostname::factory([
-    'route' => ':subdomain.domain.tld',
-    'constraints' => [
-        'subdomain' => 'fw\d{2}',
-    ],
-    'defaults' => [
-        'type' => 'json',
-    ],
+$route = new Hostname('api', ':subdomain.domain.tld', [
+    'subdomain' => 'fw\d{2}',
+], [
+    'type' => 'json',
 ]);
 ```
 
@@ -209,12 +227,11 @@ therefore is solely the path you want to match, and the "defaults", or
 parameters you want returned on a match.
 
 ```php
-$route = Literal::factory([
-    'route' => '/foo',
-    'defaults' => [
-        'controller' => 'Application\Controller\IndexController',
-        'action' => 'foo',
-    ],
+use Laminas\Router\Http\Literal;
+
+$route = new Literal('foo', '/foo', [
+    'controller' => 'Application\Controller\IndexController',
+    'action'     => 'foo',
 ]);
 ```
 
@@ -228,12 +245,11 @@ request (See RFC 2616 Sec. 5.1.1). It can optionally be configured to match
 against multiple methods by providing a comma-separated list of method tokens.
 
 ```php
-$route = Method::factory([
-    'verb' => 'post,put',
-    'defaults' => [
-        'controller' => 'Application\Controller\IndexController',
-        'action' => 'form-submit',
-    ],
+use Laminas\Router\Http\Method;
+
+$route = new Method('form-submit', 'post,put', [
+    'controller' => 'Application\Controller\IndexController',
+    'action'     => 'form-submit',
 ]);
 ```
 
@@ -249,18 +265,21 @@ the URI path. It actually extends the `TreeRouteStack`.
 here.
 
 ```php
-$route = Part::factory([
+use Laminas\Router\RouteBuilderRegistry;
+
+$registry = $container->get(RouteBuilderRegistry::class);
+
+$route = $registry->build('part', [
     'route' => [
         'type' => 'literal',
         'options' => [
             'route' => '/',
             'defaults' => [
                 'controller' => 'Application\Controller\IndexController',
-                'action' => 'index',
+                'action'     => 'index',
             ],
         ],
     ],
-    'route_plugins' => $routePlugins,
     'may_terminate' => true,
     'child_routes' => [
         'blog' => [
@@ -269,7 +288,7 @@ $route = Part::factory([
                 'route' => '/blog',
                 'defaults' => [
                     'controller' => 'Application\Controller\BlogController',
-                    'action' => 'index',
+                    'action'     => 'index',
                 ],
             ],
             'may_terminate' => true,
@@ -280,7 +299,7 @@ $route = Part::factory([
                         'route' => '/rss',
                         'defaults' => [
                             'action' => 'rss',
-                        ]
+                        ],
                     ],
                     'may_terminate' => true,
                     'child_routes' => [
@@ -303,7 +322,7 @@ $route = Part::factory([
                 'route' => 'forum',
                 'defaults' => [
                     'controller' => 'Application\Controller\ForumController',
-                    'action' => 'index',
+                    'action'     => 'index',
                 ],
             ],
         ],
@@ -329,31 +348,37 @@ You may use any route type as a child route of a `Part` route.
 > the additional [examples at the end](#http-routing-examples) will provide
 > further insight.
 
-> ### Route plugins
+> ### Route builders
 >
-> In the above example, the `$routePlugins` is an instance of
-> `Laminas\Router\RoutePluginManager`, containing essentially the following
-> configuration:
+> In the above example, `$registry` is a `RouteBuilderRegistry` that resolves
+> builders by route type or alias and constructs route instances from
+> configuration arrays.
+>
+> When using Mezzio or laminas-mvc with `ConfigProvider`, obtain the registry
+> from the container:
 >
 > ```php
-> $routePlugins = new Laminas\Router\RoutePluginManager();
-> $plugins = [
->     'hostname' => 'Laminas\Router\Http\Hostname',
->     'literal'  => 'Laminas\Router\Http\Literal',
->     'part'     => 'Laminas\Router\Http\Part',
->     'regex'    => 'Laminas\Router\Http\Regex',
->     'scheme'   => 'Laminas\Router\Http\Scheme',
->     'segment'  => 'Laminas\Router\Http\Segment',
->     'method'   => 'Laminas\Router\Http\Method',
-> ];
-> foreach ($plugins as $name => $class) {
->     $routePlugins->setInvokableClass($name, $class);
-> }
+> $registry = $container->get(RouteBuilderRegistry::class);
 > ```
 >
-> When using `Laminas\Router\Http\TreeRouteStack`, the `RoutePluginManager` is
-> set up by default, and the developer does not need to worry about autoloading
-> of standard HTTP routes.
+> Custom route types are registered by mapping a type or alias to a builder
+> service id in application configuration:
+>
+> ```php
+> 'router' => [
+>     'route_builders' => [
+>         VanityRoute::class => VanityRouteBuilder::class,
+>     ],
+> ],
+> ```
+>
+> Each builder implements `RouteBuilderInterface::build(array $options): RouteInterface`.
+> Object dependencies (such as nested registries for `Part` routes) are injected
+> into the builder at construction time, not passed via the options array.
+>
+> When using `TreeRouteStack`, the default builders are registered automatically
+> via `ConfigProvider`; the developer does not need to configure standard HTTP
+> route types manually.
 
 ### Laminas\\Router\\Http\\Placeholder
 
@@ -439,15 +464,18 @@ Just like other routes, the `Regex` route can accept "defaults", parameters to
 include in the `RouteMatch` when successfully matched.
 
 ```php
-$route = Regex::factory([
-    'regex' => '/blog/(?<id>[a-zA-Z0-9_-]+)(\.(?<format>(json|html|xml|rss)))?',
-    'defaults' => [
+use Laminas\Router\Http\Regex;
+
+$route = new Regex(
+    'blog-view',
+    '/blog/(?<id>[a-zA-Z0-9_-]+)(\.(?<format>(json|html|xml|rss)))?',
+    '/blog/%id%.%format%',
+    [
         'controller' => 'Application\Controller\BlogController',
         'action'     => 'view',
         'format'     => 'html',
     ],
-    'spec' => '/blog/%id%.%format%',
-]);
+);
 ```
 
 The above would match `/blog/001-some-blog_slug-here.html`, and return four
@@ -462,11 +490,10 @@ such, this route, like the `Literal` route, simply takes what you want to match
 and the "defaults", parameters to return on a match.
 
 ```php
-$route = Scheme::factory([
-    'scheme' => 'https',
-    'defaults' => [
-        'https' => true,
-    ],
+use Laminas\Router\Http\Scheme;
+
+$route = new Scheme('https-only', 'https', [
+    'https' => true,
 ]);
 ```
 
@@ -497,16 +524,14 @@ particularly useful when using optional segments.
 As a complex example:
 
 ```php
-$route = Segment::factory([
-    'route' => '/:controller[/:action]',
-    'constraints' => [
-        'controller' => '[a-zA-Z][a-zA-Z0-9_-]+',
-        'action'     => '[a-zA-Z][a-zA-Z0-9_-]+',
-    ],
-    'defaults' => [
-        'controller' => 'Application\Controller\IndexController',
-        'action'     => 'index',
-    ],
+use Laminas\Router\Http\Segment;
+
+$route = new Segment('default', '/:controller[/:action]', [
+    'controller' => '[a-zA-Z][a-zA-Z0-9_-]+',
+    'action'     => '[a-zA-Z][a-zA-Z0-9_-]+',
+], [
+    'controller' => 'Application\Controller\IndexController',
+    'action'     => 'index',
 ]);
 ```
 
