@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Laminas\Router;
 
-use Laminas\Router\Http\TreeRouteStack;
-use Laminas\ServiceManager\ServiceManager;
-use Laminas\Translator\TranslatorInterface;
 use Laminas\Router\Builder\SimpleRouteStackBuilder;
 use Laminas\Router\Builder\SimpleRouteStackBuilderFactory;
 use Laminas\Router\Http\Builder\ChainBuilder;
@@ -31,9 +28,10 @@ use Laminas\Router\Http\Builder\TranslatorAwareTreeRouteStackBuilder;
 use Laminas\Router\Http\Builder\TranslatorAwareTreeRouteStackBuilderFactory;
 use Laminas\Router\Http\Builder\TreeRouteStackBuilder;
 use Laminas\Router\Http\Builder\TreeRouteStackBuilderFactory;
-use Laminas\Router\Http\Builder\WildcardBuilder;
-use Laminas\Router\Http\Builder\WildcardBuilderFactory;
+use Laminas\Router\Http\TreeRouteStack;
 use Laminas\ServiceManager\ConfigInterface;
+use Laminas\ServiceManager\ServiceManager;
+use Laminas\Translator\TranslatorInterface;
 
 /**
  * Provide base configuration for using the component.
@@ -52,6 +50,7 @@ use Laminas\ServiceManager\ConfigInterface;
  *          router_class: class-string<RouteStackInterface>,
  *          route_plugins: class-string<RoutePluginManager>,
  *          translator?: class-string<TranslatorInterface>,
+ *          route_builders: array<string, class-string<RouteBuilderInterface>>
  *      }
  *  }
  */
@@ -66,8 +65,8 @@ final readonly class ConfigProvider
     {
         return [
             'router'       => [
-                'router_class'  => TreeRouteStack::class,
-                'route_plugins' => RoutePluginManager::class,
+                'router_class'   => TreeRouteStack::class,
+                'route_plugins'  => RoutePluginManager::class,
                 'route_builders' => RouteBuilderContainer::defaultBuilderMap(),
             ],
             'dependencies' => $this->getDependencyConfig(),
@@ -83,9 +82,10 @@ final readonly class ConfigProvider
     {
         return [
             'factories' => [
-                TreeRouteStack::class      => Http\HttpRouterFactory::class,
-                RoutePluginManager::class  => RoutePluginManagerFactory::class,
-                RouteStackInterface::class => RouterFactory::class,RouteBuilderContainer::class   => RouteBuilderContainerFactory::class,
+                TreeRouteStack::class          => Http\HttpRouterFactory::class,
+                RoutePluginManager::class      => RoutePluginManagerFactory::class,
+                RouteStackInterface::class     => RouterFactory::class,
+                RouteBuilderContainer::class   => RouteBuilderContainerFactory::class,
                 LiteralBuilder::class          => LiteralBuilderFactory::class,
                 SegmentBuilder::class          => SegmentBuilderFactory::class,
                 HostnameBuilder::class         => HostnameBuilderFactory::class,
@@ -99,7 +99,6 @@ final readonly class ConfigProvider
                 TreeRouteStackBuilder::class   => TreeRouteStackBuilderFactory::class,
                 TranslatorAwareTreeRouteStackBuilder::class
                 => TranslatorAwareTreeRouteStackBuilderFactory::class,
-                WildcardBuilder::class => WildcardBuilderFactory::class,
             ],
         ];
     }

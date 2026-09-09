@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace LaminasTest\Router;
 
 use Laminas\Router\ConfigProvider;
-use Laminas\Router\ConfigProvider;
 use Laminas\Router\Exception\InvalidArgumentException;
-use Laminas\Router\RouteInterface;
-use Laminas\Router\RoutePluginManager;
-use Laminas\ServiceManager\ServiceManager;
 use Laminas\Router\RouteBuilderContainerFactory;
 use Laminas\Router\RouteBuilderContainerInterface;
+use Laminas\Router\RouteInterface;
+use Laminas\Router\RoutePluginManager;
 use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
 
@@ -27,8 +25,8 @@ final class FactoryTester
     /**
      * Create a new factory tester.
      */
-    public function __construct(
-    ) {
+    public function __construct()
+    {
         $this->routerBuilderContainer = (new RouteBuilderContainerFactory())->__invoke(
             new ServiceManager((new ConfigProvider())->__invoke()['dependencies']),
         );
@@ -38,6 +36,7 @@ final class FactoryTester
      * Test a factory.
      *
      * @param array<string, string> $requiredOptions
+     * @param array<string, mixed> $options
      * @param class-string<RouteInterface> $classname
      */
     public function testFactory(string $classname, array $requiredOptions, array $options): void
@@ -61,6 +60,9 @@ final class FactoryTester
         }
 
         // Create the route, will throw an exception if something goes wrong.
-        TestCase::assertInstanceOf($classname, $$this->routerBuilderContainer->build(['type' => $classname, ...$options]));
+        TestCase::assertInstanceOf(
+            $classname,
+            $this->routerBuilderContainer->build(['type' => $classname, ...$options])
+        );
     }
 }
