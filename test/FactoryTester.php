@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace LaminasTest\Router;
 
 use Laminas\Router\ConfigProvider;
+use Laminas\Router\ConfigProvider;
 use Laminas\Router\Exception\InvalidArgumentException;
 use Laminas\Router\RouteInterface;
 use Laminas\Router\RoutePluginManager;
+use Laminas\ServiceManager\ServiceManager;
+use Laminas\Router\RouteBuilderContainerFactory;
+use Laminas\Router\RouteBuilderContainerInterface;
 use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
 
@@ -18,6 +22,18 @@ use function array_key_exists;
  */
 final class FactoryTester
 {
+    private readonly RouteBuilderContainerInterface $routerBuilderContainer;
+
+    /**
+     * Create a new factory tester.
+     */
+    public function __construct(
+    ) {
+        $this->routerBuilderContainer = (new RouteBuilderContainerFactory())->__invoke(
+            new ServiceManager((new ConfigProvider())->__invoke()['dependencies']),
+        );
+    }
+
     /**
      * Test a factory.
      *
@@ -33,7 +49,7 @@ final class FactoryTester
             unset($testOptions[$option]);
 
             try {
-                $classname::factory($testOptions);
+                $this->routerBuilderContainer->build(['type' => $classname, ...$testOptions]);
                 TestCase::fail('An expected exception was not thrown');
             } catch (InvalidArgumentException $exception) {
                 TestCase::assertStringContainsString($exceptionMessage, $exception->getMessage());
@@ -45,6 +61,6 @@ final class FactoryTester
         }
 
         // Create the route, will throw an exception if something goes wrong.
-        TestCase::assertInstanceOf($classname, $classname::factory($options));
+        TestCase::assertInstanceOf($classname, $$this->routerBuilderContainer->build(['type' => $classname, ...$options]));
     }
 }
